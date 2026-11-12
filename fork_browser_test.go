@@ -390,14 +390,25 @@ func TestForkPageNavigateFailClosesTarget(t *testing.T) {
 	b := g.browser.MustIncognito()
 	defer b.MustClose()
 
-	_, err := b.Timeout(time.Second).Page(proto.TargetCreateTarget{URL: s.URL("/hang")})
+	// Chrome may already have a page in the new context. Only a target
+	// created by the failed Page call is a leak.
+	before := map[proto.TargetTargetID]bool{}
+	list, err := proto.TargetGetTargets{}.Call(b)
+	g.E(err)
+	for _, info := range list.TargetInfos {
+		if info.BrowserContextID == b.BrowserContextID {
+			before[info.TargetID] = true
+		}
+	}
+
+	_, err = b.Timeout(time.Second).Page(proto.TargetCreateTarget{URL: s.URL("/hang")})
 	g.Is(err, context.DeadlineExceeded)
 
 	open := func() bool {
 		list, err := proto.TargetGetTargets{}.Call(b)
 		g.E(err)
 		for _, info := range list.TargetInfos {
-			if info.BrowserContextID == b.BrowserContextID {
+			if info.BrowserContextID == b.BrowserContextID && !before[info.TargetID] {
 				return true
 			}
 		}
