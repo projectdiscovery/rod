@@ -199,7 +199,8 @@ func TestForkHijackResponseStage(t *testing.T) {
 
 	s := g.Serve()
 	s.Mux.HandleFunc("/r", func(w http.ResponseWriter, r *http.Request) {
-		http.SetCookie(w, &http.Cookie{Name: "seen", Value: r.Header.Get("User-Agent")})
+		// Path keeps the cookie off other tests. The jar is per host, not per port.
+		http.SetCookie(w, &http.Cookie{Name: "seen", Path: "/r", Value: r.Header.Get("User-Agent")})
 		w.Header().Set("Content-Type", "text/html")
 		w.Header().Set("X-Origin", "yes")
 		_, _ = w.Write([]byte(`<p>origin</p>`))
