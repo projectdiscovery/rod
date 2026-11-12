@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Repository search results</title>
+  </head>
+  <body>
+    <a href="#results">results</a>
+    <form id="search" action="javascript:void(0)">
+      <input id="query-builder-test" name="type" type="text" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+      <input type="hidden" />
+    </form>
+    <div class="codesearch-results">
+      <p>Git is the most widely used version control system.</p>
+    </div>
+    <span>Git is the most widely used version control system.</span>
+    <script>
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "/" && document.activeElement.tagName !== "INPUT") {
+          e.preventDefault();
+          document.getElementById("query-builder-test").focus();
+        }
+      });
+    </script>
+  </body>
+</html>
