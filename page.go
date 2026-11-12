@@ -745,11 +745,15 @@ func (p *Page) WaitEvent(e proto.Event) (wait func()) {
 func (p *Page) WaitNavigation(name proto.PageLifecycleEventName) func() {
 	_ = proto.PageSetLifecycleEventsEnabled{Enabled: true}.Call(p)
 
+	// The event subscription is tied to this clone. Cancelling it on the way
+	// out stops the listener even when the wait returns before its own cancel.
+	p, cancel := p.WithCancel()
 	wait := p.EachEvent(func(e *proto.PageLifecycleEvent) bool {
 		return e.Name == name
 	})
 
 	return func() {
+		defer cancel()
 		defer p.tryTrace(TraceTypeWait, "navigation", name)()
 		wait()
 		_ = proto.PageSetLifecycleEventsEnabled{Enabled: false}.Call(p)
