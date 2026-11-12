@@ -135,11 +135,14 @@ func TestSetUserAgent(t *testing.T) {
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+	var once sync.Once
 
 	s.Mux.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
-		ua = r.Header.Get("User-Agent")
-		lang = r.Header.Get("Accept-Language")
-		wg.Done()
+		once.Do(func() {
+			ua = r.Header.Get("User-Agent")
+			lang = r.Header.Get("Accept-Language")
+			wg.Done()
+		})
 	})
 
 	g.newPage().MustSetUserAgent(nil).MustNavigate(s.URL())
