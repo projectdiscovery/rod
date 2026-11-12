@@ -172,6 +172,7 @@ func TestForkBrowserDisconnect(t *testing.T) {
 	g := setup(t)
 
 	l := launcher.New()
+	defer l.Cleanup()
 	defer l.Kill()
 	b := rod.New().ControlURL(l.MustLaunch()).MustConnect()
 	p := b.MustPage()
