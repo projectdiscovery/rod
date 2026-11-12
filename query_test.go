@@ -17,7 +17,8 @@ import (
 func TestPageElements(t *testing.T) {
 	g := setup(t)
 
-	g.page.MustNavigate(g.srcFile("fixtures/input.html")).MustWaitLoad().MustWaitLoad()
+	g.page.MustNavigate(g.srcFile("fixtures/input.html")).MustWaitLoad()
+	g.page.MustElement("input")
 	list := g.page.MustElements("input")
 	g.Eq("input", list.First().MustDescribe().LocalName)
 	g.Eq("submit", list.Last().MustText())
