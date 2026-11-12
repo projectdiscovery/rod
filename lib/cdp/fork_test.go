@@ -15,11 +15,20 @@ import (
 )
 
 type fakeWS struct {
-	in  chan []byte
-	out chan []byte
+	in       chan []byte
+	out      chan []byte
+	sendErr  error
+	sendHook func()
+	read     func() ([]byte, error)
 }
 
 func (f *fakeWS) Send(b []byte) error {
+	if f.sendHook != nil {
+		f.sendHook()
+	}
+	if f.sendErr != nil {
+		return f.sendErr
+	}
 	select {
 	case f.out <- append([]byte(nil), b...):
 		return nil
@@ -29,6 +38,9 @@ func (f *fakeWS) Send(b []byte) error {
 }
 
 func (f *fakeWS) Read() ([]byte, error) {
+	if f.read != nil {
+		return f.read()
+	}
 	b, ok := <-f.in
 	if !ok {
 		return nil, io.EOF

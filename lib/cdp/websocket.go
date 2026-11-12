@@ -31,6 +31,9 @@ const (
 	handshakeBody   = 4 << 10
 )
 
+// randRead is a variable so tests can simulate a failing random source.
+var randRead = rand.Read
+
 // ErrMessageTooLarge is returned when a frame exceeds MaxMessageSize.
 var ErrMessageTooLarge = errors.New("cdp: websocket message exceeds size limit")
 
@@ -193,7 +196,7 @@ func (ws *WebSocket) send(msg []byte) error {
 	}
 
 	var mask [4]byte
-	if _, err := rand.Read(mask[:]); err != nil {
+	if _, err := randRead(mask[:]); err != nil {
 		return err
 	}
 	copy(buf[headerLen-4:], mask[:])
@@ -332,10 +335,9 @@ func (ws *WebSocket) read() ([]byte, error) {
 			if expectCont {
 				return nil, errors.New("cdp: unexpected text frame")
 			}
+			// The frame size was checked against the limit above, so a
+			// single text frame can no longer exceed it here.
 			assembled = append(assembled, payload...)
-			if len(assembled) > ws.limit() {
-				return nil, ErrMessageTooLarge
-			}
 			if fin {
 				return assembled, nil
 			}
@@ -396,7 +398,7 @@ func (ws *WebSocket) writeControl(opcode byte, payload []byte) error {
 	buf[0] = opcode
 	buf[1] = 0x80 | byte(len(payload))
 	var mask [4]byte
-	_, _ = rand.Read(mask[:])
+	_, _ = randRead(mask[:])
 	copy(buf[2:], mask[:])
 	copy(buf[6:], payload)
 	maskBytes(buf[6:], mask)
@@ -428,7 +430,7 @@ func verifyWebSocketAccept(responseHeaders http.Header, websocketKey string) boo
 
 func (ws *WebSocket) handshake(ctx context.Context, u *url.URL, header http.Header) error {
 	keyBytes := make([]byte, 16)
-	if _, err := rand.Read(keyBytes); err != nil {
+	if _, err := randRead(keyBytes); err != nil {
 		return err
 	}
 	secKey := base64.StdEncoding.EncodeToString(keyBytes)

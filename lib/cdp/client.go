@@ -130,10 +130,8 @@ func (cdp *Client) writer() {
 			return
 		case job := <-cdp.writes:
 			err := cdp.ws.Send(job.data)
-			select {
-			case job.done <- err:
-			default:
-			}
+			// done has room for exactly one result, so this never blocks.
+			job.done <- err
 		}
 	}
 }
@@ -300,10 +298,8 @@ func (cdp *Client) consumeMessages() {
 		if msg.Error != nil {
 			res = result{err: msg.Error}
 		}
-		select {
-		case done <- res:
-		default:
-		}
+		// done has room for exactly one result, so this never blocks.
+		done <- res
 	}
 }
 

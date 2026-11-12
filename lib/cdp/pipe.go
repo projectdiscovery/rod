@@ -124,14 +124,17 @@ type PipePair struct {
 	ParentWrite *os.File
 }
 
+// osPipe is a variable so tests can simulate a failing pipe.
+var osPipe = os.Pipe
+
 // NewPipePair creates an OS pipe pair for --remote-debugging-pipe.
 // The child receives ChromeRead and ChromeWrite as extra files.
 func NewPipePair() (*PipePair, error) {
-	pr, cw, err := os.Pipe()
+	pr, cw, err := osPipe()
 	if err != nil {
 		return nil, err
 	}
-	cr, pw, err := os.Pipe()
+	cr, pw, err := osPipe()
 	if err != nil {
 		_ = pr.Close()
 		_ = cw.Close()
