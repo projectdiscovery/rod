@@ -19,7 +19,7 @@ func getSchema() gson.JSON {
 	if bin == "" {
 		bin = launcher.NewBrowser().MustGet()
 	}
-	l := launcher.New().Bin(bin)
+	l := launcher.New().Bin(bin).NoSandbox(true)
 	defer l.Kill()
 
 	u := l.MustLaunch()
