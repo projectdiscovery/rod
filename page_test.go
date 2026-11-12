@@ -808,11 +808,13 @@ func TestScrollScreenshotErrors(t *testing.T) {
 	p := g.page.MustNavigate(g.srcFile("fixtures/scroll-y.html"))
 
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		// mock error for get CSSContentSize
 		g.mc.stubErr(1, proto.PageGetLayoutMetrics{})
 		p.MustScrollScreenshot()
 	})
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		g.mc.stub(1, proto.PageGetLayoutMetrics{}, func(_ StubSend) (gson.JSON, error) {
 			return gson.New(proto.PageGetLayoutMetricsResult{
 				CSSVisualViewport: &proto.PageVisualViewport{},
@@ -821,6 +823,7 @@ func TestScrollScreenshotErrors(t *testing.T) {
 		p.MustScrollScreenshot()
 	})
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		g.mc.stub(1, proto.PageGetLayoutMetrics{}, func(_ StubSend) (gson.JSON, error) {
 			return gson.New(proto.PageGetLayoutMetricsResult{
 				CSSContentSize: &proto.DOMRect{},
@@ -829,16 +832,19 @@ func TestScrollScreenshotErrors(t *testing.T) {
 		p.MustScrollScreenshot()
 	})
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		// mock error for scroll
 		g.mc.stubErr(1, proto.InputDispatchMouseEvent{})
 		p.MustScrollScreenshot()
 	})
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		// mock error for Screenshot
 		g.mc.stubErr(1, proto.PageCaptureScreenshot{})
 		p.MustScrollScreenshot()
 	})
 	g.Panic(func() {
+		defer g.mc.resetCall()
 		// mock error for WaitStable
 		g.mc.stubErr(1, proto.DOMSnapshotCaptureSnapshot{})
 		p.MustScrollScreenshot()
