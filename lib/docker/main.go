@@ -152,9 +152,9 @@ func (at archType) tagDev() string {
 func (at archType) golang() string {
 	switch at {
 	case archArm:
-		return "https://go.dev/dl/go1.19.1.linux-arm64.tar.gz"
+		return "https://go.dev/dl/go1.27.4.linux-arm64.tar.gz"
 	default:
-		return "https://go.dev/dl/go1.19.1.linux-amd64.tar.gz"
+		return "https://go.dev/dl/go1.27.4.linux-amd64.tar.gz"
 	}
 }
 
