@@ -85,13 +85,13 @@ type SystemInfoVideoEncodeAcceleratorCapability struct {
 type SystemInfoSubsamplingFormat string
 
 const (
-	// SystemInfoSubsamplingFormatYuv420 enum const.
+	// SystemInfoSubsamplingFormatYuv420 enum const
 	SystemInfoSubsamplingFormatYuv420 SystemInfoSubsamplingFormat = "yuv420"
 
-	// SystemInfoSubsamplingFormatYuv422 enum const.
+	// SystemInfoSubsamplingFormatYuv422 enum const
 	SystemInfoSubsamplingFormatYuv422 SystemInfoSubsamplingFormat = "yuv422"
 
-	// SystemInfoSubsamplingFormatYuv444 enum const.
+	// SystemInfoSubsamplingFormatYuv444 enum const
 	SystemInfoSubsamplingFormatYuv444 SystemInfoSubsamplingFormat = "yuv444"
 )
 
@@ -99,31 +99,15 @@ const (
 type SystemInfoImageType string
 
 const (
-	// SystemInfoImageTypeJpeg enum const.
+	// SystemInfoImageTypeJpeg enum const
 	SystemInfoImageTypeJpeg SystemInfoImageType = "jpeg"
 
-	// SystemInfoImageTypeWebp enum const.
+	// SystemInfoImageTypeWebp enum const
 	SystemInfoImageTypeWebp SystemInfoImageType = "webp"
 
-	// SystemInfoImageTypeUnknown enum const.
+	// SystemInfoImageTypeUnknown enum const
 	SystemInfoImageTypeUnknown SystemInfoImageType = "unknown"
 )
-
-// SystemInfoImageDecodeAcceleratorCapability Describes a supported image decoding profile with its associated minimum and
-// maximum resolutions and subsampling.
-type SystemInfoImageDecodeAcceleratorCapability struct {
-	// ImageType Image coded, e.g. Jpeg.
-	ImageType SystemInfoImageType `json:"imageType"`
-
-	// MaxDimensions Maximum supported dimensions of the image in pixels.
-	MaxDimensions *SystemInfoSize `json:"maxDimensions"`
-
-	// MinDimensions Minimum supported dimensions of the image in pixels.
-	MinDimensions *SystemInfoSize `json:"minDimensions"`
-
-	// Subsamplings Optional array of supported subsampling formats, e.g. 4:2:0, if known.
-	Subsamplings []SystemInfoSubsamplingFormat `json:"subsamplings"`
-}
 
 // SystemInfoGPUInfo Provides information about the GPU(s) on the system.
 type SystemInfoGPUInfo struct {
@@ -144,9 +128,6 @@ type SystemInfoGPUInfo struct {
 
 	// VideoEncoding Supported accelerated video encoding capabilities.
 	VideoEncoding []*SystemInfoVideoEncodeAcceleratorCapability `json:"videoEncoding"`
-
-	// ImageDecoding Supported accelerated image decoding capabilities.
-	ImageDecoding []*SystemInfoImageDecodeAcceleratorCapability `json:"imageDecoding"`
 }
 
 // SystemInfoProcessInfo Represents process info.
@@ -165,10 +146,10 @@ type SystemInfoProcessInfo struct {
 // SystemInfoGetInfo Returns information about the system.
 type SystemInfoGetInfo struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m SystemInfoGetInfo) ProtoReq() string { return "SystemInfo.getInfo" }
 
-// Call the request.
+// Call the request
 func (m SystemInfoGetInfo) Call(c Client) (*SystemInfoGetInfoResult, error) {
 	var res SystemInfoGetInfoResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -198,10 +179,10 @@ type SystemInfoGetFeatureState struct {
 	FeatureState string `json:"featureState"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m SystemInfoGetFeatureState) ProtoReq() string { return "SystemInfo.getFeatureState" }
 
-// Call the request.
+// Call the request
 func (m SystemInfoGetFeatureState) Call(c Client) (*SystemInfoGetFeatureStateResult, error) {
 	var res SystemInfoGetFeatureStateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -216,10 +197,10 @@ type SystemInfoGetFeatureStateResult struct {
 // SystemInfoGetProcessInfo Returns information about all running processes.
 type SystemInfoGetProcessInfo struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m SystemInfoGetProcessInfo) ProtoReq() string { return "SystemInfo.getProcessInfo" }
 
-// Call the request.
+// Call the request
 func (m SystemInfoGetProcessInfo) Call(c Client) (*SystemInfoGetProcessInfoResult, error) {
 	var res SystemInfoGetProcessInfoResult
 	return &res, call(m.ProtoReq(), m, &res, c)

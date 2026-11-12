@@ -49,13 +49,13 @@ type InputTouchPoint struct {
 type InputGestureSourceType string
 
 const (
-	// InputGestureSourceTypeDefault enum const.
+	// InputGestureSourceTypeDefault enum const
 	InputGestureSourceTypeDefault InputGestureSourceType = "default"
 
-	// InputGestureSourceTypeTouch enum const.
+	// InputGestureSourceTypeTouch enum const
 	InputGestureSourceTypeTouch InputGestureSourceType = "touch"
 
-	// InputGestureSourceTypeMouse enum const.
+	// InputGestureSourceTypeMouse enum const
 	InputGestureSourceTypeMouse InputGestureSourceType = "mouse"
 )
 
@@ -63,22 +63,22 @@ const (
 type InputMouseButton string
 
 const (
-	// InputMouseButtonNone enum const.
+	// InputMouseButtonNone enum const
 	InputMouseButtonNone InputMouseButton = "none"
 
-	// InputMouseButtonLeft enum const.
+	// InputMouseButtonLeft enum const
 	InputMouseButtonLeft InputMouseButton = "left"
 
-	// InputMouseButtonMiddle enum const.
+	// InputMouseButtonMiddle enum const
 	InputMouseButtonMiddle InputMouseButton = "middle"
 
-	// InputMouseButtonRight enum const.
+	// InputMouseButtonRight enum const
 	InputMouseButtonRight InputMouseButton = "right"
 
-	// InputMouseButtonBack enum const.
+	// InputMouseButtonBack enum const
 	InputMouseButtonBack InputMouseButton = "back"
 
-	// InputMouseButtonForward enum const.
+	// InputMouseButtonForward enum const
 	InputMouseButtonForward InputMouseButton = "forward"
 )
 
@@ -111,20 +111,20 @@ type InputDragData struct {
 	DragOperationsMask int `json:"dragOperationsMask"`
 }
 
-// InputDispatchDragEventType enum.
+// InputDispatchDragEventType enum
 type InputDispatchDragEventType string
 
 const (
-	// InputDispatchDragEventTypeDragEnter enum const.
+	// InputDispatchDragEventTypeDragEnter enum const
 	InputDispatchDragEventTypeDragEnter InputDispatchDragEventType = "dragEnter"
 
-	// InputDispatchDragEventTypeDragOver enum const.
+	// InputDispatchDragEventTypeDragOver enum const
 	InputDispatchDragEventTypeDragOver InputDispatchDragEventType = "dragOver"
 
-	// InputDispatchDragEventTypeDrop enum const.
+	// InputDispatchDragEventTypeDrop enum const
 	InputDispatchDragEventTypeDrop InputDispatchDragEventType = "drop"
 
-	// InputDispatchDragEventTypeDragCancel enum const.
+	// InputDispatchDragEventTypeDragCancel enum const
 	InputDispatchDragEventTypeDragCancel InputDispatchDragEventType = "dragCancel"
 )
 
@@ -148,28 +148,28 @@ type InputDispatchDragEvent struct {
 	Modifiers int `json:"modifiers,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputDispatchDragEvent) ProtoReq() string { return "Input.dispatchDragEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputDispatchDragEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// InputDispatchKeyEventType enum.
+// InputDispatchKeyEventType enum
 type InputDispatchKeyEventType string
 
 const (
-	// InputDispatchKeyEventTypeKeyDown enum const.
+	// InputDispatchKeyEventTypeKeyDown enum const
 	InputDispatchKeyEventTypeKeyDown InputDispatchKeyEventType = "keyDown"
 
-	// InputDispatchKeyEventTypeKeyUp enum const.
+	// InputDispatchKeyEventTypeKeyUp enum const
 	InputDispatchKeyEventTypeKeyUp InputDispatchKeyEventType = "keyUp"
 
-	// InputDispatchKeyEventTypeRawKeyDown enum const.
+	// InputDispatchKeyEventTypeRawKeyDown enum const
 	InputDispatchKeyEventTypeRawKeyDown InputDispatchKeyEventType = "rawKeyDown"
 
-	// InputDispatchKeyEventTypeChar enum const.
+	// InputDispatchKeyEventTypeChar enum const
 	InputDispatchKeyEventTypeChar InputDispatchKeyEventType = "char"
 )
 
@@ -228,10 +228,10 @@ type InputDispatchKeyEvent struct {
 	Commands []string `json:"commands,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputDispatchKeyEvent) ProtoReq() string { return "Input.dispatchKeyEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputDispatchKeyEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -243,10 +243,10 @@ type InputInsertText struct {
 	Text string `json:"text"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputInsertText) ProtoReq() string { return "Input.insertText" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputInsertText) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -271,39 +271,39 @@ type InputImeSetComposition struct {
 	ReplacementEnd *int `json:"replacementEnd,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputImeSetComposition) ProtoReq() string { return "Input.imeSetComposition" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputImeSetComposition) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// InputDispatchMouseEventType enum.
+// InputDispatchMouseEventType enum
 type InputDispatchMouseEventType string
 
 const (
-	// InputDispatchMouseEventTypeMousePressed enum const.
+	// InputDispatchMouseEventTypeMousePressed enum const
 	InputDispatchMouseEventTypeMousePressed InputDispatchMouseEventType = "mousePressed"
 
-	// InputDispatchMouseEventTypeMouseReleased enum const.
+	// InputDispatchMouseEventTypeMouseReleased enum const
 	InputDispatchMouseEventTypeMouseReleased InputDispatchMouseEventType = "mouseReleased"
 
-	// InputDispatchMouseEventTypeMouseMoved enum const.
+	// InputDispatchMouseEventTypeMouseMoved enum const
 	InputDispatchMouseEventTypeMouseMoved InputDispatchMouseEventType = "mouseMoved"
 
-	// InputDispatchMouseEventTypeMouseWheel enum const.
+	// InputDispatchMouseEventTypeMouseWheel enum const
 	InputDispatchMouseEventTypeMouseWheel InputDispatchMouseEventType = "mouseWheel"
 )
 
-// InputDispatchMouseEventPointerType enum.
+// InputDispatchMouseEventPointerType enum
 type InputDispatchMouseEventPointerType string
 
 const (
-	// InputDispatchMouseEventPointerTypeMouse enum const.
+	// InputDispatchMouseEventPointerTypeMouse enum const
 	InputDispatchMouseEventPointerTypeMouse InputDispatchMouseEventPointerType = "mouse"
 
-	// InputDispatchMouseEventPointerTypePen enum const.
+	// InputDispatchMouseEventPointerTypePen enum const
 	InputDispatchMouseEventPointerTypePen InputDispatchMouseEventPointerType = "pen"
 )
 
@@ -361,28 +361,28 @@ type InputDispatchMouseEvent struct {
 	PointerType InputDispatchMouseEventPointerType `json:"pointerType,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputDispatchMouseEvent) ProtoReq() string { return "Input.dispatchMouseEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputDispatchMouseEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// InputDispatchTouchEventType enum.
+// InputDispatchTouchEventType enum
 type InputDispatchTouchEventType string
 
 const (
-	// InputDispatchTouchEventTypeTouchStart enum const.
+	// InputDispatchTouchEventTypeTouchStart enum const
 	InputDispatchTouchEventTypeTouchStart InputDispatchTouchEventType = "touchStart"
 
-	// InputDispatchTouchEventTypeTouchEnd enum const.
+	// InputDispatchTouchEventTypeTouchEnd enum const
 	InputDispatchTouchEventTypeTouchEnd InputDispatchTouchEventType = "touchEnd"
 
-	// InputDispatchTouchEventTypeTouchMove enum const.
+	// InputDispatchTouchEventTypeTouchMove enum const
 	InputDispatchTouchEventTypeTouchMove InputDispatchTouchEventType = "touchMove"
 
-	// InputDispatchTouchEventTypeTouchCancel enum const.
+	// InputDispatchTouchEventTypeTouchCancel enum const
 	InputDispatchTouchEventTypeTouchCancel InputDispatchTouchEventType = "touchCancel"
 )
 
@@ -405,10 +405,10 @@ type InputDispatchTouchEvent struct {
 	Timestamp TimeSinceEpoch `json:"timestamp,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputDispatchTouchEvent) ProtoReq() string { return "Input.dispatchTouchEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputDispatchTouchEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -416,28 +416,28 @@ func (m InputDispatchTouchEvent) Call(c Client) error {
 // InputCancelDragging Cancels any active dragging in the page.
 type InputCancelDragging struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputCancelDragging) ProtoReq() string { return "Input.cancelDragging" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputCancelDragging) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// InputEmulateTouchFromMouseEventType enum.
+// InputEmulateTouchFromMouseEventType enum
 type InputEmulateTouchFromMouseEventType string
 
 const (
-	// InputEmulateTouchFromMouseEventTypeMousePressed enum const.
+	// InputEmulateTouchFromMouseEventTypeMousePressed enum const
 	InputEmulateTouchFromMouseEventTypeMousePressed InputEmulateTouchFromMouseEventType = "mousePressed"
 
-	// InputEmulateTouchFromMouseEventTypeMouseReleased enum const.
+	// InputEmulateTouchFromMouseEventTypeMouseReleased enum const
 	InputEmulateTouchFromMouseEventTypeMouseReleased InputEmulateTouchFromMouseEventType = "mouseReleased"
 
-	// InputEmulateTouchFromMouseEventTypeMouseMoved enum const.
+	// InputEmulateTouchFromMouseEventTypeMouseMoved enum const
 	InputEmulateTouchFromMouseEventTypeMouseMoved InputEmulateTouchFromMouseEventType = "mouseMoved"
 
-	// InputEmulateTouchFromMouseEventTypeMouseWheel enum const.
+	// InputEmulateTouchFromMouseEventTypeMouseWheel enum const
 	InputEmulateTouchFromMouseEventTypeMouseWheel InputEmulateTouchFromMouseEventType = "mouseWheel"
 )
 
@@ -472,10 +472,10 @@ type InputEmulateTouchFromMouseEvent struct {
 	ClickCount int `json:"clickCount,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputEmulateTouchFromMouseEvent) ProtoReq() string { return "Input.emulateTouchFromMouseEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputEmulateTouchFromMouseEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -486,10 +486,10 @@ type InputSetIgnoreInputEvents struct {
 	Ignore bool `json:"ignore"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputSetIgnoreInputEvents) ProtoReq() string { return "Input.setIgnoreInputEvents" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputSetIgnoreInputEvents) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -501,10 +501,10 @@ type InputSetInterceptDrags struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputSetInterceptDrags) ProtoReq() string { return "Input.setInterceptDrags" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputSetInterceptDrags) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -528,10 +528,10 @@ type InputSynthesizePinchGesture struct {
 	GestureSourceType InputGestureSourceType `json:"gestureSourceType,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputSynthesizePinchGesture) ProtoReq() string { return "Input.synthesizePinchGesture" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputSynthesizePinchGesture) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -578,10 +578,10 @@ type InputSynthesizeScrollGesture struct {
 	InteractionMarkerName string `json:"interactionMarkerName,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputSynthesizeScrollGesture) ProtoReq() string { return "Input.synthesizeScrollGesture" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputSynthesizeScrollGesture) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -605,10 +605,10 @@ type InputSynthesizeTapGesture struct {
 	GestureSourceType InputGestureSourceType `json:"gestureSourceType,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m InputSynthesizeTapGesture) ProtoReq() string { return "Input.synthesizeTapGesture" }
 
-// Call sends the request.
+// Call sends the request
 func (m InputSynthesizeTapGesture) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -620,7 +620,7 @@ type InputDragIntercepted struct {
 	Data *InputDragData `json:"data"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt InputDragIntercepted) ProtoEvent() string {
 	return "Input.dragIntercepted"
 }

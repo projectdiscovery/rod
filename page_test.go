@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image/png"
 	"math"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -90,7 +91,7 @@ func TestSetBlockedURLs(t *testing.T) {
 			g.Eq(e.BlockedReason, proto.NetworkBlockedReasonInspector)
 		},
 	)
-	page.MustNavigate("https://github.com")
+	page.MustNavigate(g.html(`<script src="/app.js"></script>`))
 }
 
 func TestSetExtraHeaders(t *testing.T) {
@@ -133,20 +134,20 @@ func TestSetUserAgent(t *testing.T) {
 	ua := ""
 	lang := ""
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	var once sync.Once
+	// The favicon request also reaches "/", so only the first request counts.
+	once := sync.Once{}
+	got := make(chan struct{})
 
 	s.Mux.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		once.Do(func() {
 			ua = r.Header.Get("User-Agent")
 			lang = r.Header.Get("Accept-Language")
-			wg.Done()
+			close(got)
 		})
 	})
 
 	g.newPage().MustSetUserAgent(nil).MustNavigate(s.URL())
-	wg.Wait()
+	<-got
 
 	g.Eq(ua, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
 	g.Eq(lang, "en")
@@ -506,9 +507,8 @@ func TestPageWaitRequestIdle(t *testing.T) {
 	wait()
 	g.Lt(time.Since(start), sleep)
 
-	g.Panic(func() {
-		wait()
-	})
+	// A second call returns immediately instead of panicking.
+	wait()
 }
 
 func TestPageCaptureDOMSnapshot(t *testing.T) {
@@ -940,12 +940,18 @@ func TestPageNavigateErr(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	g.Is(g.Panic(func() {
-		g.page.MustNavigate(s.URL("/404"))
-	}), &rod.NavigationError{})
-	g.Is(g.Panic(func() {
-		g.page.MustNavigate(s.URL("/500"))
-	}), &rod.NavigationError{})
+	// Chrome 157 no longer reports an error for an empty 4xx or 5xx body.
+	for _, path := range []string{"/404", "/500"} {
+		if err := g.page.Navigate(s.URL(path)); err != nil {
+			g.Is(err, &rod.NavigationError{})
+		}
+	}
+
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	g.E(err)
+	refused := "http://" + l.Addr().String()
+	g.E(l.Close())
+	g.Is(g.page.Navigate(refused), &rod.NavigationError{})
 }
 
 func TestPageWaitLoadErr(t *testing.T) {
@@ -1082,7 +1088,7 @@ func TestPageActionAfterClose(t *testing.T) {
 		p.MustClose()
 
 		_, err := p.Element("not-exists")
-		g.Eq(err, context.Canceled)
+		g.True(errors.Is(err, context.Canceled))
 	}
 
 	{
@@ -1093,7 +1099,8 @@ func TestPageActionAfterClose(t *testing.T) {
 		}()
 
 		_, err := p.Eval(`() => new Promise(r => {})`)
-		g.Eq(err, context.Canceled)
+		g.True(errors.Is(err, context.Canceled))
+		g.True(errors.Is(err, rod.ErrTargetClosed))
 	}
 }
 

@@ -1,7 +1,9 @@
 package rod
 
 import (
+	"encoding/json"
 	"reflect"
+	"strings"
 
 	"github.com/go-rod/rod/lib/proto"
 )
@@ -20,7 +22,27 @@ func (b *Browser) key(sessionID proto.TargetSessionID, methodName string) stateK
 	}
 }
 
+func keepState(methodName string) bool {
+	switch {
+	case strings.HasSuffix(methodName, ".enable"), strings.HasSuffix(methodName, ".disable"):
+		return true
+	case strings.Contains(methodName, "setDeviceMetricsOverride"),
+		strings.Contains(methodName, "setDownloadBehavior"),
+		strings.Contains(methodName, "setExtraHTTPHeaders"),
+		strings.Contains(methodName, "setUserAgentOverride"),
+		strings.Contains(methodName, "setGeolocationOverride"),
+		strings.Contains(methodName, "setTouchEmulationEnabled"),
+		strings.Contains(methodName, "Emulation.clear"):
+		return true
+	default:
+		return false
+	}
+}
+
 func (b *Browser) set(sessionID proto.TargetSessionID, methodName string, params interface{}) {
+	if !keepState(methodName) {
+		return
+	}
 	b.states.Store(b.key(sessionID, methodName), params)
 
 	key := ""
@@ -58,14 +80,37 @@ func (b *Browser) RemoveState(key interface{}) {
 
 // EnableDomain and returns a restore function to restore previous state.
 func (b *Browser) EnableDomain(sessionID proto.TargetSessionID, req proto.Request) (restore func()) {
-	_, enabled := b.states.Load(b.key(sessionID, req.ProtoReq()))
+	key := b.key(sessionID, req.ProtoReq())
 
-	if !enabled {
+	b.domainMu.Lock()
+	if b.domains == nil {
+		b.domains = map[stateKey]int{}
+	}
+	n := b.domains[key]
+	if n == 0 {
+		if _, enabled := b.states.Load(key); enabled {
+			n = 1
+		}
+	}
+	n++
+	b.domains[key] = n
+	shouldEnable := n == 1
+	b.domainMu.Unlock()
+
+	if shouldEnable {
 		_, _ = b.Call(b.ctx, string(sessionID), req.ProtoReq(), req)
 	}
 
 	return func() {
-		if !enabled {
+		b.domainMu.Lock()
+		n := b.domains[key] - 1
+		if n < 0 {
+			n = 0
+		}
+		b.domains[key] = n
+		shouldDisable := n == 0
+		b.domainMu.Unlock()
+		if shouldDisable {
 			domain, _ := proto.ParseMethodName(req.ProtoReq())
 			_, _ = b.Call(b.ctx, string(sessionID), domain+".disable", nil)
 		}
@@ -88,8 +133,42 @@ func (b *Browser) DisableDomain(sessionID proto.TargetSessionID, req proto.Reque
 	}
 }
 
+type sessionPageKey proto.TargetSessionID
+
 func (b *Browser) cachePage(page *Page) {
 	b.states.Store(page.TargetID, page)
+	b.states.Store(sessionPageKey(page.SessionID), page)
+}
+
+// targetGone cancels the page owning a detached session or destroyed target
+// and drops its cached states.
+func (b *Browser) targetGone(method string, params []byte) {
+	var key interface{}
+	switch method {
+	case "Target.detachedFromTarget":
+		var e proto.TargetDetachedFromTarget
+		if json.Unmarshal(params, &e) != nil || e.SessionID == "" {
+			return
+		}
+		key = sessionPageKey(e.SessionID)
+	case "Target.targetDestroyed":
+		var e proto.TargetTargetDestroyed
+		if json.Unmarshal(params, &e) != nil {
+			return
+		}
+		key = e.TargetID
+	default:
+		return
+	}
+	cache, ok := b.states.Load(key)
+	if !ok {
+		return
+	}
+	page := cache.(*Page) //nolint: forcetypeassert
+	if page.sessionCancel != nil {
+		page.sessionCancel()
+	}
+	page.cleanupStates()
 }
 
 func (b *Browser) loadCachedPage(id proto.TargetTargetID) *Page {
@@ -115,5 +194,26 @@ func (p *Page) DisableDomain(method proto.Request) (restore func()) {
 }
 
 func (p *Page) cleanupStates() {
-	p.browser.RemoveState(p.TargetID)
+	if cache, ok := p.browser.states.Load(p.TargetID); ok && cache.(*Page).SessionID == p.SessionID { //nolint: forcetypeassert
+		p.browser.RemoveState(p.TargetID)
+	}
+	p.browser.RemoveState(sessionPageKey(p.SessionID))
+	p.browser.purgeSession(p.SessionID)
+}
+
+func (b *Browser) purgeSession(sessionID proto.TargetSessionID) {
+	b.states.Range(func(k, _ interface{}) bool {
+		key, ok := k.(stateKey)
+		if ok && key.sessionID == sessionID {
+			b.states.Delete(k)
+		}
+		return true
+	})
+	b.domainMu.Lock()
+	for key := range b.domains {
+		if key.sessionID == sessionID {
+			delete(b.domains, key)
+		}
+	}
+	b.domainMu.Unlock()
 }

@@ -37,7 +37,12 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 	if err != nil {
 		return "", err
 	}
-	defer func() { _ = res.Body.Close() }()
+	defer func() {
+		_ = res.Body.Close()
+		// HTTP/2 keeps a read goroutine after the body is closed. The leak
+		// check treats that as a live goroutine.
+		client.CloseIdleConnections()
+	}()
 	logger.Println("Download:", u)
 
 	if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {

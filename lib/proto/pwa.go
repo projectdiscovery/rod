@@ -37,10 +37,10 @@ type PWAFileHandler struct {
 type PWADisplayMode string
 
 const (
-	// PWADisplayModeStandalone enum const.
+	// PWADisplayModeStandalone enum const
 	PWADisplayModeStandalone PWADisplayMode = "standalone"
 
-	// PWADisplayModeBrowser enum const.
+	// PWADisplayModeBrowser enum const
 	PWADisplayModeBrowser PWADisplayMode = "browser"
 )
 
@@ -52,10 +52,10 @@ type PWAGetOsAppState struct {
 	ManifestID string `json:"manifestId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWAGetOsAppState) ProtoReq() string { return "PWA.getOsAppState" }
 
-// Call the request.
+// Call the request
 func (m PWAGetOsAppState) Call(c Client) (*PWAGetOsAppStateResult, error) {
 	var res PWAGetOsAppStateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -70,15 +70,31 @@ type PWAGetOsAppStateResult struct {
 	FileHandlers []*PWAFileHandler `json:"fileHandlers"`
 }
 
-// PWAInstall Installs the given manifest identity, optionally using the given install_url
-// or IWA bundle location.
+// PWAInstall Installs the given manifest identity, optionally using the given installUrlOrBundleUrl
 //
-// TODO(crbug.com/337872319) Support IWA to meet the following specific
-// requirement.
-// IWA-specific install description: If the manifest_id is isolated-app://,
-// install_url_or_bundle_url is required, and can be either an http(s) URL or
-// file:// URL pointing to a signed web bundle (.swbn). The .swbn file's
-// signing key must correspond to manifest_id. If Chrome is not in IWA dev
+// IWA-specific install description:
+// manifestId corresponds to isolated-app:// + web_package::SignedWebBundleId
+//
+// File installation mode:
+// The installUrlOrBundleUrl can be either file:// or http(s):// pointing
+// to a signed web bundle (.swbn). In this case SignedWebBundleId must correspond to
+// The .swbn file's signing key.
+//
+// Dev proxy installation mode:
+// installUrlOrBundleUrl must be http(s):// that serves dev mode IWA.
+// web_package::SignedWebBundleId must be of type dev proxy.
+//
+// The advantage of dev proxy mode is that all changes to IWA
+// automatically will be reflected in the running app without
+// reinstallation.
+//
+// To generate bundle id for proxy mode:
+//  1. Generate 32 random bytes.
+//  2. Add a specific suffix at the end following the documentation
+//     https://github.com/WICG/isolated-web-apps/blob/main/Scheme.md#suffix
+//  3. Encode the entire sequence using Base32 without padding.
+//
+// If Chrome is not in IWA dev
 // mode, the installation will fail, regardless of the state of the allowlist.
 type PWAInstall struct {
 	// ManifestID ...
@@ -89,10 +105,10 @@ type PWAInstall struct {
 	InstallURLOrBundleURL string `json:"installUrlOrBundleUrl,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWAInstall) ProtoReq() string { return "PWA.install" }
 
-// Call sends the request.
+// Call sends the request
 func (m PWAInstall) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -103,10 +119,10 @@ type PWAUninstall struct {
 	ManifestID string `json:"manifestId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWAUninstall) ProtoReq() string { return "PWA.uninstall" }
 
-// Call sends the request.
+// Call sends the request
 func (m PWAUninstall) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -122,10 +138,10 @@ type PWALaunch struct {
 	URL string `json:"url,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWALaunch) ProtoReq() string { return "PWA.launch" }
 
-// Call the request.
+// Call the request
 func (m PWALaunch) Call(c Client) (*PWALaunchResult, error) {
 	var res PWALaunchResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -158,10 +174,10 @@ type PWALaunchFilesInApp struct {
 	Files []string `json:"files"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWALaunchFilesInApp) ProtoReq() string { return "PWA.launchFilesInApp" }
 
-// Call the request.
+// Call the request
 func (m PWALaunchFilesInApp) Call(c Client) (*PWALaunchFilesInAppResult, error) {
 	var res PWALaunchFilesInAppResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -181,10 +197,10 @@ type PWAOpenCurrentPageInApp struct {
 	ManifestID string `json:"manifestId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWAOpenCurrentPageInApp) ProtoReq() string { return "PWA.openCurrentPageInApp" }
 
-// Call sends the request.
+// Call sends the request
 func (m PWAOpenCurrentPageInApp) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -219,10 +235,10 @@ type PWAChangeAppUserSettings struct {
 	DisplayMode PWADisplayMode `json:"displayMode,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PWAChangeAppUserSettings) ProtoReq() string { return "PWA.changeAppUserSettings" }
 
-// Call sends the request.
+// Call sends the request
 func (m PWAChangeAppUserSettings) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }

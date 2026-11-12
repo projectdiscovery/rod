@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 
@@ -14,7 +15,11 @@ import (
 )
 
 func getSchema() gson.JSON {
-	l := launcher.New().Bin(launcher.NewBrowser().MustGet()).NoSandbox(true)
+	bin := os.Getenv("ROD_PROTO_BIN")
+	if bin == "" {
+		bin = launcher.NewBrowser().MustGet()
+	}
+	l := launcher.New().Bin(bin).NoSandbox(true)
 	defer l.Kill()
 
 	u := l.MustLaunch()

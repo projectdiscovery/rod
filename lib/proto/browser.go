@@ -20,20 +20,20 @@ type BrowserWindowID int
 type BrowserWindowState string
 
 const (
-	// BrowserWindowStateNormal enum const.
+	// BrowserWindowStateNormal enum const
 	BrowserWindowStateNormal BrowserWindowState = "normal"
 
-	// BrowserWindowStateMinimized enum const.
+	// BrowserWindowStateMinimized enum const
 	BrowserWindowStateMinimized BrowserWindowState = "minimized"
 
-	// BrowserWindowStateMaximized enum const.
+	// BrowserWindowStateMaximized enum const
 	BrowserWindowStateMaximized BrowserWindowState = "maximized"
 
-	// BrowserWindowStateFullscreen enum const.
+	// BrowserWindowStateFullscreen enum const
 	BrowserWindowStateFullscreen BrowserWindowState = "fullscreen"
 )
 
-// BrowserBounds (experimental) Browser window bounds information.
+// BrowserBounds (experimental) Browser window bounds information
 type BrowserBounds struct {
 	// Left (optional) The offset from the left edge of the screen to the window in pixels.
 	Left *int `json:"left,omitempty"`
@@ -55,91 +55,121 @@ type BrowserBounds struct {
 type BrowserPermissionType string
 
 const (
-	// BrowserPermissionTypeAccessibilityEvents enum const.
-	BrowserPermissionTypeAccessibilityEvents BrowserPermissionType = "accessibilityEvents"
+	// BrowserPermissionTypeAr enum const
+	BrowserPermissionTypeAr BrowserPermissionType = "ar"
 
-	// BrowserPermissionTypeAudioCapture enum const.
+	// BrowserPermissionTypeAudioCapture enum const
 	BrowserPermissionTypeAudioCapture BrowserPermissionType = "audioCapture"
 
-	// BrowserPermissionTypeBackgroundSync enum const.
-	BrowserPermissionTypeBackgroundSync BrowserPermissionType = "backgroundSync"
+	// BrowserPermissionTypeAutomaticFullscreen enum const
+	BrowserPermissionTypeAutomaticFullscreen BrowserPermissionType = "automaticFullscreen"
 
-	// BrowserPermissionTypeBackgroundFetch enum const.
+	// BrowserPermissionTypeBackgroundFetch enum const
 	BrowserPermissionTypeBackgroundFetch BrowserPermissionType = "backgroundFetch"
 
-	// BrowserPermissionTypeCapturedSurfaceControl enum const.
+	// BrowserPermissionTypeBackgroundSync enum const
+	BrowserPermissionTypeBackgroundSync BrowserPermissionType = "backgroundSync"
+
+	// BrowserPermissionTypeCameraPanTiltZoom enum const
+	BrowserPermissionTypeCameraPanTiltZoom BrowserPermissionType = "cameraPanTiltZoom"
+
+	// BrowserPermissionTypeCapturedSurfaceControl enum const
 	BrowserPermissionTypeCapturedSurfaceControl BrowserPermissionType = "capturedSurfaceControl"
 
-	// BrowserPermissionTypeClipboardReadWrite enum const.
+	// BrowserPermissionTypeClipboardReadWrite enum const
 	BrowserPermissionTypeClipboardReadWrite BrowserPermissionType = "clipboardReadWrite"
 
-	// BrowserPermissionTypeClipboardSanitizedWrite enum const.
+	// BrowserPermissionTypeClipboardSanitizedWrite enum const
 	BrowserPermissionTypeClipboardSanitizedWrite BrowserPermissionType = "clipboardSanitizedWrite"
 
-	// BrowserPermissionTypeDisplayCapture enum const.
+	// BrowserPermissionTypeDisplayCapture enum const
 	BrowserPermissionTypeDisplayCapture BrowserPermissionType = "displayCapture"
 
-	// BrowserPermissionTypeDurableStorage enum const.
+	// BrowserPermissionTypeDurableStorage enum const
 	BrowserPermissionTypeDurableStorage BrowserPermissionType = "durableStorage"
 
-	// BrowserPermissionTypeFlash enum const.
-	BrowserPermissionTypeFlash BrowserPermissionType = "flash"
-
-	// BrowserPermissionTypeGeolocation enum const.
+	// BrowserPermissionTypeGeolocation enum const
 	BrowserPermissionTypeGeolocation BrowserPermissionType = "geolocation"
 
-	// BrowserPermissionTypeIdleDetection enum const.
+	// BrowserPermissionTypeHandTracking enum const
+	BrowserPermissionTypeHandTracking BrowserPermissionType = "handTracking"
+
+	// BrowserPermissionTypeIdleDetection enum const
 	BrowserPermissionTypeIdleDetection BrowserPermissionType = "idleDetection"
 
-	// BrowserPermissionTypeLocalFonts enum const.
+	// BrowserPermissionTypeKeyboardLock enum const
+	BrowserPermissionTypeKeyboardLock BrowserPermissionType = "keyboardLock"
+
+	// BrowserPermissionTypeLocalFonts enum const
 	BrowserPermissionTypeLocalFonts BrowserPermissionType = "localFonts"
 
-	// BrowserPermissionTypeMidi enum const.
+	// BrowserPermissionTypeLocalNetwork enum const
+	BrowserPermissionTypeLocalNetwork BrowserPermissionType = "localNetwork"
+
+	// BrowserPermissionTypeLocalNetworkAccess enum const
+	BrowserPermissionTypeLocalNetworkAccess BrowserPermissionType = "localNetworkAccess"
+
+	// BrowserPermissionTypeLoopbackNetwork enum const
+	BrowserPermissionTypeLoopbackNetwork BrowserPermissionType = "loopbackNetwork"
+
+	// BrowserPermissionTypeMidi enum const
 	BrowserPermissionTypeMidi BrowserPermissionType = "midi"
 
-	// BrowserPermissionTypeMidiSysex enum const.
+	// BrowserPermissionTypeMidiSysex enum const
 	BrowserPermissionTypeMidiSysex BrowserPermissionType = "midiSysex"
 
-	// BrowserPermissionTypeNfc enum const.
+	// BrowserPermissionTypeNfc enum const
 	BrowserPermissionTypeNfc BrowserPermissionType = "nfc"
 
-	// BrowserPermissionTypeNotifications enum const.
+	// BrowserPermissionTypeNotifications enum const
 	BrowserPermissionTypeNotifications BrowserPermissionType = "notifications"
 
-	// BrowserPermissionTypePaymentHandler enum const.
+	// BrowserPermissionTypePaymentHandler enum const
 	BrowserPermissionTypePaymentHandler BrowserPermissionType = "paymentHandler"
 
-	// BrowserPermissionTypePeriodicBackgroundSync enum const.
+	// BrowserPermissionTypePeriodicBackgroundSync enum const
 	BrowserPermissionTypePeriodicBackgroundSync BrowserPermissionType = "periodicBackgroundSync"
 
-	// BrowserPermissionTypeProtectedMediaIdentifier enum const.
+	// BrowserPermissionTypePointerLock enum const
+	BrowserPermissionTypePointerLock BrowserPermissionType = "pointerLock"
+
+	// BrowserPermissionTypeProtectedMediaIdentifier enum const
 	BrowserPermissionTypeProtectedMediaIdentifier BrowserPermissionType = "protectedMediaIdentifier"
 
-	// BrowserPermissionTypeSensors enum const.
+	// BrowserPermissionTypeSensors enum const
 	BrowserPermissionTypeSensors BrowserPermissionType = "sensors"
 
-	// BrowserPermissionTypeStorageAccess enum const.
-	BrowserPermissionTypeStorageAccess BrowserPermissionType = "storageAccess"
+	// BrowserPermissionTypeSmartCard enum const
+	BrowserPermissionTypeSmartCard BrowserPermissionType = "smartCard"
 
-	// BrowserPermissionTypeSpeakerSelection enum const.
+	// BrowserPermissionTypeSpeakerSelection enum const
 	BrowserPermissionTypeSpeakerSelection BrowserPermissionType = "speakerSelection"
 
-	// BrowserPermissionTypeTopLevelStorageAccess enum const.
+	// BrowserPermissionTypeStorageAccess enum const
+	BrowserPermissionTypeStorageAccess BrowserPermissionType = "storageAccess"
+
+	// BrowserPermissionTypeTopLevelStorageAccess enum const
 	BrowserPermissionTypeTopLevelStorageAccess BrowserPermissionType = "topLevelStorageAccess"
 
-	// BrowserPermissionTypeVideoCapture enum const.
+	// BrowserPermissionTypeVideoCapture enum const
 	BrowserPermissionTypeVideoCapture BrowserPermissionType = "videoCapture"
 
-	// BrowserPermissionTypeVideoCapturePanTiltZoom enum const.
-	BrowserPermissionTypeVideoCapturePanTiltZoom BrowserPermissionType = "videoCapturePanTiltZoom"
+	// BrowserPermissionTypeVr enum const
+	BrowserPermissionTypeVr BrowserPermissionType = "vr"
 
-	// BrowserPermissionTypeWakeLockScreen enum const.
+	// BrowserPermissionTypeWakeLockScreen enum const
 	BrowserPermissionTypeWakeLockScreen BrowserPermissionType = "wakeLockScreen"
 
-	// BrowserPermissionTypeWakeLockSystem enum const.
+	// BrowserPermissionTypeWakeLockSystem enum const
 	BrowserPermissionTypeWakeLockSystem BrowserPermissionType = "wakeLockSystem"
 
-	// BrowserPermissionTypeWindowManagement enum const.
+	// BrowserPermissionTypeWebAppInstallation enum const
+	BrowserPermissionTypeWebAppInstallation BrowserPermissionType = "webAppInstallation"
+
+	// BrowserPermissionTypeWebPrinting enum const
+	BrowserPermissionTypeWebPrinting BrowserPermissionType = "webPrinting"
+
+	// BrowserPermissionTypeWindowManagement enum const
 	BrowserPermissionTypeWindowManagement BrowserPermissionType = "windowManagement"
 )
 
@@ -147,13 +177,13 @@ const (
 type BrowserPermissionSetting string
 
 const (
-	// BrowserPermissionSettingGranted enum const.
+	// BrowserPermissionSettingGranted enum const
 	BrowserPermissionSettingGranted BrowserPermissionSetting = "granted"
 
-	// BrowserPermissionSettingDenied enum const.
+	// BrowserPermissionSettingDenied enum const
 	BrowserPermissionSettingDenied BrowserPermissionSetting = "denied"
 
-	// BrowserPermissionSettingPrompt enum const.
+	// BrowserPermissionSettingPrompt enum const
 	BrowserPermissionSettingPrompt BrowserPermissionSetting = "prompt"
 )
 
@@ -185,11 +215,14 @@ type BrowserPermissionDescriptor struct {
 type BrowserBrowserCommandID string
 
 const (
-	// BrowserBrowserCommandIDOpenTabSearch enum const.
+	// BrowserBrowserCommandIDOpenTabSearch enum const
 	BrowserBrowserCommandIDOpenTabSearch BrowserBrowserCommandID = "openTabSearch"
 
-	// BrowserBrowserCommandIDCloseTabSearch enum const.
+	// BrowserBrowserCommandIDCloseTabSearch enum const
 	BrowserBrowserCommandIDCloseTabSearch BrowserBrowserCommandID = "closeTabSearch"
+
+	// BrowserBrowserCommandIDOpenGlic enum const
+	BrowserBrowserCommandIDOpenGlic BrowserBrowserCommandID = "openGlic"
 )
 
 // BrowserBucket (experimental) Chrome histogram bucket.
@@ -219,7 +252,7 @@ type BrowserHistogram struct {
 	Buckets []*BrowserBucket `json:"buckets"`
 }
 
-// BrowserSetPermission (experimental) Set permission settings for given origin.
+// BrowserSetPermission (experimental) Set permission settings for given embedding and embedded origins.
 type BrowserSetPermission struct {
 	// Permission Descriptor of permission to override.
 	Permission *BrowserPermissionDescriptor `json:"permission"`
@@ -227,22 +260,28 @@ type BrowserSetPermission struct {
 	// Setting of the permission.
 	Setting BrowserPermissionSetting `json:"setting"`
 
-	// Origin (optional) Origin the permission applies to, all origins if not specified.
+	// Origin (optional) Embedding origin the permission applies to, all origins if not specified.
 	Origin string `json:"origin,omitempty"`
+
+	// EmbeddedOrigin (optional) Embedded origin the permission applies to. It is ignored unless the embedding origin is
+	// present and valid. If the embedding origin is provided but the embedded origin isn't, the
+	// embedding origin is used as the embedded origin.
+	EmbeddedOrigin string `json:"embeddedOrigin,omitempty"`
 
 	// BrowserContextID (optional) Context to override. When omitted, default browser context is used.
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserSetPermission) ProtoReq() string { return "Browser.setPermission" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserSetPermission) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// BrowserGrantPermissions (experimental) Grant specific permissions to the given origin and reject all others.
+// BrowserGrantPermissions (deprecated) (experimental) Grant specific permissions to the given origin and reject all others. Deprecated. Use
+// setPermission instead.
 type BrowserGrantPermissions struct {
 	// Permissions ...
 	Permissions []BrowserPermissionType `json:"permissions"`
@@ -254,10 +293,10 @@ type BrowserGrantPermissions struct {
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGrantPermissions) ProtoReq() string { return "Browser.grantPermissions" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserGrantPermissions) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -268,28 +307,28 @@ type BrowserResetPermissions struct {
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserResetPermissions) ProtoReq() string { return "Browser.resetPermissions" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserResetPermissions) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// BrowserSetDownloadBehaviorBehavior enum.
+// BrowserSetDownloadBehaviorBehavior enum
 type BrowserSetDownloadBehaviorBehavior string
 
 const (
-	// BrowserSetDownloadBehaviorBehaviorDeny enum const.
+	// BrowserSetDownloadBehaviorBehaviorDeny enum const
 	BrowserSetDownloadBehaviorBehaviorDeny BrowserSetDownloadBehaviorBehavior = "deny"
 
-	// BrowserSetDownloadBehaviorBehaviorAllow enum const.
+	// BrowserSetDownloadBehaviorBehaviorAllow enum const
 	BrowserSetDownloadBehaviorBehaviorAllow BrowserSetDownloadBehaviorBehavior = "allow"
 
-	// BrowserSetDownloadBehaviorBehaviorAllowAndName enum const.
+	// BrowserSetDownloadBehaviorBehaviorAllowAndName enum const
 	BrowserSetDownloadBehaviorBehaviorAllowAndName BrowserSetDownloadBehaviorBehavior = "allowAndName"
 
-	// BrowserSetDownloadBehaviorBehaviorDefault enum const.
+	// BrowserSetDownloadBehaviorBehaviorDefault enum const
 	BrowserSetDownloadBehaviorBehaviorDefault BrowserSetDownloadBehaviorBehavior = "default"
 )
 
@@ -311,15 +350,15 @@ type BrowserSetDownloadBehavior struct {
 	EventsEnabled bool `json:"eventsEnabled,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserSetDownloadBehavior) ProtoReq() string { return "Browser.setDownloadBehavior" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserSetDownloadBehavior) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// BrowserCancelDownload (experimental) Cancel a download if in progress.
+// BrowserCancelDownload (experimental) Cancel a download if in progress
 type BrowserCancelDownload struct {
 	// GUID Global unique identifier of the download.
 	GUID string `json:"guid"`
@@ -328,10 +367,10 @@ type BrowserCancelDownload struct {
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserCancelDownload) ProtoReq() string { return "Browser.cancelDownload" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserCancelDownload) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -339,10 +378,10 @@ func (m BrowserCancelDownload) Call(c Client) error {
 // BrowserClose Close browser gracefully.
 type BrowserClose struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserClose) ProtoReq() string { return "Browser.close" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserClose) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -350,10 +389,10 @@ func (m BrowserClose) Call(c Client) error {
 // BrowserCrash (experimental) Crashes browser on the main thread.
 type BrowserCrash struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserCrash) ProtoReq() string { return "Browser.crash" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserCrash) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -361,10 +400,10 @@ func (m BrowserCrash) Call(c Client) error {
 // BrowserCrashGpuProcess (experimental) Crashes GPU process.
 type BrowserCrashGpuProcess struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserCrashGpuProcess) ProtoReq() string { return "Browser.crashGpuProcess" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserCrashGpuProcess) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -372,10 +411,10 @@ func (m BrowserCrashGpuProcess) Call(c Client) error {
 // BrowserGetVersion Returns version information.
 type BrowserGetVersion struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetVersion) ProtoReq() string { return "Browser.getVersion" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetVersion) Call(c Client) (*BrowserGetVersionResult, error) {
 	var res BrowserGetVersionResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -403,10 +442,10 @@ type BrowserGetVersionResult struct {
 // --enable-automation is on the commandline.
 type BrowserGetBrowserCommandLine struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetBrowserCommandLine) ProtoReq() string { return "Browser.getBrowserCommandLine" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetBrowserCommandLine) Call(c Client) (*BrowserGetBrowserCommandLineResult, error) {
 	var res BrowserGetBrowserCommandLineResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -416,6 +455,24 @@ func (m BrowserGetBrowserCommandLine) Call(c Client) (*BrowserGetBrowserCommandL
 type BrowserGetBrowserCommandLineResult struct {
 	// Arguments Commandline parameters
 	Arguments []string `json:"arguments"`
+}
+
+// BrowserAddMockCamera (experimental) Adds or updates a mock camera in the shared video capture device list for
+// test automation. The mock camera is not scoped to a particular page or
+// frame and is removed when the DevTools session that created it disconnects.
+type BrowserAddMockCamera struct {
+	// DeviceID Required non-empty identifier for the mock camera. This is mapped to an
+	// internal virtual-device identifier and is not the MediaDeviceInfo.deviceId
+	// exposed to the page.
+	DeviceID string `json:"deviceId"`
+}
+
+// ProtoReq name
+func (m BrowserAddMockCamera) ProtoReq() string { return "Browser.addMockCamera" }
+
+// Call sends the request
+func (m BrowserAddMockCamera) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
 }
 
 // BrowserGetHistograms (experimental) Get Chrome histograms.
@@ -429,10 +486,10 @@ type BrowserGetHistograms struct {
 	Delta bool `json:"delta,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetHistograms) ProtoReq() string { return "Browser.getHistograms" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetHistograms) Call(c Client) (*BrowserGetHistogramsResult, error) {
 	var res BrowserGetHistogramsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -453,10 +510,10 @@ type BrowserGetHistogram struct {
 	Delta bool `json:"delta,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetHistogram) ProtoReq() string { return "Browser.getHistogram" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetHistogram) Call(c Client) (*BrowserGetHistogramResult, error) {
 	var res BrowserGetHistogramResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -474,10 +531,10 @@ type BrowserGetWindowBounds struct {
 	WindowID BrowserWindowID `json:"windowId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetWindowBounds) ProtoReq() string { return "Browser.getWindowBounds" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetWindowBounds) Call(c Client) (*BrowserGetWindowBoundsResult, error) {
 	var res BrowserGetWindowBoundsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -496,10 +553,10 @@ type BrowserGetWindowForTarget struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserGetWindowForTarget) ProtoReq() string { return "Browser.getWindowForTarget" }
 
-// Call the request.
+// Call the request
 func (m BrowserGetWindowForTarget) Call(c Client) (*BrowserGetWindowForTargetResult, error) {
 	var res BrowserGetWindowForTargetResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -525,11 +582,33 @@ type BrowserSetWindowBounds struct {
 	Bounds *BrowserBounds `json:"bounds"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserSetWindowBounds) ProtoReq() string { return "Browser.setWindowBounds" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserSetWindowBounds) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// BrowserSetContentsSize (experimental) Set size of the browser contents resizing browser window as necessary.
+type BrowserSetContentsSize struct {
+	// WindowID Browser window id.
+	WindowID BrowserWindowID `json:"windowId"`
+
+	// Width (optional) The window contents width in DIP. Assumes current width if omitted.
+	// Must be specified if 'height' is omitted.
+	Width *int `json:"width,omitempty"`
+
+	// Height (optional) The window contents height in DIP. Assumes current height if omitted.
+	// Must be specified if 'width' is omitted.
+	Height *int `json:"height,omitempty"`
+}
+
+// ProtoReq name
+func (m BrowserSetContentsSize) ProtoReq() string { return "Browser.setContentsSize" }
+
+// Call sends the request
+func (m BrowserSetContentsSize) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -542,10 +621,10 @@ type BrowserSetDockTile struct {
 	Image []byte `json:"image,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserSetDockTile) ProtoReq() string { return "Browser.setDockTile" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserSetDockTile) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -556,10 +635,10 @@ type BrowserExecuteBrowserCommand struct {
 	CommandID BrowserBrowserCommandID `json:"commandId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserExecuteBrowserCommand) ProtoReq() string { return "Browser.executeBrowserCommand" }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserExecuteBrowserCommand) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -571,14 +650,55 @@ type BrowserAddPrivacySandboxEnrollmentOverride struct {
 	URL string `json:"url"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m BrowserAddPrivacySandboxEnrollmentOverride) ProtoReq() string {
 	return "Browser.addPrivacySandboxEnrollmentOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m BrowserAddPrivacySandboxEnrollmentOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
+}
+
+// BrowserGetGlobalPrivacyControl (experimental) Gets the current globally-applied privacy control status
+// See https://www.w3.org/TR/gpc/#get-global-privacy-control
+type BrowserGetGlobalPrivacyControl struct{}
+
+// ProtoReq name
+func (m BrowserGetGlobalPrivacyControl) ProtoReq() string { return "Browser.getGlobalPrivacyControl" }
+
+// Call the request
+func (m BrowserGetGlobalPrivacyControl) Call(c Client) (*BrowserGetGlobalPrivacyControlResult, error) {
+	var res BrowserGetGlobalPrivacyControlResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// BrowserGetGlobalPrivacyControlResult (experimental) ...
+type BrowserGetGlobalPrivacyControlResult struct {
+	// Gpc ...
+	Gpc bool `json:"gpc"`
+}
+
+// BrowserSetGlobalPrivacyControl (experimental) Sets and then gets the current globally-applied privacy control status
+// See https://www.w3.org/TR/gpc/#set-global-privacy-control
+type BrowserSetGlobalPrivacyControl struct {
+	// Gpc ...
+	Gpc bool `json:"gpc"`
+}
+
+// ProtoReq name
+func (m BrowserSetGlobalPrivacyControl) ProtoReq() string { return "Browser.setGlobalPrivacyControl" }
+
+// Call the request
+func (m BrowserSetGlobalPrivacyControl) Call(c Client) (*BrowserSetGlobalPrivacyControlResult, error) {
+	var res BrowserSetGlobalPrivacyControlResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// BrowserSetGlobalPrivacyControlResult (experimental) ...
+type BrowserSetGlobalPrivacyControlResult struct {
+	// Gpc ...
+	Gpc bool `json:"gpc"`
 }
 
 // BrowserDownloadWillBegin (experimental) Fired when page is about to start a download.
@@ -596,22 +716,22 @@ type BrowserDownloadWillBegin struct {
 	SuggestedFilename string `json:"suggestedFilename"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt BrowserDownloadWillBegin) ProtoEvent() string {
 	return "Browser.downloadWillBegin"
 }
 
-// BrowserDownloadProgressState enum.
+// BrowserDownloadProgressState enum
 type BrowserDownloadProgressState string
 
 const (
-	// BrowserDownloadProgressStateInProgress enum const.
+	// BrowserDownloadProgressStateInProgress enum const
 	BrowserDownloadProgressStateInProgress BrowserDownloadProgressState = "inProgress"
 
-	// BrowserDownloadProgressStateCompleted enum const.
+	// BrowserDownloadProgressStateCompleted enum const
 	BrowserDownloadProgressStateCompleted BrowserDownloadProgressState = "completed"
 
-	// BrowserDownloadProgressStateCanceled enum const.
+	// BrowserDownloadProgressStateCanceled enum const
 	BrowserDownloadProgressStateCanceled BrowserDownloadProgressState = "canceled"
 )
 
@@ -628,9 +748,14 @@ type BrowserDownloadProgress struct {
 
 	// State Download status.
 	State BrowserDownloadProgressState `json:"state"`
+
+	// FilePath (experimental) (optional) If download is "completed", provides the path of the downloaded file.
+	// Depending on the platform, it is not guaranteed to be set, nor the file
+	// is guaranteed to exist.
+	FilePath string `json:"filePath,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt BrowserDownloadProgress) ProtoEvent() string {
 	return "Browser.downloadProgress"
 }

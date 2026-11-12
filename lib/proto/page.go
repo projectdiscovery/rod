@@ -17,13 +17,13 @@ type PageFrameID string
 type PageAdFrameType string
 
 const (
-	// PageAdFrameTypeNone enum const.
+	// PageAdFrameTypeNone enum const
 	PageAdFrameTypeNone PageAdFrameType = "none"
 
-	// PageAdFrameTypeChild enum const.
+	// PageAdFrameTypeChild enum const
 	PageAdFrameTypeChild PageAdFrameType = "child"
 
-	// PageAdFrameTypeRoot enum const.
+	// PageAdFrameTypeRoot enum const
 	PageAdFrameTypeRoot PageAdFrameType = "root"
 )
 
@@ -31,13 +31,13 @@ const (
 type PageAdFrameExplanation string
 
 const (
-	// PageAdFrameExplanationParentIsAd enum const.
+	// PageAdFrameExplanationParentIsAd enum const
 	PageAdFrameExplanationParentIsAd PageAdFrameExplanation = "ParentIsAd"
 
-	// PageAdFrameExplanationCreatedByAdScript enum const.
+	// PageAdFrameExplanationCreatedByAdScript enum const
 	PageAdFrameExplanationCreatedByAdScript PageAdFrameExplanation = "CreatedByAdScript"
 
-	// PageAdFrameExplanationMatchedBlockingRule enum const.
+	// PageAdFrameExplanationMatchedBlockingRule enum const
 	PageAdFrameExplanationMatchedBlockingRule PageAdFrameExplanation = "MatchedBlockingRule"
 )
 
@@ -50,31 +50,20 @@ type PageAdFrameStatus struct {
 	Explanations []PageAdFrameExplanation `json:"explanations,omitempty"`
 }
 
-// PageAdScriptID (experimental) Identifies the bottom-most script which caused the frame to be labelled
-// as an ad.
-type PageAdScriptID struct {
-	// ScriptID Script Id of the bottom-most script which caused the frame to be labelled
-	// as an ad.
-	ScriptID RuntimeScriptID `json:"scriptId"`
-
-	// DebuggerID Id of adScriptId's debugger.
-	DebuggerID RuntimeUniqueDebuggerID `json:"debuggerId"`
-}
-
 // PageSecureContextType (experimental) Indicates whether the frame is a secure context and why it is the case.
 type PageSecureContextType string
 
 const (
-	// PageSecureContextTypeSecure enum const.
+	// PageSecureContextTypeSecure enum const
 	PageSecureContextTypeSecure PageSecureContextType = "Secure"
 
-	// PageSecureContextTypeSecureLocalhost enum const.
+	// PageSecureContextTypeSecureLocalhost enum const
 	PageSecureContextTypeSecureLocalhost PageSecureContextType = "SecureLocalhost"
 
-	// PageSecureContextTypeInsecureScheme enum const.
+	// PageSecureContextTypeInsecureScheme enum const
 	PageSecureContextTypeInsecureScheme PageSecureContextType = "InsecureScheme"
 
-	// PageSecureContextTypeInsecureAncestor enum const.
+	// PageSecureContextTypeInsecureAncestor enum const
 	PageSecureContextTypeInsecureAncestor PageSecureContextType = "InsecureAncestor"
 )
 
@@ -82,13 +71,13 @@ const (
 type PageCrossOriginIsolatedContextType string
 
 const (
-	// PageCrossOriginIsolatedContextTypeIsolated enum const.
+	// PageCrossOriginIsolatedContextTypeIsolated enum const
 	PageCrossOriginIsolatedContextTypeIsolated PageCrossOriginIsolatedContextType = "Isolated"
 
-	// PageCrossOriginIsolatedContextTypeNotIsolated enum const.
+	// PageCrossOriginIsolatedContextTypeNotIsolated enum const
 	PageCrossOriginIsolatedContextTypeNotIsolated PageCrossOriginIsolatedContextType = "NotIsolated"
 
-	// PageCrossOriginIsolatedContextTypeNotIsolatedFeatureDisabled enum const.
+	// PageCrossOriginIsolatedContextTypeNotIsolatedFeatureDisabled enum const
 	PageCrossOriginIsolatedContextTypeNotIsolatedFeatureDisabled PageCrossOriginIsolatedContextType = "NotIsolatedFeatureDisabled"
 )
 
@@ -96,277 +85,338 @@ const (
 type PageGatedAPIFeatures string
 
 const (
-	// PageGatedAPIFeaturesSharedArrayBuffers enum const.
+	// PageGatedAPIFeaturesSharedArrayBuffers enum const
 	PageGatedAPIFeaturesSharedArrayBuffers PageGatedAPIFeatures = "SharedArrayBuffers"
 
-	// PageGatedAPIFeaturesSharedArrayBuffersTransferAllowed enum const.
+	// PageGatedAPIFeaturesSharedArrayBuffersTransferAllowed enum const
 	PageGatedAPIFeaturesSharedArrayBuffersTransferAllowed PageGatedAPIFeatures = "SharedArrayBuffersTransferAllowed"
 
-	// PageGatedAPIFeaturesPerformanceMeasureMemory enum const.
+	// PageGatedAPIFeaturesPerformanceMeasureMemory enum const
 	PageGatedAPIFeaturesPerformanceMeasureMemory PageGatedAPIFeatures = "PerformanceMeasureMemory"
 
-	// PageGatedAPIFeaturesPerformanceProfile enum const.
+	// PageGatedAPIFeaturesPerformanceProfile enum const
 	PageGatedAPIFeaturesPerformanceProfile PageGatedAPIFeatures = "PerformanceProfile"
 )
 
 // PagePermissionsPolicyFeature (experimental) All Permissions Policy features. This enum should match the one defined
-// in third_party/blink/renderer/core/permissions_policy/permissions_policy_features.json5.
+// in services/network/public/cpp/permissions_policy/permissions_policy_features.json5.
+// LINT.IfChange(PermissionsPolicyFeature)
 type PagePermissionsPolicyFeature string
 
 const (
-	// PagePermissionsPolicyFeatureAccelerometer enum const.
+	// PagePermissionsPolicyFeatureAccelerometer enum const
 	PagePermissionsPolicyFeatureAccelerometer PagePermissionsPolicyFeature = "accelerometer"
 
-	// PagePermissionsPolicyFeatureAmbientLightSensor enum const.
+	// PagePermissionsPolicyFeatureAllScreensCapture enum const
+	PagePermissionsPolicyFeatureAllScreensCapture PagePermissionsPolicyFeature = "all-screens-capture"
+
+	// PagePermissionsPolicyFeatureAmbientLightSensor enum const
 	PagePermissionsPolicyFeatureAmbientLightSensor PagePermissionsPolicyFeature = "ambient-light-sensor"
 
-	// PagePermissionsPolicyFeatureAttributionReporting enum const.
-	PagePermissionsPolicyFeatureAttributionReporting PagePermissionsPolicyFeature = "attribution-reporting"
+	// PagePermissionsPolicyFeatureAriaNotify enum const
+	PagePermissionsPolicyFeatureAriaNotify PagePermissionsPolicyFeature = "aria-notify"
 
-	// PagePermissionsPolicyFeatureAutoplay enum const.
+	// PagePermissionsPolicyFeatureAutofill enum const
+	PagePermissionsPolicyFeatureAutofill PagePermissionsPolicyFeature = "autofill"
+
+	// PagePermissionsPolicyFeatureAutoplay enum const
 	PagePermissionsPolicyFeatureAutoplay PagePermissionsPolicyFeature = "autoplay"
 
-	// PagePermissionsPolicyFeatureBluetooth enum const.
+	// PagePermissionsPolicyFeatureBluetooth enum const
 	PagePermissionsPolicyFeatureBluetooth PagePermissionsPolicyFeature = "bluetooth"
 
-	// PagePermissionsPolicyFeatureBrowsingTopics enum const.
+	// PagePermissionsPolicyFeatureBrowsingTopics enum const
 	PagePermissionsPolicyFeatureBrowsingTopics PagePermissionsPolicyFeature = "browsing-topics"
 
-	// PagePermissionsPolicyFeatureCamera enum const.
+	// PagePermissionsPolicyFeatureCamera enum const
 	PagePermissionsPolicyFeatureCamera PagePermissionsPolicyFeature = "camera"
 
-	// PagePermissionsPolicyFeatureCapturedSurfaceControl enum const.
+	// PagePermissionsPolicyFeatureCapturedSurfaceControl enum const
 	PagePermissionsPolicyFeatureCapturedSurfaceControl PagePermissionsPolicyFeature = "captured-surface-control"
 
-	// PagePermissionsPolicyFeatureChDpr enum const.
+	// PagePermissionsPolicyFeatureChDpr enum const
 	PagePermissionsPolicyFeatureChDpr PagePermissionsPolicyFeature = "ch-dpr"
 
-	// PagePermissionsPolicyFeatureChDeviceMemory enum const.
+	// PagePermissionsPolicyFeatureChDeviceMemory enum const
 	PagePermissionsPolicyFeatureChDeviceMemory PagePermissionsPolicyFeature = "ch-device-memory"
 
-	// PagePermissionsPolicyFeatureChDownlink enum const.
+	// PagePermissionsPolicyFeatureChDownlink enum const
 	PagePermissionsPolicyFeatureChDownlink PagePermissionsPolicyFeature = "ch-downlink"
 
-	// PagePermissionsPolicyFeatureChEct enum const.
-	PagePermissionsPolicyFeatureChEct PagePermissionsPolicyFeature = "ch-etc"
+	// PagePermissionsPolicyFeatureChEct enum const
+	PagePermissionsPolicyFeatureChEct PagePermissionsPolicyFeature = "ch-ect"
 
-	// PagePermissionsPolicyFeatureChPrefersColorScheme enum const.
+	// PagePermissionsPolicyFeatureChPrefersColorScheme enum const
 	PagePermissionsPolicyFeatureChPrefersColorScheme PagePermissionsPolicyFeature = "ch-prefers-color-scheme"
 
-	// PagePermissionsPolicyFeatureChPrefersReducedMotion enum const.
+	// PagePermissionsPolicyFeatureChPrefersReducedMotion enum const
 	PagePermissionsPolicyFeatureChPrefersReducedMotion PagePermissionsPolicyFeature = "ch-prefers-reduced-motion"
 
-	// PagePermissionsPolicyFeatureChPrefersReducedTransparency enum const.
+	// PagePermissionsPolicyFeatureChPrefersReducedTransparency enum const
 	PagePermissionsPolicyFeatureChPrefersReducedTransparency PagePermissionsPolicyFeature = "ch-prefers-reduced-transparency"
 
-	// PagePermissionsPolicyFeatureChRtt enum const.
+	// PagePermissionsPolicyFeatureChRtt enum const
 	PagePermissionsPolicyFeatureChRtt PagePermissionsPolicyFeature = "ch-rtt"
 
-	// PagePermissionsPolicyFeatureChSaveData enum const.
+	// PagePermissionsPolicyFeatureChSaveData enum const
 	PagePermissionsPolicyFeatureChSaveData PagePermissionsPolicyFeature = "ch-save-data"
 
-	// PagePermissionsPolicyFeatureChUa enum const.
+	// PagePermissionsPolicyFeatureChUa enum const
 	PagePermissionsPolicyFeatureChUa PagePermissionsPolicyFeature = "ch-ua"
 
-	// PagePermissionsPolicyFeatureChUaArch enum const.
+	// PagePermissionsPolicyFeatureChUaArch enum const
 	PagePermissionsPolicyFeatureChUaArch PagePermissionsPolicyFeature = "ch-ua-arch"
 
-	// PagePermissionsPolicyFeatureChUaBitness enum const.
+	// PagePermissionsPolicyFeatureChUaBitness enum const
 	PagePermissionsPolicyFeatureChUaBitness PagePermissionsPolicyFeature = "ch-ua-bitness"
 
-	// PagePermissionsPolicyFeatureChUaPlatform enum const.
+	// PagePermissionsPolicyFeatureChUaHighEntropyValues enum const
+	PagePermissionsPolicyFeatureChUaHighEntropyValues PagePermissionsPolicyFeature = "ch-ua-high-entropy-values"
+
+	// PagePermissionsPolicyFeatureChUaPlatform enum const
 	PagePermissionsPolicyFeatureChUaPlatform PagePermissionsPolicyFeature = "ch-ua-platform"
 
-	// PagePermissionsPolicyFeatureChUaModel enum const.
+	// PagePermissionsPolicyFeatureChUaModel enum const
 	PagePermissionsPolicyFeatureChUaModel PagePermissionsPolicyFeature = "ch-ua-model"
 
-	// PagePermissionsPolicyFeatureChUaMobile enum const.
+	// PagePermissionsPolicyFeatureChUaMobile enum const
 	PagePermissionsPolicyFeatureChUaMobile PagePermissionsPolicyFeature = "ch-ua-mobile"
 
-	// PagePermissionsPolicyFeatureChUaFormFactors enum const.
+	// PagePermissionsPolicyFeatureChUaFormFactors enum const
 	PagePermissionsPolicyFeatureChUaFormFactors PagePermissionsPolicyFeature = "ch-ua-form-factors"
 
-	// PagePermissionsPolicyFeatureChUaFullVersion enum const.
+	// PagePermissionsPolicyFeatureChUaFullVersion enum const
 	PagePermissionsPolicyFeatureChUaFullVersion PagePermissionsPolicyFeature = "ch-ua-full-version"
 
-	// PagePermissionsPolicyFeatureChUaFullVersionList enum const.
+	// PagePermissionsPolicyFeatureChUaFullVersionList enum const
 	PagePermissionsPolicyFeatureChUaFullVersionList PagePermissionsPolicyFeature = "ch-ua-full-version-list"
 
-	// PagePermissionsPolicyFeatureChUaPlatformVersion enum const.
+	// PagePermissionsPolicyFeatureChUaPlatformVersion enum const
 	PagePermissionsPolicyFeatureChUaPlatformVersion PagePermissionsPolicyFeature = "ch-ua-platform-version"
 
-	// PagePermissionsPolicyFeatureChUaWow64 enum const.
+	// PagePermissionsPolicyFeatureChUaWow64 enum const
 	PagePermissionsPolicyFeatureChUaWow64 PagePermissionsPolicyFeature = "ch-ua-wow64"
 
-	// PagePermissionsPolicyFeatureChViewportHeight enum const.
+	// PagePermissionsPolicyFeatureChViewportHeight enum const
 	PagePermissionsPolicyFeatureChViewportHeight PagePermissionsPolicyFeature = "ch-viewport-height"
 
-	// PagePermissionsPolicyFeatureChViewportWidth enum const.
+	// PagePermissionsPolicyFeatureChViewportWidth enum const
 	PagePermissionsPolicyFeatureChViewportWidth PagePermissionsPolicyFeature = "ch-viewport-width"
 
-	// PagePermissionsPolicyFeatureChWidth enum const.
+	// PagePermissionsPolicyFeatureChWidth enum const
 	PagePermissionsPolicyFeatureChWidth PagePermissionsPolicyFeature = "ch-width"
 
-	// PagePermissionsPolicyFeatureClipboardRead enum const.
+	// PagePermissionsPolicyFeatureClipboardRead enum const
 	PagePermissionsPolicyFeatureClipboardRead PagePermissionsPolicyFeature = "clipboard-read"
 
-	// PagePermissionsPolicyFeatureClipboardWrite enum const.
+	// PagePermissionsPolicyFeatureClipboardWrite enum const
 	PagePermissionsPolicyFeatureClipboardWrite PagePermissionsPolicyFeature = "clipboard-write"
 
-	// PagePermissionsPolicyFeatureComputePressure enum const.
+	// PagePermissionsPolicyFeatureComputePressure enum const
 	PagePermissionsPolicyFeatureComputePressure PagePermissionsPolicyFeature = "compute-pressure"
 
-	// PagePermissionsPolicyFeatureCrossOriginIsolated enum const.
+	// PagePermissionsPolicyFeatureControlledFrame enum const
+	PagePermissionsPolicyFeatureControlledFrame PagePermissionsPolicyFeature = "controlled-frame"
+
+	// PagePermissionsPolicyFeatureCrossOriginIsolated enum const
 	PagePermissionsPolicyFeatureCrossOriginIsolated PagePermissionsPolicyFeature = "cross-origin-isolated"
 
-	// PagePermissionsPolicyFeatureDeferredFetch enum const.
+	// PagePermissionsPolicyFeatureDeferredFetch enum const
 	PagePermissionsPolicyFeatureDeferredFetch PagePermissionsPolicyFeature = "deferred-fetch"
 
-	// PagePermissionsPolicyFeatureDirectSockets enum const.
+	// PagePermissionsPolicyFeatureDeferredFetchMinimal enum const
+	PagePermissionsPolicyFeatureDeferredFetchMinimal PagePermissionsPolicyFeature = "deferred-fetch-minimal"
+
+	// PagePermissionsPolicyFeatureDeviceAttributes enum const
+	PagePermissionsPolicyFeatureDeviceAttributes PagePermissionsPolicyFeature = "device-attributes"
+
+	// PagePermissionsPolicyFeatureDigitalCredentialsCreate enum const
+	PagePermissionsPolicyFeatureDigitalCredentialsCreate PagePermissionsPolicyFeature = "digital-credentials-create"
+
+	// PagePermissionsPolicyFeatureDigitalCredentialsGet enum const
+	PagePermissionsPolicyFeatureDigitalCredentialsGet PagePermissionsPolicyFeature = "digital-credentials-get"
+
+	// PagePermissionsPolicyFeatureDirectSockets enum const
 	PagePermissionsPolicyFeatureDirectSockets PagePermissionsPolicyFeature = "direct-sockets"
 
-	// PagePermissionsPolicyFeatureDisplayCapture enum const.
+	// PagePermissionsPolicyFeatureDirectSocketsMulticast enum const
+	PagePermissionsPolicyFeatureDirectSocketsMulticast PagePermissionsPolicyFeature = "direct-sockets-multicast"
+
+	// PagePermissionsPolicyFeatureDisplayCapture enum const
 	PagePermissionsPolicyFeatureDisplayCapture PagePermissionsPolicyFeature = "display-capture"
 
-	// PagePermissionsPolicyFeatureDocumentDomain enum const.
+	// PagePermissionsPolicyFeatureDocumentDomain enum const
 	PagePermissionsPolicyFeatureDocumentDomain PagePermissionsPolicyFeature = "document-domain"
 
-	// PagePermissionsPolicyFeatureEncryptedMedia enum const.
+	// PagePermissionsPolicyFeatureEncryptedMedia enum const
 	PagePermissionsPolicyFeatureEncryptedMedia PagePermissionsPolicyFeature = "encrypted-media"
 
-	// PagePermissionsPolicyFeatureExecutionWhileOutOfViewport enum const.
+	// PagePermissionsPolicyFeatureExecutionWhileOutOfViewport enum const
 	PagePermissionsPolicyFeatureExecutionWhileOutOfViewport PagePermissionsPolicyFeature = "execution-while-out-of-viewport"
 
-	// PagePermissionsPolicyFeatureExecutionWhileNotRendered enum const.
+	// PagePermissionsPolicyFeatureExecutionWhileNotRendered enum const
 	PagePermissionsPolicyFeatureExecutionWhileNotRendered PagePermissionsPolicyFeature = "execution-while-not-rendered"
 
-	// PagePermissionsPolicyFeatureFocusWithoutUserActivation enum const.
+	// PagePermissionsPolicyFeatureFocusWithoutUserActivation enum const
 	PagePermissionsPolicyFeatureFocusWithoutUserActivation PagePermissionsPolicyFeature = "focus-without-user-activation"
 
-	// PagePermissionsPolicyFeatureFullscreen enum const.
+	// PagePermissionsPolicyFeatureFullscreen enum const
 	PagePermissionsPolicyFeatureFullscreen PagePermissionsPolicyFeature = "fullscreen"
 
-	// PagePermissionsPolicyFeatureFrobulate enum const.
+	// PagePermissionsPolicyFeatureFrobulate enum const
 	PagePermissionsPolicyFeatureFrobulate PagePermissionsPolicyFeature = "frobulate"
 
-	// PagePermissionsPolicyFeatureGamepad enum const.
+	// PagePermissionsPolicyFeatureGamepad enum const
 	PagePermissionsPolicyFeatureGamepad PagePermissionsPolicyFeature = "gamepad"
 
-	// PagePermissionsPolicyFeatureGeolocation enum const.
+	// PagePermissionsPolicyFeatureGeolocation enum const
 	PagePermissionsPolicyFeatureGeolocation PagePermissionsPolicyFeature = "geolocation"
 
-	// PagePermissionsPolicyFeatureGyroscope enum const.
+	// PagePermissionsPolicyFeatureGyroscope enum const
 	PagePermissionsPolicyFeatureGyroscope PagePermissionsPolicyFeature = "gyroscope"
 
-	// PagePermissionsPolicyFeatureHid enum const.
+	// PagePermissionsPolicyFeatureHaptics enum const
+	PagePermissionsPolicyFeatureHaptics PagePermissionsPolicyFeature = "haptics"
+
+	// PagePermissionsPolicyFeatureHid enum const
 	PagePermissionsPolicyFeatureHid PagePermissionsPolicyFeature = "hid"
 
-	// PagePermissionsPolicyFeatureIdentityCredentialsGet enum const.
+	// PagePermissionsPolicyFeatureIdentityCredentialsGet enum const
 	PagePermissionsPolicyFeatureIdentityCredentialsGet PagePermissionsPolicyFeature = "identity-credentials-get"
 
-	// PagePermissionsPolicyFeatureIdleDetection enum const.
+	// PagePermissionsPolicyFeatureIdleDetection enum const
 	PagePermissionsPolicyFeatureIdleDetection PagePermissionsPolicyFeature = "idle-detection"
 
-	// PagePermissionsPolicyFeatureInterestCohort enum const.
+	// PagePermissionsPolicyFeatureInterestCohort enum const
 	PagePermissionsPolicyFeatureInterestCohort PagePermissionsPolicyFeature = "interest-cohort"
 
-	// PagePermissionsPolicyFeatureJoinAdInterestGroup enum const.
-	PagePermissionsPolicyFeatureJoinAdInterestGroup PagePermissionsPolicyFeature = "join-ad-interest-group"
-
-	// PagePermissionsPolicyFeatureKeyboardMap enum const.
+	// PagePermissionsPolicyFeatureKeyboardMap enum const
 	PagePermissionsPolicyFeatureKeyboardMap PagePermissionsPolicyFeature = "keyboard-map"
 
-	// PagePermissionsPolicyFeatureLocalFonts enum const.
+	// PagePermissionsPolicyFeatureLanguageDetector enum const
+	PagePermissionsPolicyFeatureLanguageDetector PagePermissionsPolicyFeature = "language-detector"
+
+	// PagePermissionsPolicyFeatureLanguageModel enum const
+	PagePermissionsPolicyFeatureLanguageModel PagePermissionsPolicyFeature = "language-model"
+
+	// PagePermissionsPolicyFeatureLocalFonts enum const
 	PagePermissionsPolicyFeatureLocalFonts PagePermissionsPolicyFeature = "local-fonts"
 
-	// PagePermissionsPolicyFeatureMagnetometer enum const.
+	// PagePermissionsPolicyFeatureLocalNetwork enum const
+	PagePermissionsPolicyFeatureLocalNetwork PagePermissionsPolicyFeature = "local-network"
+
+	// PagePermissionsPolicyFeatureLocalNetworkAccess enum const
+	PagePermissionsPolicyFeatureLocalNetworkAccess PagePermissionsPolicyFeature = "local-network-access"
+
+	// PagePermissionsPolicyFeatureLoopbackNetwork enum const
+	PagePermissionsPolicyFeatureLoopbackNetwork PagePermissionsPolicyFeature = "loopback-network"
+
+	// PagePermissionsPolicyFeatureMagnetometer enum const
 	PagePermissionsPolicyFeatureMagnetometer PagePermissionsPolicyFeature = "magnetometer"
 
-	// PagePermissionsPolicyFeatureMicrophone enum const.
+	// PagePermissionsPolicyFeatureManualText enum const
+	PagePermissionsPolicyFeatureManualText PagePermissionsPolicyFeature = "manual-text"
+
+	// PagePermissionsPolicyFeatureMediaPlaybackWhileNotVisible enum const
+	PagePermissionsPolicyFeatureMediaPlaybackWhileNotVisible PagePermissionsPolicyFeature = "media-playback-while-not-visible"
+
+	// PagePermissionsPolicyFeatureMicrophone enum const
 	PagePermissionsPolicyFeatureMicrophone PagePermissionsPolicyFeature = "microphone"
 
-	// PagePermissionsPolicyFeatureMidi enum const.
+	// PagePermissionsPolicyFeatureMidi enum const
 	PagePermissionsPolicyFeatureMidi PagePermissionsPolicyFeature = "midi"
 
-	// PagePermissionsPolicyFeatureOtpCredentials enum const.
+	// PagePermissionsPolicyFeatureOnDeviceSpeechRecognition enum const
+	PagePermissionsPolicyFeatureOnDeviceSpeechRecognition PagePermissionsPolicyFeature = "on-device-speech-recognition"
+
+	// PagePermissionsPolicyFeatureOtpCredentials enum const
 	PagePermissionsPolicyFeatureOtpCredentials PagePermissionsPolicyFeature = "otp-credentials"
 
-	// PagePermissionsPolicyFeaturePayment enum const.
+	// PagePermissionsPolicyFeaturePayment enum const
 	PagePermissionsPolicyFeaturePayment PagePermissionsPolicyFeature = "payment"
 
-	// PagePermissionsPolicyFeaturePictureInPicture enum const.
+	// PagePermissionsPolicyFeaturePictureInPicture enum const
 	PagePermissionsPolicyFeaturePictureInPicture PagePermissionsPolicyFeature = "picture-in-picture"
 
-	// PagePermissionsPolicyFeaturePrivateAggregation enum const.
-	PagePermissionsPolicyFeaturePrivateAggregation PagePermissionsPolicyFeature = "private-aggregation"
-
-	// PagePermissionsPolicyFeaturePrivateStateTokenIssuance enum const.
+	// PagePermissionsPolicyFeaturePrivateStateTokenIssuance enum const
 	PagePermissionsPolicyFeaturePrivateStateTokenIssuance PagePermissionsPolicyFeature = "private-state-token-issuance"
 
-	// PagePermissionsPolicyFeaturePrivateStateTokenRedemption enum const.
+	// PagePermissionsPolicyFeaturePrivateStateTokenRedemption enum const
 	PagePermissionsPolicyFeaturePrivateStateTokenRedemption PagePermissionsPolicyFeature = "private-state-token-redemption"
 
-	// PagePermissionsPolicyFeaturePublickeyCredentialsCreate enum const.
+	// PagePermissionsPolicyFeaturePublickeyCredentialsCreate enum const
 	PagePermissionsPolicyFeaturePublickeyCredentialsCreate PagePermissionsPolicyFeature = "publickey-credentials-create"
 
-	// PagePermissionsPolicyFeaturePublickeyCredentialsGet enum const.
+	// PagePermissionsPolicyFeaturePublickeyCredentialsGet enum const
 	PagePermissionsPolicyFeaturePublickeyCredentialsGet PagePermissionsPolicyFeature = "publickey-credentials-get"
 
-	// PagePermissionsPolicyFeatureRunAdAuction enum const.
-	PagePermissionsPolicyFeatureRunAdAuction PagePermissionsPolicyFeature = "run-ad-auction"
+	// PagePermissionsPolicyFeaturePublickeyCredentialsRemoteClientDataJSON enum const
+	PagePermissionsPolicyFeaturePublickeyCredentialsRemoteClientDataJSON PagePermissionsPolicyFeature = "publickey-credentials-remote-client-data-json"
 
-	// PagePermissionsPolicyFeatureScreenWakeLock enum const.
+	// PagePermissionsPolicyFeatureRewriter enum const
+	PagePermissionsPolicyFeatureRewriter PagePermissionsPolicyFeature = "rewriter"
+
+	// PagePermissionsPolicyFeatureScreenWakeLock enum const
 	PagePermissionsPolicyFeatureScreenWakeLock PagePermissionsPolicyFeature = "screen-wake-lock"
 
-	// PagePermissionsPolicyFeatureSerial enum const.
+	// PagePermissionsPolicyFeatureSerial enum const
 	PagePermissionsPolicyFeatureSerial PagePermissionsPolicyFeature = "serial"
 
-	// PagePermissionsPolicyFeatureSharedAutofill enum const.
-	PagePermissionsPolicyFeatureSharedAutofill PagePermissionsPolicyFeature = "shared-autofill"
-
-	// PagePermissionsPolicyFeatureSharedStorage enum const.
-	PagePermissionsPolicyFeatureSharedStorage PagePermissionsPolicyFeature = "shared-storage"
-
-	// PagePermissionsPolicyFeatureSharedStorageSelectURL enum const.
-	PagePermissionsPolicyFeatureSharedStorageSelectURL PagePermissionsPolicyFeature = "shared-storage-select-url"
-
-	// PagePermissionsPolicyFeatureSmartCard enum const.
+	// PagePermissionsPolicyFeatureSmartCard enum const
 	PagePermissionsPolicyFeatureSmartCard PagePermissionsPolicyFeature = "smart-card"
 
-	// PagePermissionsPolicyFeatureSpeakerSelection enum const.
+	// PagePermissionsPolicyFeatureSpeakerSelection enum const
 	PagePermissionsPolicyFeatureSpeakerSelection PagePermissionsPolicyFeature = "speaker-selection"
 
-	// PagePermissionsPolicyFeatureStorageAccess enum const.
+	// PagePermissionsPolicyFeatureStorageAccess enum const
 	PagePermissionsPolicyFeatureStorageAccess PagePermissionsPolicyFeature = "storage-access"
 
-	// PagePermissionsPolicyFeatureSubApps enum const.
+	// PagePermissionsPolicyFeatureSubApps enum const
 	PagePermissionsPolicyFeatureSubApps PagePermissionsPolicyFeature = "sub-apps"
 
-	// PagePermissionsPolicyFeatureSyncXhr enum const.
+	// PagePermissionsPolicyFeatureSummarizer enum const
+	PagePermissionsPolicyFeatureSummarizer PagePermissionsPolicyFeature = "summarizer"
+
+	// PagePermissionsPolicyFeatureSyncXhr enum const
 	PagePermissionsPolicyFeatureSyncXhr PagePermissionsPolicyFeature = "sync-xhr"
 
-	// PagePermissionsPolicyFeatureUnload enum const.
+	// PagePermissionsPolicyFeatureTools enum const
+	PagePermissionsPolicyFeatureTools PagePermissionsPolicyFeature = "tools"
+
+	// PagePermissionsPolicyFeatureTranslator enum const
+	PagePermissionsPolicyFeatureTranslator PagePermissionsPolicyFeature = "translator"
+
+	// PagePermissionsPolicyFeatureUnload enum const
 	PagePermissionsPolicyFeatureUnload PagePermissionsPolicyFeature = "unload"
 
-	// PagePermissionsPolicyFeatureUsb enum const.
+	// PagePermissionsPolicyFeatureUsb enum const
 	PagePermissionsPolicyFeatureUsb PagePermissionsPolicyFeature = "usb"
 
-	// PagePermissionsPolicyFeatureUsbUnrestricted enum const.
+	// PagePermissionsPolicyFeatureUsbUnrestricted enum const
 	PagePermissionsPolicyFeatureUsbUnrestricted PagePermissionsPolicyFeature = "usb-unrestricted"
 
-	// PagePermissionsPolicyFeatureVerticalScroll enum const.
+	// PagePermissionsPolicyFeatureVerticalScroll enum const
 	PagePermissionsPolicyFeatureVerticalScroll PagePermissionsPolicyFeature = "vertical-scroll"
 
-	// PagePermissionsPolicyFeatureWebPrinting enum const.
+	// PagePermissionsPolicyFeatureWebAppInstallation enum const
+	PagePermissionsPolicyFeatureWebAppInstallation PagePermissionsPolicyFeature = "web-app-installation"
+
+	// PagePermissionsPolicyFeatureWebnn enum const
+	PagePermissionsPolicyFeatureWebnn PagePermissionsPolicyFeature = "webnn"
+
+	// PagePermissionsPolicyFeatureWebPrinting enum const
 	PagePermissionsPolicyFeatureWebPrinting PagePermissionsPolicyFeature = "web-printing"
 
-	// PagePermissionsPolicyFeatureWebShare enum const.
+	// PagePermissionsPolicyFeatureWebShare enum const
 	PagePermissionsPolicyFeatureWebShare PagePermissionsPolicyFeature = "web-share"
 
-	// PagePermissionsPolicyFeatureWindowManagement enum const.
+	// PagePermissionsPolicyFeatureWindowManagement enum const
 	PagePermissionsPolicyFeatureWindowManagement PagePermissionsPolicyFeature = "window-management"
 
-	// PagePermissionsPolicyFeatureXrSpatialTracking enum const.
+	// PagePermissionsPolicyFeatureWriter enum const
+	PagePermissionsPolicyFeatureWriter PagePermissionsPolicyFeature = "writer"
+
+	// PagePermissionsPolicyFeatureXrSpatialTracking enum const
 	PagePermissionsPolicyFeatureXrSpatialTracking PagePermissionsPolicyFeature = "xr-spatial-tracking"
 )
 
@@ -374,16 +424,16 @@ const (
 type PagePermissionsPolicyBlockReason string
 
 const (
-	// PagePermissionsPolicyBlockReasonHeader enum const.
+	// PagePermissionsPolicyBlockReasonHeader enum const
 	PagePermissionsPolicyBlockReasonHeader PagePermissionsPolicyBlockReason = "Header"
 
-	// PagePermissionsPolicyBlockReasonIframeAttribute enum const.
+	// PagePermissionsPolicyBlockReasonIframeAttribute enum const
 	PagePermissionsPolicyBlockReasonIframeAttribute PagePermissionsPolicyBlockReason = "IframeAttribute"
 
-	// PagePermissionsPolicyBlockReasonInFencedFrameTree enum const.
+	// PagePermissionsPolicyBlockReasonInFencedFrameTree enum const
 	PagePermissionsPolicyBlockReasonInFencedFrameTree PagePermissionsPolicyBlockReason = "InFencedFrameTree"
 
-	// PagePermissionsPolicyBlockReasonInIsolatedApp enum const.
+	// PagePermissionsPolicyBlockReasonInIsolatedApp enum const
 	PagePermissionsPolicyBlockReasonInIsolatedApp PagePermissionsPolicyBlockReason = "InIsolatedApp"
 )
 
@@ -413,40 +463,40 @@ type PagePermissionsPolicyFeatureState struct {
 type PageOriginTrialTokenStatus string
 
 const (
-	// PageOriginTrialTokenStatusSuccess enum const.
+	// PageOriginTrialTokenStatusSuccess enum const
 	PageOriginTrialTokenStatusSuccess PageOriginTrialTokenStatus = "Success"
 
-	// PageOriginTrialTokenStatusNotSupported enum const.
+	// PageOriginTrialTokenStatusNotSupported enum const
 	PageOriginTrialTokenStatusNotSupported PageOriginTrialTokenStatus = "NotSupported"
 
-	// PageOriginTrialTokenStatusInsecure enum const.
+	// PageOriginTrialTokenStatusInsecure enum const
 	PageOriginTrialTokenStatusInsecure PageOriginTrialTokenStatus = "Insecure"
 
-	// PageOriginTrialTokenStatusExpired enum const.
+	// PageOriginTrialTokenStatusExpired enum const
 	PageOriginTrialTokenStatusExpired PageOriginTrialTokenStatus = "Expired"
 
-	// PageOriginTrialTokenStatusWrongOrigin enum const.
+	// PageOriginTrialTokenStatusWrongOrigin enum const
 	PageOriginTrialTokenStatusWrongOrigin PageOriginTrialTokenStatus = "WrongOrigin"
 
-	// PageOriginTrialTokenStatusInvalidSignature enum const.
+	// PageOriginTrialTokenStatusInvalidSignature enum const
 	PageOriginTrialTokenStatusInvalidSignature PageOriginTrialTokenStatus = "InvalidSignature"
 
-	// PageOriginTrialTokenStatusMalformed enum const.
+	// PageOriginTrialTokenStatusMalformed enum const
 	PageOriginTrialTokenStatusMalformed PageOriginTrialTokenStatus = "Malformed"
 
-	// PageOriginTrialTokenStatusWrongVersion enum const.
+	// PageOriginTrialTokenStatusWrongVersion enum const
 	PageOriginTrialTokenStatusWrongVersion PageOriginTrialTokenStatus = "WrongVersion"
 
-	// PageOriginTrialTokenStatusFeatureDisabled enum const.
+	// PageOriginTrialTokenStatusFeatureDisabled enum const
 	PageOriginTrialTokenStatusFeatureDisabled PageOriginTrialTokenStatus = "FeatureDisabled"
 
-	// PageOriginTrialTokenStatusTokenDisabled enum const.
+	// PageOriginTrialTokenStatusTokenDisabled enum const
 	PageOriginTrialTokenStatusTokenDisabled PageOriginTrialTokenStatus = "TokenDisabled"
 
-	// PageOriginTrialTokenStatusFeatureDisabledForUser enum const.
+	// PageOriginTrialTokenStatusFeatureDisabledForUser enum const
 	PageOriginTrialTokenStatusFeatureDisabledForUser PageOriginTrialTokenStatus = "FeatureDisabledForUser"
 
-	// PageOriginTrialTokenStatusUnknownTrial enum const.
+	// PageOriginTrialTokenStatusUnknownTrial enum const
 	PageOriginTrialTokenStatusUnknownTrial PageOriginTrialTokenStatus = "UnknownTrial"
 )
 
@@ -454,16 +504,16 @@ const (
 type PageOriginTrialStatus string
 
 const (
-	// PageOriginTrialStatusEnabled enum const.
+	// PageOriginTrialStatusEnabled enum const
 	PageOriginTrialStatusEnabled PageOriginTrialStatus = "Enabled"
 
-	// PageOriginTrialStatusValidTokenNotProvided enum const.
+	// PageOriginTrialStatusValidTokenNotProvided enum const
 	PageOriginTrialStatusValidTokenNotProvided PageOriginTrialStatus = "ValidTokenNotProvided"
 
-	// PageOriginTrialStatusOSNotSupported enum const.
+	// PageOriginTrialStatusOSNotSupported enum const
 	PageOriginTrialStatusOSNotSupported PageOriginTrialStatus = "OSNotSupported"
 
-	// PageOriginTrialStatusTrialNotAllowed enum const.
+	// PageOriginTrialStatusTrialNotAllowed enum const
 	PageOriginTrialStatusTrialNotAllowed PageOriginTrialStatus = "TrialNotAllowed"
 )
 
@@ -471,10 +521,10 @@ const (
 type PageOriginTrialUsageRestriction string
 
 const (
-	// PageOriginTrialUsageRestrictionNone enum const.
+	// PageOriginTrialUsageRestrictionNone enum const
 	PageOriginTrialUsageRestrictionNone PageOriginTrialUsageRestriction = "None"
 
-	// PageOriginTrialUsageRestrictionSubset enum const.
+	// PageOriginTrialUsageRestrictionSubset enum const
 	PageOriginTrialUsageRestrictionSubset PageOriginTrialUsageRestriction = "Subset"
 )
 
@@ -524,6 +574,14 @@ type PageOriginTrial struct {
 	TokensWithStatus []*PageOriginTrialTokenWithStatus `json:"tokensWithStatus"`
 }
 
+// PageSecurityOriginDetails (experimental) Additional information about the frame document's security origin.
+type PageSecurityOriginDetails struct {
+	// IsLocalhost Indicates whether the frame document's security origin is one
+	// of the local hostnames (e.g. "localhost") or IP addresses (IPv4
+	// 127.0.0.0/8 or IPv6 ::1).
+	IsLocalhost bool `json:"isLocalhost"`
+}
+
 // PageFrame Information about the Frame on the page.
 type PageFrame struct {
 	// ID Frame unique identifier.
@@ -552,6 +610,9 @@ type PageFrame struct {
 
 	// SecurityOrigin Frame document's security origin.
 	SecurityOrigin string `json:"securityOrigin"`
+
+	// SecurityOriginDetails (experimental) (optional) Additional details about the frame document's security origin.
+	SecurityOriginDetails *PageSecurityOriginDetails `json:"securityOriginDetails,omitempty"`
 
 	// MIMEType Frame document's mimeType as determined by the browser.
 	MIMEType string `json:"mimeType"`
@@ -624,43 +685,43 @@ type PageScriptIdentifier string
 type PageTransitionType string
 
 const (
-	// PageTransitionTypeLink enum const.
+	// PageTransitionTypeLink enum const
 	PageTransitionTypeLink PageTransitionType = "link"
 
-	// PageTransitionTypeTyped enum const.
+	// PageTransitionTypeTyped enum const
 	PageTransitionTypeTyped PageTransitionType = "typed"
 
-	// PageTransitionTypeAddressBar enum const.
+	// PageTransitionTypeAddressBar enum const
 	PageTransitionTypeAddressBar PageTransitionType = "address_bar"
 
-	// PageTransitionTypeAutoBookmark enum const.
+	// PageTransitionTypeAutoBookmark enum const
 	PageTransitionTypeAutoBookmark PageTransitionType = "auto_bookmark"
 
-	// PageTransitionTypeAutoSubframe enum const.
+	// PageTransitionTypeAutoSubframe enum const
 	PageTransitionTypeAutoSubframe PageTransitionType = "auto_subframe"
 
-	// PageTransitionTypeManualSubframe enum const.
+	// PageTransitionTypeManualSubframe enum const
 	PageTransitionTypeManualSubframe PageTransitionType = "manual_subframe"
 
-	// PageTransitionTypeGenerated enum const.
+	// PageTransitionTypeGenerated enum const
 	PageTransitionTypeGenerated PageTransitionType = "generated"
 
-	// PageTransitionTypeAutoToplevel enum const.
+	// PageTransitionTypeAutoToplevel enum const
 	PageTransitionTypeAutoToplevel PageTransitionType = "auto_toplevel"
 
-	// PageTransitionTypeFormSubmit enum const.
+	// PageTransitionTypeFormSubmit enum const
 	PageTransitionTypeFormSubmit PageTransitionType = "form_submit"
 
-	// PageTransitionTypeReload enum const.
+	// PageTransitionTypeReload enum const
 	PageTransitionTypeReload PageTransitionType = "reload"
 
-	// PageTransitionTypeKeyword enum const.
+	// PageTransitionTypeKeyword enum const
 	PageTransitionTypeKeyword PageTransitionType = "keyword"
 
-	// PageTransitionTypeKeywordGenerated enum const.
+	// PageTransitionTypeKeywordGenerated enum const
 	PageTransitionTypeKeywordGenerated PageTransitionType = "keyword_generated"
 
-	// PageTransitionTypeOther enum const.
+	// PageTransitionTypeOther enum const
 	PageTransitionTypeOther PageTransitionType = "other"
 )
 
@@ -704,22 +765,25 @@ type PageScreencastFrameMetadata struct {
 
 	// Timestamp (optional) Frame swap timestamp.
 	Timestamp TimeSinceEpoch `json:"timestamp,omitempty"`
+
+	// MonotonicTimestamp (optional) Frame swap timestamp as monotonic time.
+	MonotonicTimestamp MonotonicTime `json:"monotonicTimestamp,omitempty"`
 }
 
 // PageDialogType Javascript dialog type.
 type PageDialogType string
 
 const (
-	// PageDialogTypeAlert enum const.
+	// PageDialogTypeAlert enum const
 	PageDialogTypeAlert PageDialogType = "alert"
 
-	// PageDialogTypeConfirm enum const.
+	// PageDialogTypeConfirm enum const
 	PageDialogTypeConfirm PageDialogType = "confirm"
 
-	// PageDialogTypePrompt enum const.
+	// PageDialogTypePrompt enum const
 	PageDialogTypePrompt PageDialogType = "prompt"
 
-	// PageDialogTypeBeforeunload enum const.
+	// PageDialogTypeBeforeunload enum const
 	PageDialogTypeBeforeunload PageDialogType = "beforeunload"
 )
 
@@ -850,45 +914,51 @@ type PageFontSizes struct {
 type PageClientNavigationReason string
 
 const (
-	// PageClientNavigationReasonFormSubmissionGet enum const.
+	// PageClientNavigationReasonAnchorClick enum const
+	PageClientNavigationReasonAnchorClick PageClientNavigationReason = "anchorClick"
+
+	// PageClientNavigationReasonFormSubmissionGet enum const
 	PageClientNavigationReasonFormSubmissionGet PageClientNavigationReason = "formSubmissionGet"
 
-	// PageClientNavigationReasonFormSubmissionPost enum const.
+	// PageClientNavigationReasonFormSubmissionPost enum const
 	PageClientNavigationReasonFormSubmissionPost PageClientNavigationReason = "formSubmissionPost"
 
-	// PageClientNavigationReasonHTTPHeaderRefresh enum const.
+	// PageClientNavigationReasonHTTPHeaderRefresh enum const
 	PageClientNavigationReasonHTTPHeaderRefresh PageClientNavigationReason = "httpHeaderRefresh"
 
-	// PageClientNavigationReasonScriptInitiated enum const.
-	PageClientNavigationReasonScriptInitiated PageClientNavigationReason = "scriptInitiated"
+	// PageClientNavigationReasonInitialFrameNavigation enum const
+	PageClientNavigationReasonInitialFrameNavigation PageClientNavigationReason = "initialFrameNavigation"
 
-	// PageClientNavigationReasonMetaTagRefresh enum const.
+	// PageClientNavigationReasonMetaTagRefresh enum const
 	PageClientNavigationReasonMetaTagRefresh PageClientNavigationReason = "metaTagRefresh"
 
-	// PageClientNavigationReasonPageBlockInterstitial enum const.
+	// PageClientNavigationReasonOther enum const
+	PageClientNavigationReasonOther PageClientNavigationReason = "other"
+
+	// PageClientNavigationReasonPageBlockInterstitial enum const
 	PageClientNavigationReasonPageBlockInterstitial PageClientNavigationReason = "pageBlockInterstitial"
 
-	// PageClientNavigationReasonReload enum const.
+	// PageClientNavigationReasonReload enum const
 	PageClientNavigationReasonReload PageClientNavigationReason = "reload"
 
-	// PageClientNavigationReasonAnchorClick enum const.
-	PageClientNavigationReasonAnchorClick PageClientNavigationReason = "anchorClick"
+	// PageClientNavigationReasonScriptInitiated enum const
+	PageClientNavigationReasonScriptInitiated PageClientNavigationReason = "scriptInitiated"
 )
 
 // PageClientNavigationDisposition (experimental) ...
 type PageClientNavigationDisposition string
 
 const (
-	// PageClientNavigationDispositionCurrentTab enum const.
+	// PageClientNavigationDispositionCurrentTab enum const
 	PageClientNavigationDispositionCurrentTab PageClientNavigationDisposition = "currentTab"
 
-	// PageClientNavigationDispositionNewTab enum const.
+	// PageClientNavigationDispositionNewTab enum const
 	PageClientNavigationDispositionNewTab PageClientNavigationDisposition = "newTab"
 
-	// PageClientNavigationDispositionNewWindow enum const.
+	// PageClientNavigationDispositionNewWindow enum const
 	PageClientNavigationDispositionNewWindow PageClientNavigationDisposition = "newWindow"
 
-	// PageClientNavigationDispositionDownload enum const.
+	// PageClientNavigationDispositionDownload enum const
 	PageClientNavigationDispositionDownload PageClientNavigationDisposition = "download"
 )
 
@@ -901,7 +971,7 @@ type PageInstallabilityErrorArgument struct {
 	Value string `json:"value"`
 }
 
-// PageInstallabilityError (experimental) The installability error.
+// PageInstallabilityError (experimental) The installability error
 type PageInstallabilityError struct {
 	// ErrorID The error id (e.g. 'manifest-missing-suitable-icon').
 	ErrorID string `json:"errorId"`
@@ -914,32 +984,32 @@ type PageInstallabilityError struct {
 type PageReferrerPolicy string
 
 const (
-	// PageReferrerPolicyNoReferrer enum const.
+	// PageReferrerPolicyNoReferrer enum const
 	PageReferrerPolicyNoReferrer PageReferrerPolicy = "noReferrer"
 
-	// PageReferrerPolicyNoReferrerWhenDowngrade enum const.
+	// PageReferrerPolicyNoReferrerWhenDowngrade enum const
 	PageReferrerPolicyNoReferrerWhenDowngrade PageReferrerPolicy = "noReferrerWhenDowngrade"
 
-	// PageReferrerPolicyOrigin enum const.
+	// PageReferrerPolicyOrigin enum const
 	PageReferrerPolicyOrigin PageReferrerPolicy = "origin"
 
-	// PageReferrerPolicyOriginWhenCrossOrigin enum const.
+	// PageReferrerPolicyOriginWhenCrossOrigin enum const
 	PageReferrerPolicyOriginWhenCrossOrigin PageReferrerPolicy = "originWhenCrossOrigin"
 
-	// PageReferrerPolicySameOrigin enum const.
+	// PageReferrerPolicySameOrigin enum const
 	PageReferrerPolicySameOrigin PageReferrerPolicy = "sameOrigin"
 
-	// PageReferrerPolicyStrictOrigin enum const.
+	// PageReferrerPolicyStrictOrigin enum const
 	PageReferrerPolicyStrictOrigin PageReferrerPolicy = "strictOrigin"
 
-	// PageReferrerPolicyStrictOriginWhenCrossOrigin enum const.
+	// PageReferrerPolicyStrictOriginWhenCrossOrigin enum const
 	PageReferrerPolicyStrictOriginWhenCrossOrigin PageReferrerPolicy = "strictOriginWhenCrossOrigin"
 
-	// PageReferrerPolicyUnsafeURL enum const.
+	// PageReferrerPolicyUnsafeURL enum const
 	PageReferrerPolicyUnsafeURL PageReferrerPolicy = "unsafeUrl"
 )
 
-// PageCompilationCacheParams (experimental) Per-script compilation cache parameters for `Page.produceCompilationCache`.
+// PageCompilationCacheParams (experimental) Per-script compilation cache parameters for `Page.produceCompilationCache`
 type PageCompilationCacheParams struct {
 	// URL The URL of the script to produce a compilation cache entry for.
 	URL string `json:"url"`
@@ -965,9 +1035,6 @@ type PageFileHandler struct {
 
 	// Name ...
 	Name string `json:"name"`
-
-	// Icons (optional) ...
-	Icons []*PageImageResource `json:"icons,omitempty"`
 
 	// Accepts (optional) Mimic a map, name is the key, accepts is the value.
 	Accepts []*PageFileFilter `json:"accepts,omitempty"`
@@ -1144,31 +1211,29 @@ type PageWebAppManifest struct {
 	ThemeColor string `json:"themeColor,omitempty"`
 }
 
-// PageAutoResponseMode (experimental) Enum of possible auto-response for permission / prompt dialogs.
-type PageAutoResponseMode string
+// PageSubApp ...
+type PageSubApp struct {
+	// Name Display name of the sub-app.
+	Name string `json:"name"`
 
-const (
-	// PageAutoResponseModeNone enum const.
-	PageAutoResponseModeNone PageAutoResponseMode = "none"
+	// Scope of the sub-app.
+	Scope string `json:"scope"`
 
-	// PageAutoResponseModeAutoAccept enum const.
-	PageAutoResponseModeAutoAccept PageAutoResponseMode = "autoAccept"
+	// ManifestID Manifest id of the sub-app.
+	ManifestID string `json:"manifestId"`
 
-	// PageAutoResponseModeAutoReject enum const.
-	PageAutoResponseModeAutoReject PageAutoResponseMode = "autoReject"
-
-	// PageAutoResponseModeAutoOptOut enum const.
-	PageAutoResponseModeAutoOptOut PageAutoResponseMode = "autoOptOut"
-)
+	// StartURL Start URL of the sub-app.
+	StartURL string `json:"startUrl"`
+}
 
 // PageNavigationType (experimental) The type of a frameNavigated event.
 type PageNavigationType string
 
 const (
-	// PageNavigationTypeNavigation enum const.
+	// PageNavigationTypeNavigation enum const
 	PageNavigationTypeNavigation PageNavigationType = "Navigation"
 
-	// PageNavigationTypeBackForwardCacheRestore enum const.
+	// PageNavigationTypeBackForwardCacheRestore enum const
 	PageNavigationTypeBackForwardCacheRestore PageNavigationType = "BackForwardCacheRestore"
 )
 
@@ -1176,432 +1241,465 @@ const (
 type PageBackForwardCacheNotRestoredReason string
 
 const (
-	// PageBackForwardCacheNotRestoredReasonNotPrimaryMainFrame enum const.
+	// PageBackForwardCacheNotRestoredReasonNotPrimaryMainFrame enum const
 	PageBackForwardCacheNotRestoredReasonNotPrimaryMainFrame PageBackForwardCacheNotRestoredReason = "NotPrimaryMainFrame"
 
-	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabled enum const.
+	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabled enum const
 	PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabled PageBackForwardCacheNotRestoredReason = "BackForwardCacheDisabled"
 
-	// PageBackForwardCacheNotRestoredReasonRelatedActiveContentsExist enum const.
+	// PageBackForwardCacheNotRestoredReasonRelatedActiveContentsExist enum const
 	PageBackForwardCacheNotRestoredReasonRelatedActiveContentsExist PageBackForwardCacheNotRestoredReason = "RelatedActiveContentsExist"
 
-	// PageBackForwardCacheNotRestoredReasonHTTPStatusNotOK enum const.
+	// PageBackForwardCacheNotRestoredReasonHTTPStatusNotOK enum const
 	PageBackForwardCacheNotRestoredReasonHTTPStatusNotOK PageBackForwardCacheNotRestoredReason = "HTTPStatusNotOK"
 
-	// PageBackForwardCacheNotRestoredReasonSchemeNotHTTPOrHTTPS enum const.
+	// PageBackForwardCacheNotRestoredReasonSchemeNotHTTPOrHTTPS enum const
 	PageBackForwardCacheNotRestoredReasonSchemeNotHTTPOrHTTPS PageBackForwardCacheNotRestoredReason = "SchemeNotHTTPOrHTTPS"
 
-	// PageBackForwardCacheNotRestoredReasonLoading enum const.
+	// PageBackForwardCacheNotRestoredReasonLoading enum const
 	PageBackForwardCacheNotRestoredReasonLoading PageBackForwardCacheNotRestoredReason = "Loading"
 
-	// PageBackForwardCacheNotRestoredReasonWasGrantedMediaAccess enum const.
+	// PageBackForwardCacheNotRestoredReasonWasGrantedMediaAccess enum const
 	PageBackForwardCacheNotRestoredReasonWasGrantedMediaAccess PageBackForwardCacheNotRestoredReason = "WasGrantedMediaAccess"
 
-	// PageBackForwardCacheNotRestoredReasonDisableForRenderFrameHostCalled enum const.
+	// PageBackForwardCacheNotRestoredReasonDisableForRenderFrameHostCalled enum const
 	PageBackForwardCacheNotRestoredReasonDisableForRenderFrameHostCalled PageBackForwardCacheNotRestoredReason = "DisableForRenderFrameHostCalled"
 
-	// PageBackForwardCacheNotRestoredReasonDomainNotAllowed enum const.
+	// PageBackForwardCacheNotRestoredReasonDomainNotAllowed enum const
 	PageBackForwardCacheNotRestoredReasonDomainNotAllowed PageBackForwardCacheNotRestoredReason = "DomainNotAllowed"
 
-	// PageBackForwardCacheNotRestoredReasonHTTPMethodNotGET enum const.
+	// PageBackForwardCacheNotRestoredReasonHTTPMethodNotGET enum const
 	PageBackForwardCacheNotRestoredReasonHTTPMethodNotGET PageBackForwardCacheNotRestoredReason = "HTTPMethodNotGET"
 
-	// PageBackForwardCacheNotRestoredReasonSubframeIsNavigating enum const.
+	// PageBackForwardCacheNotRestoredReasonSubframeIsNavigating enum const
 	PageBackForwardCacheNotRestoredReasonSubframeIsNavigating PageBackForwardCacheNotRestoredReason = "SubframeIsNavigating"
 
-	// PageBackForwardCacheNotRestoredReasonTimeout enum const.
+	// PageBackForwardCacheNotRestoredReasonTimeout enum const
 	PageBackForwardCacheNotRestoredReasonTimeout PageBackForwardCacheNotRestoredReason = "Timeout"
 
-	// PageBackForwardCacheNotRestoredReasonCacheLimit enum const.
+	// PageBackForwardCacheNotRestoredReasonCacheLimit enum const
 	PageBackForwardCacheNotRestoredReasonCacheLimit PageBackForwardCacheNotRestoredReason = "CacheLimit"
 
-	// PageBackForwardCacheNotRestoredReasonJavaScriptExecution enum const.
+	// PageBackForwardCacheNotRestoredReasonJavaScriptExecution enum const
 	PageBackForwardCacheNotRestoredReasonJavaScriptExecution PageBackForwardCacheNotRestoredReason = "JavaScriptExecution"
 
-	// PageBackForwardCacheNotRestoredReasonRendererProcessKilled enum const.
+	// PageBackForwardCacheNotRestoredReasonRendererProcessKilled enum const
 	PageBackForwardCacheNotRestoredReasonRendererProcessKilled PageBackForwardCacheNotRestoredReason = "RendererProcessKilled"
 
-	// PageBackForwardCacheNotRestoredReasonRendererProcessCrashed enum const.
+	// PageBackForwardCacheNotRestoredReasonRendererProcessCrashed enum const
 	PageBackForwardCacheNotRestoredReasonRendererProcessCrashed PageBackForwardCacheNotRestoredReason = "RendererProcessCrashed"
 
-	// PageBackForwardCacheNotRestoredReasonSchedulerTrackedFeatureUsed enum const.
+	// PageBackForwardCacheNotRestoredReasonSchedulerTrackedFeatureUsed enum const
 	PageBackForwardCacheNotRestoredReasonSchedulerTrackedFeatureUsed PageBackForwardCacheNotRestoredReason = "SchedulerTrackedFeatureUsed"
 
-	// PageBackForwardCacheNotRestoredReasonConflictingBrowsingInstance enum const.
+	// PageBackForwardCacheNotRestoredReasonConflictingBrowsingInstance enum const
 	PageBackForwardCacheNotRestoredReasonConflictingBrowsingInstance PageBackForwardCacheNotRestoredReason = "ConflictingBrowsingInstance"
 
-	// PageBackForwardCacheNotRestoredReasonCacheFlushed enum const.
+	// PageBackForwardCacheNotRestoredReasonCacheFlushed enum const
 	PageBackForwardCacheNotRestoredReasonCacheFlushed PageBackForwardCacheNotRestoredReason = "CacheFlushed"
 
-	// PageBackForwardCacheNotRestoredReasonServiceWorkerVersionActivation enum const.
+	// PageBackForwardCacheNotRestoredReasonServiceWorkerVersionActivation enum const
 	PageBackForwardCacheNotRestoredReasonServiceWorkerVersionActivation PageBackForwardCacheNotRestoredReason = "ServiceWorkerVersionActivation"
 
-	// PageBackForwardCacheNotRestoredReasonSessionRestored enum const.
+	// PageBackForwardCacheNotRestoredReasonSessionRestored enum const
 	PageBackForwardCacheNotRestoredReasonSessionRestored PageBackForwardCacheNotRestoredReason = "SessionRestored"
 
-	// PageBackForwardCacheNotRestoredReasonServiceWorkerPostMessage enum const.
+	// PageBackForwardCacheNotRestoredReasonServiceWorkerPostMessage enum const
 	PageBackForwardCacheNotRestoredReasonServiceWorkerPostMessage PageBackForwardCacheNotRestoredReason = "ServiceWorkerPostMessage"
 
-	// PageBackForwardCacheNotRestoredReasonEnteredBackForwardCacheBeforeServiceWorkerHostAdded enum const.
+	// PageBackForwardCacheNotRestoredReasonEnteredBackForwardCacheBeforeServiceWorkerHostAdded enum const
 	PageBackForwardCacheNotRestoredReasonEnteredBackForwardCacheBeforeServiceWorkerHostAdded PageBackForwardCacheNotRestoredReason = "EnteredBackForwardCacheBeforeServiceWorkerHostAdded"
 
-	// PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedSameSite enum const.
+	// PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedSameSite enum const
 	PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedSameSite PageBackForwardCacheNotRestoredReason = "RenderFrameHostReused_SameSite"
 
-	// PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedCrossSite enum const.
+	// PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedCrossSite enum const
 	PageBackForwardCacheNotRestoredReasonRenderFrameHostReusedCrossSite PageBackForwardCacheNotRestoredReason = "RenderFrameHostReused_CrossSite"
 
-	// PageBackForwardCacheNotRestoredReasonServiceWorkerClaim enum const.
+	// PageBackForwardCacheNotRestoredReasonServiceWorkerClaim enum const
 	PageBackForwardCacheNotRestoredReasonServiceWorkerClaim PageBackForwardCacheNotRestoredReason = "ServiceWorkerClaim"
 
-	// PageBackForwardCacheNotRestoredReasonIgnoreEventAndEvict enum const.
+	// PageBackForwardCacheNotRestoredReasonIgnoreEventAndEvict enum const
 	PageBackForwardCacheNotRestoredReasonIgnoreEventAndEvict PageBackForwardCacheNotRestoredReason = "IgnoreEventAndEvict"
 
-	// PageBackForwardCacheNotRestoredReasonHaveInnerContents enum const.
+	// PageBackForwardCacheNotRestoredReasonHaveInnerContents enum const
 	PageBackForwardCacheNotRestoredReasonHaveInnerContents PageBackForwardCacheNotRestoredReason = "HaveInnerContents"
 
-	// PageBackForwardCacheNotRestoredReasonTimeoutPuttingInCache enum const.
+	// PageBackForwardCacheNotRestoredReasonTimeoutPuttingInCache enum const
 	PageBackForwardCacheNotRestoredReasonTimeoutPuttingInCache PageBackForwardCacheNotRestoredReason = "TimeoutPuttingInCache"
 
-	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByLowMemory enum const.
+	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByLowMemory enum const
 	PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByLowMemory PageBackForwardCacheNotRestoredReason = "BackForwardCacheDisabledByLowMemory"
 
-	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByCommandLine enum const.
+	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByCommandLine enum const
 	PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledByCommandLine PageBackForwardCacheNotRestoredReason = "BackForwardCacheDisabledByCommandLine"
 
-	// PageBackForwardCacheNotRestoredReasonNetworkRequestDatapipeDrainedAsBytesConsumer enum const.
+	// PageBackForwardCacheNotRestoredReasonNetworkRequestDatapipeDrainedAsBytesConsumer enum const
 	PageBackForwardCacheNotRestoredReasonNetworkRequestDatapipeDrainedAsBytesConsumer PageBackForwardCacheNotRestoredReason = "NetworkRequestDatapipeDrainedAsBytesConsumer"
 
-	// PageBackForwardCacheNotRestoredReasonNetworkRequestRedirected enum const.
+	// PageBackForwardCacheNotRestoredReasonNetworkRequestRedirected enum const
 	PageBackForwardCacheNotRestoredReasonNetworkRequestRedirected PageBackForwardCacheNotRestoredReason = "NetworkRequestRedirected"
 
-	// PageBackForwardCacheNotRestoredReasonNetworkRequestTimeout enum const.
+	// PageBackForwardCacheNotRestoredReasonNetworkRequestTimeout enum const
 	PageBackForwardCacheNotRestoredReasonNetworkRequestTimeout PageBackForwardCacheNotRestoredReason = "NetworkRequestTimeout"
 
-	// PageBackForwardCacheNotRestoredReasonNetworkExceedsBufferLimit enum const.
+	// PageBackForwardCacheNotRestoredReasonNetworkExceedsBufferLimit enum const
 	PageBackForwardCacheNotRestoredReasonNetworkExceedsBufferLimit PageBackForwardCacheNotRestoredReason = "NetworkExceedsBufferLimit"
 
-	// PageBackForwardCacheNotRestoredReasonNavigationCancelledWhileRestoring enum const.
+	// PageBackForwardCacheNotRestoredReasonNavigationCancelledWhileRestoring enum const
 	PageBackForwardCacheNotRestoredReasonNavigationCancelledWhileRestoring PageBackForwardCacheNotRestoredReason = "NavigationCancelledWhileRestoring"
 
-	// PageBackForwardCacheNotRestoredReasonNotMostRecentNavigationEntry enum const.
+	// PageBackForwardCacheNotRestoredReasonNotMostRecentNavigationEntry enum const
 	PageBackForwardCacheNotRestoredReasonNotMostRecentNavigationEntry PageBackForwardCacheNotRestoredReason = "NotMostRecentNavigationEntry"
 
-	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForPrerender enum const.
+	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForPrerender enum const
 	PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForPrerender PageBackForwardCacheNotRestoredReason = "BackForwardCacheDisabledForPrerender"
 
-	// PageBackForwardCacheNotRestoredReasonUserAgentOverrideDiffers enum const.
+	// PageBackForwardCacheNotRestoredReasonUserAgentOverrideDiffers enum const
 	PageBackForwardCacheNotRestoredReasonUserAgentOverrideDiffers PageBackForwardCacheNotRestoredReason = "UserAgentOverrideDiffers"
 
-	// PageBackForwardCacheNotRestoredReasonForegroundCacheLimit enum const.
+	// PageBackForwardCacheNotRestoredReasonForegroundCacheLimit enum const
 	PageBackForwardCacheNotRestoredReasonForegroundCacheLimit PageBackForwardCacheNotRestoredReason = "ForegroundCacheLimit"
 
-	// PageBackForwardCacheNotRestoredReasonBrowsingInstanceNotSwapped enum const.
+	// PageBackForwardCacheNotRestoredReasonForwardCacheDisabled enum const
+	PageBackForwardCacheNotRestoredReasonForwardCacheDisabled PageBackForwardCacheNotRestoredReason = "ForwardCacheDisabled"
+
+	// PageBackForwardCacheNotRestoredReasonBrowsingInstanceNotSwapped enum const
 	PageBackForwardCacheNotRestoredReasonBrowsingInstanceNotSwapped PageBackForwardCacheNotRestoredReason = "BrowsingInstanceNotSwapped"
 
-	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForDelegate enum const.
+	// PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForDelegate enum const
 	PageBackForwardCacheNotRestoredReasonBackForwardCacheDisabledForDelegate PageBackForwardCacheNotRestoredReason = "BackForwardCacheDisabledForDelegate"
 
-	// PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInMainFrame enum const.
+	// PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInMainFrame enum const
 	PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInMainFrame PageBackForwardCacheNotRestoredReason = "UnloadHandlerExistsInMainFrame"
 
-	// PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInSubFrame enum const.
+	// PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInSubFrame enum const
 	PageBackForwardCacheNotRestoredReasonUnloadHandlerExistsInSubFrame PageBackForwardCacheNotRestoredReason = "UnloadHandlerExistsInSubFrame"
 
-	// PageBackForwardCacheNotRestoredReasonServiceWorkerUnregistration enum const.
+	// PageBackForwardCacheNotRestoredReasonServiceWorkerUnregistration enum const
 	PageBackForwardCacheNotRestoredReasonServiceWorkerUnregistration PageBackForwardCacheNotRestoredReason = "ServiceWorkerUnregistration"
 
-	// PageBackForwardCacheNotRestoredReasonCacheControlNoStore enum const.
+	// PageBackForwardCacheNotRestoredReasonCacheControlNoStore enum const
 	PageBackForwardCacheNotRestoredReasonCacheControlNoStore PageBackForwardCacheNotRestoredReason = "CacheControlNoStore"
 
-	// PageBackForwardCacheNotRestoredReasonCacheControlNoStoreCookieModified enum const.
+	// PageBackForwardCacheNotRestoredReasonCacheControlNoStoreCookieModified enum const
 	PageBackForwardCacheNotRestoredReasonCacheControlNoStoreCookieModified PageBackForwardCacheNotRestoredReason = "CacheControlNoStoreCookieModified"
 
-	// PageBackForwardCacheNotRestoredReasonCacheControlNoStoreHTTPOnlyCookieModified enum const.
+	// PageBackForwardCacheNotRestoredReasonCacheControlNoStoreHTTPOnlyCookieModified enum const
 	PageBackForwardCacheNotRestoredReasonCacheControlNoStoreHTTPOnlyCookieModified PageBackForwardCacheNotRestoredReason = "CacheControlNoStoreHTTPOnlyCookieModified"
 
-	// PageBackForwardCacheNotRestoredReasonNoResponseHead enum const.
+	// PageBackForwardCacheNotRestoredReasonNoResponseHead enum const
 	PageBackForwardCacheNotRestoredReasonNoResponseHead PageBackForwardCacheNotRestoredReason = "NoResponseHead"
 
-	// PageBackForwardCacheNotRestoredReasonUnknown enum const.
+	// PageBackForwardCacheNotRestoredReasonUnknown enum const
 	PageBackForwardCacheNotRestoredReasonUnknown PageBackForwardCacheNotRestoredReason = "Unknown"
 
-	// PageBackForwardCacheNotRestoredReasonActivationNavigationsDisallowedForBug1234857 enum const.
+	// PageBackForwardCacheNotRestoredReasonActivationNavigationsDisallowedForBug1234857 enum const
 	PageBackForwardCacheNotRestoredReasonActivationNavigationsDisallowedForBug1234857 PageBackForwardCacheNotRestoredReason = "ActivationNavigationsDisallowedForBug1234857"
 
-	// PageBackForwardCacheNotRestoredReasonErrorDocument enum const.
+	// PageBackForwardCacheNotRestoredReasonErrorDocument enum const
 	PageBackForwardCacheNotRestoredReasonErrorDocument PageBackForwardCacheNotRestoredReason = "ErrorDocument"
 
-	// PageBackForwardCacheNotRestoredReasonFencedFramesEmbedder enum const.
+	// PageBackForwardCacheNotRestoredReasonFencedFramesEmbedder enum const
 	PageBackForwardCacheNotRestoredReasonFencedFramesEmbedder PageBackForwardCacheNotRestoredReason = "FencedFramesEmbedder"
 
-	// PageBackForwardCacheNotRestoredReasonCookieDisabled enum const.
+	// PageBackForwardCacheNotRestoredReasonCookieDisabled enum const
 	PageBackForwardCacheNotRestoredReasonCookieDisabled PageBackForwardCacheNotRestoredReason = "CookieDisabled"
 
-	// PageBackForwardCacheNotRestoredReasonHTTPAuthRequired enum const.
+	// PageBackForwardCacheNotRestoredReasonHTTPAuthRequired enum const
 	PageBackForwardCacheNotRestoredReasonHTTPAuthRequired PageBackForwardCacheNotRestoredReason = "HTTPAuthRequired"
 
-	// PageBackForwardCacheNotRestoredReasonCookieFlushed enum const.
+	// PageBackForwardCacheNotRestoredReasonCookieFlushed enum const
 	PageBackForwardCacheNotRestoredReasonCookieFlushed PageBackForwardCacheNotRestoredReason = "CookieFlushed"
 
-	// PageBackForwardCacheNotRestoredReasonBroadcastChannelOnMessage enum const.
+	// PageBackForwardCacheNotRestoredReasonBroadcastChannelOnMessage enum const
 	PageBackForwardCacheNotRestoredReasonBroadcastChannelOnMessage PageBackForwardCacheNotRestoredReason = "BroadcastChannelOnMessage"
 
-	// PageBackForwardCacheNotRestoredReasonWebViewSettingsChanged enum const.
+	// PageBackForwardCacheNotRestoredReasonWebViewSettingsChanged enum const
 	PageBackForwardCacheNotRestoredReasonWebViewSettingsChanged PageBackForwardCacheNotRestoredReason = "WebViewSettingsChanged"
 
-	// PageBackForwardCacheNotRestoredReasonWebViewJavaScriptObjectChanged enum const.
+	// PageBackForwardCacheNotRestoredReasonWebViewJavaScriptObjectChanged enum const
 	PageBackForwardCacheNotRestoredReasonWebViewJavaScriptObjectChanged PageBackForwardCacheNotRestoredReason = "WebViewJavaScriptObjectChanged"
 
-	// PageBackForwardCacheNotRestoredReasonWebViewMessageListenerInjected enum const.
+	// PageBackForwardCacheNotRestoredReasonWebViewMessageListenerInjected enum const
 	PageBackForwardCacheNotRestoredReasonWebViewMessageListenerInjected PageBackForwardCacheNotRestoredReason = "WebViewMessageListenerInjected"
 
-	// PageBackForwardCacheNotRestoredReasonWebViewSafeBrowsingAllowlistChanged enum const.
+	// PageBackForwardCacheNotRestoredReasonWebViewSafeBrowsingAllowlistChanged enum const
 	PageBackForwardCacheNotRestoredReasonWebViewSafeBrowsingAllowlistChanged PageBackForwardCacheNotRestoredReason = "WebViewSafeBrowsingAllowlistChanged"
 
-	// PageBackForwardCacheNotRestoredReasonWebViewDocumentStartJavascriptChanged enum const.
+	// PageBackForwardCacheNotRestoredReasonWebViewDocumentStartJavascriptChanged enum const
 	PageBackForwardCacheNotRestoredReasonWebViewDocumentStartJavascriptChanged PageBackForwardCacheNotRestoredReason = "WebViewDocumentStartJavascriptChanged"
 
-	// PageBackForwardCacheNotRestoredReasonWebSocket enum const.
+	// PageBackForwardCacheNotRestoredReasonWebSocket enum const
 	PageBackForwardCacheNotRestoredReasonWebSocket PageBackForwardCacheNotRestoredReason = "WebSocket"
 
-	// PageBackForwardCacheNotRestoredReasonWebTransport enum const.
+	// PageBackForwardCacheNotRestoredReasonWebTransport enum const
 	PageBackForwardCacheNotRestoredReasonWebTransport PageBackForwardCacheNotRestoredReason = "WebTransport"
 
-	// PageBackForwardCacheNotRestoredReasonWebRTC enum const.
+	// PageBackForwardCacheNotRestoredReasonWebRTC enum const
 	PageBackForwardCacheNotRestoredReasonWebRTC PageBackForwardCacheNotRestoredReason = "WebRTC"
 
-	// PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoStore enum const.
+	// PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoStore enum const
 	PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoStore PageBackForwardCacheNotRestoredReason = "MainResourceHasCacheControlNoStore"
 
-	// PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoCache enum const.
+	// PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoCache enum const
 	PageBackForwardCacheNotRestoredReasonMainResourceHasCacheControlNoCache PageBackForwardCacheNotRestoredReason = "MainResourceHasCacheControlNoCache"
 
-	// PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoStore enum const.
+	// PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoStore enum const
 	PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoStore PageBackForwardCacheNotRestoredReason = "SubresourceHasCacheControlNoStore"
 
-	// PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoCache enum const.
+	// PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoCache enum const
 	PageBackForwardCacheNotRestoredReasonSubresourceHasCacheControlNoCache PageBackForwardCacheNotRestoredReason = "SubresourceHasCacheControlNoCache"
 
-	// PageBackForwardCacheNotRestoredReasonContainsPlugins enum const.
+	// PageBackForwardCacheNotRestoredReasonContainsPlugins enum const
 	PageBackForwardCacheNotRestoredReasonContainsPlugins PageBackForwardCacheNotRestoredReason = "ContainsPlugins"
 
-	// PageBackForwardCacheNotRestoredReasonDocumentLoaded enum const.
+	// PageBackForwardCacheNotRestoredReasonDocumentLoaded enum const
 	PageBackForwardCacheNotRestoredReasonDocumentLoaded PageBackForwardCacheNotRestoredReason = "DocumentLoaded"
 
-	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestOthers enum const.
+	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestOthers enum const
 	PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestOthers PageBackForwardCacheNotRestoredReason = "OutstandingNetworkRequestOthers"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedMIDIPermission enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedMIDIPermission enum const
 	PageBackForwardCacheNotRestoredReasonRequestedMIDIPermission PageBackForwardCacheNotRestoredReason = "RequestedMIDIPermission"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedAudioCapturePermission enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedAudioCapturePermission enum const
 	PageBackForwardCacheNotRestoredReasonRequestedAudioCapturePermission PageBackForwardCacheNotRestoredReason = "RequestedAudioCapturePermission"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedVideoCapturePermission enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedVideoCapturePermission enum const
 	PageBackForwardCacheNotRestoredReasonRequestedVideoCapturePermission PageBackForwardCacheNotRestoredReason = "RequestedVideoCapturePermission"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedBackForwardCacheBlockedSensors enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedBackForwardCacheBlockedSensors enum const
 	PageBackForwardCacheNotRestoredReasonRequestedBackForwardCacheBlockedSensors PageBackForwardCacheNotRestoredReason = "RequestedBackForwardCacheBlockedSensors"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedBackgroundWorkPermission enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedBackgroundWorkPermission enum const
 	PageBackForwardCacheNotRestoredReasonRequestedBackgroundWorkPermission PageBackForwardCacheNotRestoredReason = "RequestedBackgroundWorkPermission"
 
-	// PageBackForwardCacheNotRestoredReasonBroadcastChannel enum const.
+	// PageBackForwardCacheNotRestoredReasonBroadcastChannel enum const
 	PageBackForwardCacheNotRestoredReasonBroadcastChannel PageBackForwardCacheNotRestoredReason = "BroadcastChannel"
 
-	// PageBackForwardCacheNotRestoredReasonWebXR enum const.
+	// PageBackForwardCacheNotRestoredReasonWebXR enum const
 	PageBackForwardCacheNotRestoredReasonWebXR PageBackForwardCacheNotRestoredReason = "WebXR"
 
-	// PageBackForwardCacheNotRestoredReasonSharedWorker enum const.
+	// PageBackForwardCacheNotRestoredReasonSharedWorker enum const
 	PageBackForwardCacheNotRestoredReasonSharedWorker PageBackForwardCacheNotRestoredReason = "SharedWorker"
 
-	// PageBackForwardCacheNotRestoredReasonWebLocks enum const.
+	// PageBackForwardCacheNotRestoredReasonSharedWorkerMessage enum const
+	PageBackForwardCacheNotRestoredReasonSharedWorkerMessage PageBackForwardCacheNotRestoredReason = "SharedWorkerMessage"
+
+	// PageBackForwardCacheNotRestoredReasonSharedWorkerWithNoActiveClient enum const
+	PageBackForwardCacheNotRestoredReasonSharedWorkerWithNoActiveClient PageBackForwardCacheNotRestoredReason = "SharedWorkerWithNoActiveClient"
+
+	// PageBackForwardCacheNotRestoredReasonWebLocks enum const
 	PageBackForwardCacheNotRestoredReasonWebLocks PageBackForwardCacheNotRestoredReason = "WebLocks"
 
-	// PageBackForwardCacheNotRestoredReasonWebHID enum const.
+	// PageBackForwardCacheNotRestoredReasonWebLocksContention enum const
+	PageBackForwardCacheNotRestoredReasonWebLocksContention PageBackForwardCacheNotRestoredReason = "WebLocksContention"
+
+	// PageBackForwardCacheNotRestoredReasonWebHID enum const
 	PageBackForwardCacheNotRestoredReasonWebHID PageBackForwardCacheNotRestoredReason = "WebHID"
 
-	// PageBackForwardCacheNotRestoredReasonWebShare enum const.
+	// PageBackForwardCacheNotRestoredReasonWebBluetooth enum const
+	PageBackForwardCacheNotRestoredReasonWebBluetooth PageBackForwardCacheNotRestoredReason = "WebBluetooth"
+
+	// PageBackForwardCacheNotRestoredReasonWebShare enum const
 	PageBackForwardCacheNotRestoredReasonWebShare PageBackForwardCacheNotRestoredReason = "WebShare"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedStorageAccessGrant enum const.
+	// PageBackForwardCacheNotRestoredReasonRequestedStorageAccessGrant enum const
 	PageBackForwardCacheNotRestoredReasonRequestedStorageAccessGrant PageBackForwardCacheNotRestoredReason = "RequestedStorageAccessGrant"
 
-	// PageBackForwardCacheNotRestoredReasonWebNfc enum const.
+	// PageBackForwardCacheNotRestoredReasonWebNfc enum const
 	PageBackForwardCacheNotRestoredReasonWebNfc PageBackForwardCacheNotRestoredReason = "WebNfc"
 
-	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestFetch enum const.
+	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestFetch enum const
 	PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestFetch PageBackForwardCacheNotRestoredReason = "OutstandingNetworkRequestFetch"
 
-	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestXHR enum const.
+	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestXHR enum const
 	PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestXHR PageBackForwardCacheNotRestoredReason = "OutstandingNetworkRequestXHR"
 
-	// PageBackForwardCacheNotRestoredReasonAppBanner enum const.
+	// PageBackForwardCacheNotRestoredReasonAppBanner enum const
 	PageBackForwardCacheNotRestoredReasonAppBanner PageBackForwardCacheNotRestoredReason = "AppBanner"
 
-	// PageBackForwardCacheNotRestoredReasonPrinting enum const.
+	// PageBackForwardCacheNotRestoredReasonPrinting enum const
 	PageBackForwardCacheNotRestoredReasonPrinting PageBackForwardCacheNotRestoredReason = "Printing"
 
-	// PageBackForwardCacheNotRestoredReasonWebDatabase enum const.
+	// PageBackForwardCacheNotRestoredReasonWebDatabase enum const
 	PageBackForwardCacheNotRestoredReasonWebDatabase PageBackForwardCacheNotRestoredReason = "WebDatabase"
 
-	// PageBackForwardCacheNotRestoredReasonPictureInPicture enum const.
+	// PageBackForwardCacheNotRestoredReasonPictureInPicture enum const
 	PageBackForwardCacheNotRestoredReasonPictureInPicture PageBackForwardCacheNotRestoredReason = "PictureInPicture"
 
-	// PageBackForwardCacheNotRestoredReasonPortal enum const.
-	PageBackForwardCacheNotRestoredReasonPortal PageBackForwardCacheNotRestoredReason = "Portal"
-
-	// PageBackForwardCacheNotRestoredReasonSpeechRecognizer enum const.
+	// PageBackForwardCacheNotRestoredReasonSpeechRecognizer enum const
 	PageBackForwardCacheNotRestoredReasonSpeechRecognizer PageBackForwardCacheNotRestoredReason = "SpeechRecognizer"
 
-	// PageBackForwardCacheNotRestoredReasonIdleManager enum const.
+	// PageBackForwardCacheNotRestoredReasonIdleManager enum const
 	PageBackForwardCacheNotRestoredReasonIdleManager PageBackForwardCacheNotRestoredReason = "IdleManager"
 
-	// PageBackForwardCacheNotRestoredReasonPaymentManager enum const.
+	// PageBackForwardCacheNotRestoredReasonPaymentManager enum const
 	PageBackForwardCacheNotRestoredReasonPaymentManager PageBackForwardCacheNotRestoredReason = "PaymentManager"
 
-	// PageBackForwardCacheNotRestoredReasonSpeechSynthesis enum const.
+	// PageBackForwardCacheNotRestoredReasonSpeechSynthesis enum const
 	PageBackForwardCacheNotRestoredReasonSpeechSynthesis PageBackForwardCacheNotRestoredReason = "SpeechSynthesis"
 
-	// PageBackForwardCacheNotRestoredReasonKeyboardLock enum const.
+	// PageBackForwardCacheNotRestoredReasonKeyboardLock enum const
 	PageBackForwardCacheNotRestoredReasonKeyboardLock PageBackForwardCacheNotRestoredReason = "KeyboardLock"
 
-	// PageBackForwardCacheNotRestoredReasonWebOTPService enum const.
+	// PageBackForwardCacheNotRestoredReasonWebOTPService enum const
 	PageBackForwardCacheNotRestoredReasonWebOTPService PageBackForwardCacheNotRestoredReason = "WebOTPService"
 
-	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestDirectSocket enum const.
+	// PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestDirectSocket enum const
 	PageBackForwardCacheNotRestoredReasonOutstandingNetworkRequestDirectSocket PageBackForwardCacheNotRestoredReason = "OutstandingNetworkRequestDirectSocket"
 
-	// PageBackForwardCacheNotRestoredReasonInjectedJavascript enum const.
+	// PageBackForwardCacheNotRestoredReasonInjectedJavascript enum const
 	PageBackForwardCacheNotRestoredReasonInjectedJavascript PageBackForwardCacheNotRestoredReason = "InjectedJavascript"
 
-	// PageBackForwardCacheNotRestoredReasonInjectedStyleSheet enum const.
+	// PageBackForwardCacheNotRestoredReasonInjectedStyleSheet enum const
 	PageBackForwardCacheNotRestoredReasonInjectedStyleSheet PageBackForwardCacheNotRestoredReason = "InjectedStyleSheet"
 
-	// PageBackForwardCacheNotRestoredReasonKeepaliveRequest enum const.
+	// PageBackForwardCacheNotRestoredReasonKeepaliveRequest enum const
 	PageBackForwardCacheNotRestoredReasonKeepaliveRequest PageBackForwardCacheNotRestoredReason = "KeepaliveRequest"
 
-	// PageBackForwardCacheNotRestoredReasonIndexedDBEvent enum const.
+	// PageBackForwardCacheNotRestoredReasonIndexedDBEvent enum const
 	PageBackForwardCacheNotRestoredReasonIndexedDBEvent PageBackForwardCacheNotRestoredReason = "IndexedDBEvent"
 
-	// PageBackForwardCacheNotRestoredReasonDummy enum const.
+	// PageBackForwardCacheNotRestoredReasonDummy enum const
 	PageBackForwardCacheNotRestoredReasonDummy PageBackForwardCacheNotRestoredReason = "Dummy"
 
-	// PageBackForwardCacheNotRestoredReasonJsNetworkRequestReceivedCacheControlNoStoreResource enum const.
+	// PageBackForwardCacheNotRestoredReasonJsNetworkRequestReceivedCacheControlNoStoreResource enum const
 	PageBackForwardCacheNotRestoredReasonJsNetworkRequestReceivedCacheControlNoStoreResource PageBackForwardCacheNotRestoredReason = "JsNetworkRequestReceivedCacheControlNoStoreResource"
 
-	// PageBackForwardCacheNotRestoredReasonWebRTCSticky enum const.
-	PageBackForwardCacheNotRestoredReasonWebRTCSticky PageBackForwardCacheNotRestoredReason = "WebRTCSticky"
+	// PageBackForwardCacheNotRestoredReasonWebRTCUsedWithCCNS enum const
+	PageBackForwardCacheNotRestoredReasonWebRTCUsedWithCCNS PageBackForwardCacheNotRestoredReason = "WebRTCUsedWithCCNS"
 
-	// PageBackForwardCacheNotRestoredReasonWebTransportSticky enum const.
-	PageBackForwardCacheNotRestoredReasonWebTransportSticky PageBackForwardCacheNotRestoredReason = "WebTransportSticky"
+	// PageBackForwardCacheNotRestoredReasonWebTransportUsedWithCCNS enum const
+	PageBackForwardCacheNotRestoredReasonWebTransportUsedWithCCNS PageBackForwardCacheNotRestoredReason = "WebTransportUsedWithCCNS"
 
-	// PageBackForwardCacheNotRestoredReasonWebSocketSticky enum const.
-	PageBackForwardCacheNotRestoredReasonWebSocketSticky PageBackForwardCacheNotRestoredReason = "WebSocketSticky"
+	// PageBackForwardCacheNotRestoredReasonWebSocketUsedWithCCNS enum const
+	PageBackForwardCacheNotRestoredReasonWebSocketUsedWithCCNS PageBackForwardCacheNotRestoredReason = "WebSocketUsedWithCCNS"
 
-	// PageBackForwardCacheNotRestoredReasonSmartCard enum const.
+	// PageBackForwardCacheNotRestoredReasonSmartCard enum const
 	PageBackForwardCacheNotRestoredReasonSmartCard PageBackForwardCacheNotRestoredReason = "SmartCard"
 
-	// PageBackForwardCacheNotRestoredReasonLiveMediaStreamTrack enum const.
+	// PageBackForwardCacheNotRestoredReasonLiveMediaStreamTrack enum const
 	PageBackForwardCacheNotRestoredReasonLiveMediaStreamTrack PageBackForwardCacheNotRestoredReason = "LiveMediaStreamTrack"
 
-	// PageBackForwardCacheNotRestoredReasonUnloadHandler enum const.
+	// PageBackForwardCacheNotRestoredReasonUnloadHandler enum const
 	PageBackForwardCacheNotRestoredReasonUnloadHandler PageBackForwardCacheNotRestoredReason = "UnloadHandler"
 
-	// PageBackForwardCacheNotRestoredReasonParserAborted enum const.
+	// PageBackForwardCacheNotRestoredReasonParserAborted enum const
 	PageBackForwardCacheNotRestoredReasonParserAborted PageBackForwardCacheNotRestoredReason = "ParserAborted"
 
-	// PageBackForwardCacheNotRestoredReasonContentSecurityHandler enum const.
+	// PageBackForwardCacheNotRestoredReasonContentSecurityHandler enum const
 	PageBackForwardCacheNotRestoredReasonContentSecurityHandler PageBackForwardCacheNotRestoredReason = "ContentSecurityHandler"
 
-	// PageBackForwardCacheNotRestoredReasonContentWebAuthenticationAPI enum const.
+	// PageBackForwardCacheNotRestoredReasonContentWebAuthenticationAPI enum const
 	PageBackForwardCacheNotRestoredReasonContentWebAuthenticationAPI PageBackForwardCacheNotRestoredReason = "ContentWebAuthenticationAPI"
 
-	// PageBackForwardCacheNotRestoredReasonContentFileChooser enum const.
+	// PageBackForwardCacheNotRestoredReasonContentFileChooser enum const
 	PageBackForwardCacheNotRestoredReasonContentFileChooser PageBackForwardCacheNotRestoredReason = "ContentFileChooser"
 
-	// PageBackForwardCacheNotRestoredReasonContentSerial enum const.
+	// PageBackForwardCacheNotRestoredReasonContentSerial enum const
 	PageBackForwardCacheNotRestoredReasonContentSerial PageBackForwardCacheNotRestoredReason = "ContentSerial"
 
-	// PageBackForwardCacheNotRestoredReasonContentFileSystemAccess enum const.
+	// PageBackForwardCacheNotRestoredReasonContentFileSystemAccess enum const
 	PageBackForwardCacheNotRestoredReasonContentFileSystemAccess PageBackForwardCacheNotRestoredReason = "ContentFileSystemAccess"
 
-	// PageBackForwardCacheNotRestoredReasonContentMediaDevicesDispatcherHost enum const.
+	// PageBackForwardCacheNotRestoredReasonContentMediaDevicesDispatcherHost enum const
 	PageBackForwardCacheNotRestoredReasonContentMediaDevicesDispatcherHost PageBackForwardCacheNotRestoredReason = "ContentMediaDevicesDispatcherHost"
 
-	// PageBackForwardCacheNotRestoredReasonContentWebBluetooth enum const.
+	// PageBackForwardCacheNotRestoredReasonContentWebBluetooth enum const
 	PageBackForwardCacheNotRestoredReasonContentWebBluetooth PageBackForwardCacheNotRestoredReason = "ContentWebBluetooth"
 
-	// PageBackForwardCacheNotRestoredReasonContentWebUSB enum const.
+	// PageBackForwardCacheNotRestoredReasonContentWebUSB enum const
 	PageBackForwardCacheNotRestoredReasonContentWebUSB PageBackForwardCacheNotRestoredReason = "ContentWebUSB"
 
-	// PageBackForwardCacheNotRestoredReasonContentMediaSessionService enum const.
+	// PageBackForwardCacheNotRestoredReasonContentMediaSessionService enum const
 	PageBackForwardCacheNotRestoredReasonContentMediaSessionService PageBackForwardCacheNotRestoredReason = "ContentMediaSessionService"
 
-	// PageBackForwardCacheNotRestoredReasonContentScreenReader enum const.
+	// PageBackForwardCacheNotRestoredReasonContentScreenReader enum const
 	PageBackForwardCacheNotRestoredReasonContentScreenReader PageBackForwardCacheNotRestoredReason = "ContentScreenReader"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderPopupBlockerTabHelper enum const.
+	// PageBackForwardCacheNotRestoredReasonContentDiscarded enum const
+	PageBackForwardCacheNotRestoredReasonContentDiscarded PageBackForwardCacheNotRestoredReason = "ContentDiscarded"
+
+	// PageBackForwardCacheNotRestoredReasonEmbedderPopupBlockerTabHelper enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderPopupBlockerTabHelper PageBackForwardCacheNotRestoredReason = "EmbedderPopupBlockerTabHelper"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingTriggeredPopupBlocker enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingTriggeredPopupBlocker enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingTriggeredPopupBlocker PageBackForwardCacheNotRestoredReason = "EmbedderSafeBrowsingTriggeredPopupBlocker"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingThreatDetails enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingThreatDetails enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderSafeBrowsingThreatDetails PageBackForwardCacheNotRestoredReason = "EmbedderSafeBrowsingThreatDetails"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderAppBannerManager enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderAppBannerManager enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderAppBannerManager PageBackForwardCacheNotRestoredReason = "EmbedderAppBannerManager"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerViewerSource enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerViewerSource enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerViewerSource PageBackForwardCacheNotRestoredReason = "EmbedderDomDistillerViewerSource"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerSelfDeletingRequestDelegate enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerSelfDeletingRequestDelegate enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderDomDistillerSelfDeletingRequestDelegate PageBackForwardCacheNotRestoredReason = "EmbedderDomDistillerSelfDeletingRequestDelegate"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderOomInterventionTabHelper enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderOomInterventionTabHelper enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderOomInterventionTabHelper PageBackForwardCacheNotRestoredReason = "EmbedderOomInterventionTabHelper"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderOfflinePage enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderOfflinePage enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderOfflinePage PageBackForwardCacheNotRestoredReason = "EmbedderOfflinePage"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderChromePasswordManagerClientBindCredentialManager enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderChromePasswordManagerClientBindCredentialManager enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderChromePasswordManagerClientBindCredentialManager PageBackForwardCacheNotRestoredReason = "EmbedderChromePasswordManagerClientBindCredentialManager"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderPermissionRequestManager enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderPermissionRequestManager enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderPermissionRequestManager PageBackForwardCacheNotRestoredReason = "EmbedderPermissionRequestManager"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderModalDialog enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderModalDialog enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderModalDialog PageBackForwardCacheNotRestoredReason = "EmbedderModalDialog"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderExtensions enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderExtensions enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderExtensions PageBackForwardCacheNotRestoredReason = "EmbedderExtensions"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessaging enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessaging enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessaging PageBackForwardCacheNotRestoredReason = "EmbedderExtensionMessaging"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessagingForOpenPort enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessagingForOpenPort enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderExtensionMessagingForOpenPort PageBackForwardCacheNotRestoredReason = "EmbedderExtensionMessagingForOpenPort"
 
-	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionSentMessageToCachedFrame enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionSentMessageToCachedFrame enum const
 	PageBackForwardCacheNotRestoredReasonEmbedderExtensionSentMessageToCachedFrame PageBackForwardCacheNotRestoredReason = "EmbedderExtensionSentMessageToCachedFrame"
 
-	// PageBackForwardCacheNotRestoredReasonRequestedByWebViewClient enum const.
+	// PageBackForwardCacheNotRestoredReasonEmbedderExtensionFrame enum const
+	PageBackForwardCacheNotRestoredReasonEmbedderExtensionFrame PageBackForwardCacheNotRestoredReason = "EmbedderExtensionFrame"
+
+	// PageBackForwardCacheNotRestoredReasonEmbedderPrivilegedWebContents enum const
+	PageBackForwardCacheNotRestoredReasonEmbedderPrivilegedWebContents PageBackForwardCacheNotRestoredReason = "EmbedderPrivilegedWebContents"
+
+	// PageBackForwardCacheNotRestoredReasonRequestedByWebViewClient enum const
 	PageBackForwardCacheNotRestoredReasonRequestedByWebViewClient PageBackForwardCacheNotRestoredReason = "RequestedByWebViewClient"
+
+	// PageBackForwardCacheNotRestoredReasonPostMessageByWebViewClient enum const
+	PageBackForwardCacheNotRestoredReasonPostMessageByWebViewClient PageBackForwardCacheNotRestoredReason = "PostMessageByWebViewClient"
+
+	// PageBackForwardCacheNotRestoredReasonCacheControlNoStoreDeviceBoundSessionTerminated enum const
+	PageBackForwardCacheNotRestoredReasonCacheControlNoStoreDeviceBoundSessionTerminated PageBackForwardCacheNotRestoredReason = "CacheControlNoStoreDeviceBoundSessionTerminated"
+
+	// PageBackForwardCacheNotRestoredReasonCacheLimitPrunedOnModerateMemoryPressure enum const
+	PageBackForwardCacheNotRestoredReasonCacheLimitPrunedOnModerateMemoryPressure PageBackForwardCacheNotRestoredReason = "CacheLimitPrunedOnModerateMemoryPressure"
+
+	// PageBackForwardCacheNotRestoredReasonCacheLimitPrunedOnCriticalMemoryPressure enum const
+	PageBackForwardCacheNotRestoredReasonCacheLimitPrunedOnCriticalMemoryPressure PageBackForwardCacheNotRestoredReason = "CacheLimitPrunedOnCriticalMemoryPressure"
 )
 
 // PageBackForwardCacheNotRestoredReasonType (experimental) Types of not restored reasons for back-forward cache.
 type PageBackForwardCacheNotRestoredReasonType string
 
 const (
-	// PageBackForwardCacheNotRestoredReasonTypeSupportPending enum const.
+	// PageBackForwardCacheNotRestoredReasonTypeSupportPending enum const
 	PageBackForwardCacheNotRestoredReasonTypeSupportPending PageBackForwardCacheNotRestoredReasonType = "SupportPending"
 
-	// PageBackForwardCacheNotRestoredReasonTypePageSupportNeeded enum const.
+	// PageBackForwardCacheNotRestoredReasonTypePageSupportNeeded enum const
 	PageBackForwardCacheNotRestoredReasonTypePageSupportNeeded PageBackForwardCacheNotRestoredReasonType = "PageSupportNeeded"
 
-	// PageBackForwardCacheNotRestoredReasonTypeCircumstantial enum const.
+	// PageBackForwardCacheNotRestoredReasonTypeCircumstantial enum const
 	PageBackForwardCacheNotRestoredReasonTypeCircumstantial PageBackForwardCacheNotRestoredReasonType = "Circumstantial"
 )
 
@@ -1655,10 +1753,10 @@ type PageAddScriptToEvaluateOnLoad struct {
 	ScriptSource string `json:"scriptSource"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageAddScriptToEvaluateOnLoad) ProtoReq() string { return "Page.addScriptToEvaluateOnLoad" }
 
-// Call the request.
+// Call the request
 func (m PageAddScriptToEvaluateOnLoad) Call(c Client) (*PageAddScriptToEvaluateOnLoadResult, error) {
 	var res PageAddScriptToEvaluateOnLoadResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1689,12 +1787,12 @@ type PageAddScriptToEvaluateOnNewDocument struct {
 	RunImmediately bool `json:"runImmediately,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageAddScriptToEvaluateOnNewDocument) ProtoReq() string {
 	return "Page.addScriptToEvaluateOnNewDocument"
 }
 
-// Call the request.
+// Call the request
 func (m PageAddScriptToEvaluateOnNewDocument) Call(c Client) (*PageAddScriptToEvaluateOnNewDocumentResult, error) {
 	var res PageAddScriptToEvaluateOnNewDocumentResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1709,25 +1807,25 @@ type PageAddScriptToEvaluateOnNewDocumentResult struct {
 // PageBringToFront Brings page to front (activates tab).
 type PageBringToFront struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageBringToFront) ProtoReq() string { return "Page.bringToFront" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageBringToFront) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PageCaptureScreenshotFormat enum.
+// PageCaptureScreenshotFormat enum
 type PageCaptureScreenshotFormat string
 
 const (
-	// PageCaptureScreenshotFormatJpeg enum const.
+	// PageCaptureScreenshotFormatJpeg enum const
 	PageCaptureScreenshotFormatJpeg PageCaptureScreenshotFormat = "jpeg"
 
-	// PageCaptureScreenshotFormatPng enum const.
+	// PageCaptureScreenshotFormatPng enum const
 	PageCaptureScreenshotFormatPng PageCaptureScreenshotFormat = "png"
 
-	// PageCaptureScreenshotFormatWebp enum const.
+	// PageCaptureScreenshotFormatWebp enum const
 	PageCaptureScreenshotFormatWebp PageCaptureScreenshotFormat = "webp"
 )
 
@@ -1752,10 +1850,10 @@ type PageCaptureScreenshot struct {
 	OptimizeForSpeed bool `json:"optimizeForSpeed,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageCaptureScreenshot) ProtoReq() string { return "Page.captureScreenshot" }
 
-// Call the request.
+// Call the request
 func (m PageCaptureScreenshot) Call(c Client) (*PageCaptureScreenshotResult, error) {
 	var res PageCaptureScreenshotResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1767,11 +1865,11 @@ type PageCaptureScreenshotResult struct {
 	Data []byte `json:"data"`
 }
 
-// PageCaptureSnapshotFormat enum.
+// PageCaptureSnapshotFormat enum
 type PageCaptureSnapshotFormat string
 
 const (
-	// PageCaptureSnapshotFormatMhtml enum const.
+	// PageCaptureSnapshotFormatMhtml enum const
 	PageCaptureSnapshotFormatMhtml PageCaptureSnapshotFormat = "mhtml"
 )
 
@@ -1782,10 +1880,10 @@ type PageCaptureSnapshot struct {
 	Format PageCaptureSnapshotFormat `json:"format,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageCaptureSnapshot) ProtoReq() string { return "Page.captureSnapshot" }
 
-// Call the request.
+// Call the request
 func (m PageCaptureSnapshot) Call(c Client) (*PageCaptureSnapshotResult, error) {
 	var res PageCaptureSnapshotResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1800,10 +1898,10 @@ type PageCaptureSnapshotResult struct {
 // PageClearDeviceMetricsOverride (deprecated) (experimental) Clears the overridden device metrics.
 type PageClearDeviceMetricsOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageClearDeviceMetricsOverride) ProtoReq() string { return "Page.clearDeviceMetricsOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageClearDeviceMetricsOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1811,12 +1909,12 @@ func (m PageClearDeviceMetricsOverride) Call(c Client) error {
 // PageClearDeviceOrientationOverride (deprecated) (experimental) Clears the overridden Device Orientation.
 type PageClearDeviceOrientationOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageClearDeviceOrientationOverride) ProtoReq() string {
 	return "Page.clearDeviceOrientationOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m PageClearDeviceOrientationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1824,10 +1922,10 @@ func (m PageClearDeviceOrientationOverride) Call(c Client) error {
 // PageClearGeolocationOverride (deprecated) Clears the overridden Geolocation Position and Error.
 type PageClearGeolocationOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageClearGeolocationOverride) ProtoReq() string { return "Page.clearGeolocationOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageClearGeolocationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1843,12 +1941,20 @@ type PageCreateIsolatedWorld struct {
 	// GrantUniveralAccess (optional) Whether or not universal access should be granted to the isolated world. This is a powerful
 	// option, use with caution.
 	GrantUniveralAccess bool `json:"grantUniveralAccess,omitempty"`
+
+	// ContentSecurityPolicy (optional) An optional content security policy to set for the isolated world.
+	// If omitted, any existing CSP for the world will be cleared.
+	// Note that clearing or updating the CSP does not immediately affect the active
+	// context in the same document because LocalDOMWindow caches the
+	// ContentSecurityPolicy object. The change takes effect on subsequent
+	// navigations when a new window context is created.
+	ContentSecurityPolicy string `json:"contentSecurityPolicy,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageCreateIsolatedWorld) ProtoReq() string { return "Page.createIsolatedWorld" }
 
-// Call the request.
+// Call the request
 func (m PageCreateIsolatedWorld) Call(c Client) (*PageCreateIsolatedWorldResult, error) {
 	var res PageCreateIsolatedWorldResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1869,10 +1975,10 @@ type PageDeleteCookie struct {
 	URL string `json:"url"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageDeleteCookie) ProtoReq() string { return "Page.deleteCookie" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageDeleteCookie) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1880,21 +1986,25 @@ func (m PageDeleteCookie) Call(c Client) error {
 // PageDisable Disables page domain notifications.
 type PageDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageDisable) ProtoReq() string { return "Page.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
 // PageEnable Enables page domain notifications.
-type PageEnable struct{}
+type PageEnable struct {
+	// EnableFileChooserOpenedEvent (experimental) (optional) If true, the `Page.fileChooserOpened` event will be emitted regardless of the state set by
+	// `Page.setInterceptFileChooserDialog` command (default: false).
+	EnableFileChooserOpenedEvent bool `json:"enableFileChooserOpenedEvent,omitempty"`
+}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageEnable) ProtoReq() string { return "Page.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1910,10 +2020,10 @@ type PageGetAppManifest struct {
 	ManifestID string `json:"manifestId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetAppManifest) ProtoReq() string { return "Page.getAppManifest" }
 
-// Call the request.
+// Call the request
 func (m PageGetAppManifest) Call(c Client) (*PageGetAppManifestResult, error) {
 	var res PageGetAppManifestResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1940,10 +2050,10 @@ type PageGetAppManifestResult struct {
 // PageGetInstallabilityErrors (experimental) ...
 type PageGetInstallabilityErrors struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetInstallabilityErrors) ProtoReq() string { return "Page.getInstallabilityErrors" }
 
-// Call the request.
+// Call the request
 func (m PageGetInstallabilityErrors) Call(c Client) (*PageGetInstallabilityErrorsResult, error) {
 	var res PageGetInstallabilityErrorsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1958,10 +2068,10 @@ type PageGetInstallabilityErrorsResult struct {
 // PageGetManifestIcons (deprecated) (experimental) Deprecated because it's not guaranteed that the returned icon is in fact the one used for PWA installation.
 type PageGetManifestIcons struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetManifestIcons) ProtoReq() string { return "Page.getManifestIcons" }
 
-// Call the request.
+// Call the request
 func (m PageGetManifestIcons) Call(c Client) (*PageGetManifestIconsResult, error) {
 	var res PageGetManifestIconsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1973,14 +2083,14 @@ type PageGetManifestIconsResult struct {
 	PrimaryIcon []byte `json:"primaryIcon,omitempty"`
 }
 
-// PageGetAppID (experimental) Returns the unique (PWA) app id.
-// Only returns values if the feature flag 'WebAppEnableManifestId' is enabled.
+// PageGetAppID (experimental) Returns the unique (PWA) app id, along with IWA bundle ID and parent app info.
+// Only returns values if the feature flag 'WebAppEnableManifestId' is enabled
 type PageGetAppID struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetAppID) ProtoReq() string { return "Page.getAppId" }
 
-// Call the request.
+// Call the request
 func (m PageGetAppID) Call(c Client) (*PageGetAppIDResult, error) {
 	var res PageGetAppIDResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1993,37 +2103,108 @@ type PageGetAppIDResult struct {
 
 	// RecommendedID (optional) Recommendation for manifest's id attribute to match current id computed from start_url
 	RecommendedID string `json:"recommendedId,omitempty"`
+
+	// BundleID (optional) The bundle ID for an Isolated Web App (IWA)
+	BundleID string `json:"bundleId,omitempty"`
+
+	// ParentAppName (optional) The name of the parent app if this app is a Sub-App
+	ParentAppName string `json:"parentAppName,omitempty"`
 }
 
-// PageGetAdScriptID (experimental) ...
-type PageGetAdScriptID struct {
+// PageGetSubApps (experimental) Returns the list of installed child Sub-Apps for the inspected parent app.
+type PageGetSubApps struct{}
+
+// ProtoReq name
+func (m PageGetSubApps) ProtoReq() string { return "Page.getSubApps" }
+
+// Call the request
+func (m PageGetSubApps) Call(c Client) (*PageGetSubAppsResult, error) {
+	var res PageGetSubAppsResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageGetSubAppsResult (experimental) ...
+type PageGetSubAppsResult struct {
+	// SubApps ...
+	SubApps []*PageSubApp `json:"subApps"`
+}
+
+// PageGetSiblingSubApps (experimental) Returns the list of sibling Sub-Apps sharing the same parent app if the inspected context is a Sub-App.
+type PageGetSiblingSubApps struct{}
+
+// ProtoReq name
+func (m PageGetSiblingSubApps) ProtoReq() string { return "Page.getSiblingSubApps" }
+
+// Call the request
+func (m PageGetSiblingSubApps) Call(c Client) (*PageGetSiblingSubAppsResult, error) {
+	var res PageGetSiblingSubAppsResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageGetSiblingSubAppsResult (experimental) ...
+type PageGetSiblingSubAppsResult struct {
+	// SubApps ...
+	SubApps []*PageSubApp `json:"subApps"`
+}
+
+// PageGetAdScriptAncestry (experimental) ...
+type PageGetAdScriptAncestry struct {
 	// FrameID ...
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoReq name.
-func (m PageGetAdScriptID) ProtoReq() string { return "Page.getAdScriptId" }
+// ProtoReq name
+func (m PageGetAdScriptAncestry) ProtoReq() string { return "Page.getAdScriptAncestry" }
 
-// Call the request.
-func (m PageGetAdScriptID) Call(c Client) (*PageGetAdScriptIDResult, error) {
-	var res PageGetAdScriptIDResult
+// Call the request
+func (m PageGetAdScriptAncestry) Call(c Client) (*PageGetAdScriptAncestryResult, error) {
+	var res PageGetAdScriptAncestryResult
 	return &res, call(m.ProtoReq(), m, &res, c)
 }
 
-// PageGetAdScriptIDResult (experimental) ...
-type PageGetAdScriptIDResult struct {
-	// AdScriptID (optional) Identifies the bottom-most script which caused the frame to be labelled
-	// as an ad. Only sent if frame is labelled as an ad and id is available.
-	AdScriptID *PageAdScriptID `json:"adScriptId,omitempty"`
+// PageGetAdScriptAncestryResult (experimental) ...
+type PageGetAdScriptAncestryResult struct {
+	// AdScriptAncestry (optional) The ancestry chain of ad script identifiers leading to this frame's
+	// creation, along with the root script's filterlist rule. The ancestry
+	// chain is ordered from the most immediate script (in the frame creation
+	// stack) to more distant ancestors (that created the immediately preceding
+	// script). Only sent if frame is labelled as an ad and ids are available.
+	AdScriptAncestry *NetworkAdAncestry `json:"adScriptAncestry,omitempty"`
+}
+
+// PageGetSpellCheckCustomDictionary (experimental) Returns the words that the frame's document added to its spell check custom
+// dictionary with `document.spellCheckCustomDictionary.addWords()`, sorted.
+// Page script cannot read the dictionary back; this lets developers inspect
+// it.
+type PageGetSpellCheckCustomDictionary struct {
+	// FrameID ...
+	FrameID PageFrameID `json:"frameId"`
+}
+
+// ProtoReq name
+func (m PageGetSpellCheckCustomDictionary) ProtoReq() string {
+	return "Page.getSpellCheckCustomDictionary"
+}
+
+// Call the request
+func (m PageGetSpellCheckCustomDictionary) Call(c Client) (*PageGetSpellCheckCustomDictionaryResult, error) {
+	var res PageGetSpellCheckCustomDictionaryResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageGetSpellCheckCustomDictionaryResult (experimental) ...
+type PageGetSpellCheckCustomDictionaryResult struct {
+	// Words ...
+	Words []string `json:"words"`
 }
 
 // PageGetFrameTree Returns present frame tree structure.
 type PageGetFrameTree struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetFrameTree) ProtoReq() string { return "Page.getFrameTree" }
 
-// Call the request.
+// Call the request
 func (m PageGetFrameTree) Call(c Client) (*PageGetFrameTreeResult, error) {
 	var res PageGetFrameTreeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2038,10 +2219,10 @@ type PageGetFrameTreeResult struct {
 // PageGetLayoutMetrics Returns metrics relating to the layouting of the page, such as viewport bounds/scale.
 type PageGetLayoutMetrics struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetLayoutMetrics) ProtoReq() string { return "Page.getLayoutMetrics" }
 
-// Call the request.
+// Call the request
 func (m PageGetLayoutMetrics) Call(c Client) (*PageGetLayoutMetricsResult, error) {
 	var res PageGetLayoutMetricsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2071,10 +2252,10 @@ type PageGetLayoutMetricsResult struct {
 // PageGetNavigationHistory Returns navigation history for the current page.
 type PageGetNavigationHistory struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetNavigationHistory) ProtoReq() string { return "Page.getNavigationHistory" }
 
-// Call the request.
+// Call the request
 func (m PageGetNavigationHistory) Call(c Client) (*PageGetNavigationHistoryResult, error) {
 	var res PageGetNavigationHistoryResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2092,10 +2273,10 @@ type PageGetNavigationHistoryResult struct {
 // PageResetNavigationHistory Resets navigation history for the current page.
 type PageResetNavigationHistory struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageResetNavigationHistory) ProtoReq() string { return "Page.resetNavigationHistory" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageResetNavigationHistory) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2109,10 +2290,10 @@ type PageGetResourceContent struct {
 	URL string `json:"url"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetResourceContent) ProtoReq() string { return "Page.getResourceContent" }
 
-// Call the request.
+// Call the request
 func (m PageGetResourceContent) Call(c Client) (*PageGetResourceContentResult, error) {
 	var res PageGetResourceContentResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2130,10 +2311,10 @@ type PageGetResourceContentResult struct {
 // PageGetResourceTree (experimental) Returns present frame / resource tree structure.
 type PageGetResourceTree struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetResourceTree) ProtoReq() string { return "Page.getResourceTree" }
 
-// Call the request.
+// Call the request
 func (m PageGetResourceTree) Call(c Client) (*PageGetResourceTreeResult, error) {
 	var res PageGetResourceTreeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2155,10 +2336,10 @@ type PageHandleJavaScriptDialog struct {
 	PromptText string `json:"promptText,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageHandleJavaScriptDialog) ProtoReq() string { return "Page.handleJavaScriptDialog" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageHandleJavaScriptDialog) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2181,10 +2362,10 @@ type PageNavigate struct {
 	ReferrerPolicy PageReferrerPolicy `json:"referrerPolicy,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageNavigate) ProtoReq() string { return "Page.navigate" }
 
-// Call the request.
+// Call the request
 func (m PageNavigate) Call(c Client) (*PageNavigateResult, error) {
 	var res PageNavigateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2201,6 +2382,9 @@ type PageNavigateResult struct {
 
 	// ErrorText (optional) User friendly error message, present if and only if navigation has failed.
 	ErrorText string `json:"errorText,omitempty"`
+
+	// IsDownload (experimental) (optional) Whether the navigation resulted in a download.
+	IsDownload bool `json:"isDownload,omitempty"`
 }
 
 // PageNavigateToHistoryEntry Navigates current page to the given history entry.
@@ -2209,22 +2393,22 @@ type PageNavigateToHistoryEntry struct {
 	EntryID int `json:"entryId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageNavigateToHistoryEntry) ProtoReq() string { return "Page.navigateToHistoryEntry" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageNavigateToHistoryEntry) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PagePrintToPDFTransferMode enum.
+// PagePrintToPDFTransferMode enum
 type PagePrintToPDFTransferMode string
 
 const (
-	// PagePrintToPDFTransferModeReturnAsBase64 enum const.
+	// PagePrintToPDFTransferModeReturnAsBase64 enum const
 	PagePrintToPDFTransferModeReturnAsBase64 PagePrintToPDFTransferMode = "ReturnAsBase64"
 
-	// PagePrintToPDFTransferModeReturnAsStream enum const.
+	// PagePrintToPDFTransferModeReturnAsStream enum const
 	PagePrintToPDFTransferModeReturnAsStream PagePrintToPDFTransferMode = "ReturnAsStream"
 )
 
@@ -2298,10 +2482,10 @@ type PagePrintToPDF struct {
 	GenerateDocumentOutline bool `json:"generateDocumentOutline,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PagePrintToPDF) ProtoReq() string { return "Page.printToPDF" }
 
-// Call the request.
+// Call the request
 func (m PagePrintToPDF) Call(c Client) (*PagePrintToPDFResult, error) {
 	var res PagePrintToPDFResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2331,10 +2515,10 @@ type PageReload struct {
 	LoaderID NetworkLoaderID `json:"loaderId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageReload) ProtoReq() string { return "Page.reload" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageReload) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2345,12 +2529,12 @@ type PageRemoveScriptToEvaluateOnLoad struct {
 	Identifier PageScriptIdentifier `json:"identifier"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageRemoveScriptToEvaluateOnLoad) ProtoReq() string {
 	return "Page.removeScriptToEvaluateOnLoad"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m PageRemoveScriptToEvaluateOnLoad) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2361,12 +2545,12 @@ type PageRemoveScriptToEvaluateOnNewDocument struct {
 	Identifier PageScriptIdentifier `json:"identifier"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageRemoveScriptToEvaluateOnNewDocument) ProtoReq() string {
 	return "Page.removeScriptToEvaluateOnNewDocument"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m PageRemoveScriptToEvaluateOnNewDocument) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2377,10 +2561,10 @@ type PageScreencastFrameAck struct {
 	SessionID int `json:"sessionId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageScreencastFrameAck) ProtoReq() string { return "Page.screencastFrameAck" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageScreencastFrameAck) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2403,10 +2587,10 @@ type PageSearchInResource struct {
 	IsRegex bool `json:"isRegex,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSearchInResource) ProtoReq() string { return "Page.searchInResource" }
 
-// Call the request.
+// Call the request
 func (m PageSearchInResource) Call(c Client) (*PageSearchInResourceResult, error) {
 	var res PageSearchInResourceResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2424,10 +2608,10 @@ type PageSetAdBlockingEnabled struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetAdBlockingEnabled) ProtoReq() string { return "Page.setAdBlockingEnabled" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetAdBlockingEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2438,10 +2622,10 @@ type PageSetBypassCSP struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetBypassCSP) ProtoReq() string { return "Page.setBypassCSP" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetBypassCSP) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2452,10 +2636,10 @@ type PageGetPermissionsPolicyState struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetPermissionsPolicyState) ProtoReq() string { return "Page.getPermissionsPolicyState" }
 
-// Call the request.
+// Call the request
 func (m PageGetPermissionsPolicyState) Call(c Client) (*PageGetPermissionsPolicyStateResult, error) {
 	var res PageGetPermissionsPolicyStateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2473,10 +2657,10 @@ type PageGetOriginTrials struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGetOriginTrials) ProtoReq() string { return "Page.getOriginTrials" }
 
-// Call the request.
+// Call the request
 func (m PageGetOriginTrials) Call(c Client) (*PageGetOriginTrialsResult, error) {
 	var res PageGetOriginTrialsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -2530,10 +2714,10 @@ type PageSetDeviceMetricsOverride struct {
 	Viewport *PageViewport `json:"viewport,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetDeviceMetricsOverride) ProtoReq() string { return "Page.setDeviceMetricsOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetDeviceMetricsOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2550,12 +2734,12 @@ type PageSetDeviceOrientationOverride struct {
 	Gamma float64 `json:"gamma"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetDeviceOrientationOverride) ProtoReq() string {
 	return "Page.setDeviceOrientationOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetDeviceOrientationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2569,10 +2753,10 @@ type PageSetFontFamilies struct {
 	ForScripts []*PageScriptFontFamilies `json:"forScripts,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetFontFamilies) ProtoReq() string { return "Page.setFontFamilies" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetFontFamilies) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2583,10 +2767,10 @@ type PageSetFontSizes struct {
 	FontSizes *PageFontSizes `json:"fontSizes"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetFontSizes) ProtoReq() string { return "Page.setFontSizes" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetFontSizes) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2600,25 +2784,25 @@ type PageSetDocumentContent struct {
 	HTML string `json:"html"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetDocumentContent) ProtoReq() string { return "Page.setDocumentContent" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetDocumentContent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PageSetDownloadBehaviorBehavior enum.
+// PageSetDownloadBehaviorBehavior enum
 type PageSetDownloadBehaviorBehavior string
 
 const (
-	// PageSetDownloadBehaviorBehaviorDeny enum const.
+	// PageSetDownloadBehaviorBehaviorDeny enum const
 	PageSetDownloadBehaviorBehaviorDeny PageSetDownloadBehaviorBehavior = "deny"
 
-	// PageSetDownloadBehaviorBehaviorAllow enum const.
+	// PageSetDownloadBehaviorBehaviorAllow enum const
 	PageSetDownloadBehaviorBehaviorAllow PageSetDownloadBehaviorBehavior = "allow"
 
-	// PageSetDownloadBehaviorBehaviorDefault enum const.
+	// PageSetDownloadBehaviorBehaviorDefault enum const
 	PageSetDownloadBehaviorBehaviorDefault PageSetDownloadBehaviorBehavior = "default"
 )
 
@@ -2632,10 +2816,10 @@ type PageSetDownloadBehavior struct {
 	DownloadPath string `json:"downloadPath,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetDownloadBehavior) ProtoReq() string { return "Page.setDownloadBehavior" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetDownloadBehavior) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2653,10 +2837,10 @@ type PageSetGeolocationOverride struct {
 	Accuracy *float64 `json:"accuracy,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetGeolocationOverride) ProtoReq() string { return "Page.setGeolocationOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetGeolocationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2667,22 +2851,22 @@ type PageSetLifecycleEventsEnabled struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetLifecycleEventsEnabled) ProtoReq() string { return "Page.setLifecycleEventsEnabled" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetLifecycleEventsEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PageSetTouchEmulationEnabledConfiguration enum.
+// PageSetTouchEmulationEnabledConfiguration enum
 type PageSetTouchEmulationEnabledConfiguration string
 
 const (
-	// PageSetTouchEmulationEnabledConfigurationMobile enum const.
+	// PageSetTouchEmulationEnabledConfigurationMobile enum const
 	PageSetTouchEmulationEnabledConfigurationMobile PageSetTouchEmulationEnabledConfiguration = "mobile"
 
-	// PageSetTouchEmulationEnabledConfigurationDesktop enum const.
+	// PageSetTouchEmulationEnabledConfigurationDesktop enum const
 	PageSetTouchEmulationEnabledConfigurationDesktop PageSetTouchEmulationEnabledConfiguration = "desktop"
 )
 
@@ -2695,22 +2879,22 @@ type PageSetTouchEmulationEnabled struct {
 	Configuration PageSetTouchEmulationEnabledConfiguration `json:"configuration,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetTouchEmulationEnabled) ProtoReq() string { return "Page.setTouchEmulationEnabled" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetTouchEmulationEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PageStartScreencastFormat enum.
+// PageStartScreencastFormat enum
 type PageStartScreencastFormat string
 
 const (
-	// PageStartScreencastFormatJpeg enum const.
+	// PageStartScreencastFormatJpeg enum const
 	PageStartScreencastFormatJpeg PageStartScreencastFormat = "jpeg"
 
-	// PageStartScreencastFormatPng enum const.
+	// PageStartScreencastFormatPng enum const
 	PageStartScreencastFormatPng PageStartScreencastFormat = "png"
 )
 
@@ -2728,25 +2912,83 @@ type PageStartScreencast struct {
 	// MaxHeight (optional) Maximum screenshot height.
 	MaxHeight *int `json:"maxHeight,omitempty"`
 
-	// EveryNthFrame (optional) Send every n-th frame.
+	// EveryNthFrame (optional) Send every n-th frame. Must be a positive integer.
 	EveryNthFrame *int `json:"everyNthFrame,omitempty"`
+
+	// MaxFramesInFlight (optional) Maximum number of frames sent until screencastFrameAck is required.
+	// Defaults to 3. Must be a positive integer.
+	MaxFramesInFlight *int `json:"maxFramesInFlight,omitempty"`
+
+	// SendLastFrame (optional) By default, after screencastFrameAck arrives, the next produced frame is sent.
+	// Passing this flag enables storing the last produced frame in memory, which is
+	// immediately sent upon screencastFrameAck. This way, overall performance is
+	// traded for a better latency.
+	SendLastFrame bool `json:"sendLastFrame,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageStartScreencast) ProtoReq() string { return "Page.startScreencast" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageStartScreencast) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
+}
+
+// PageStartScreenRecording (experimental) Starts screencast video recording.
+type PageStartScreenRecording struct {
+	// Audio (optional) ...
+	Audio bool `json:"audio,omitempty"`
+
+	// MaxWidth (optional) Maximum frame width in pixels.
+	MaxWidth *int `json:"maxWidth,omitempty"`
+
+	// MaxHeight (optional) Maximum frame height in pixels.
+	MaxHeight *int `json:"maxHeight,omitempty"`
+
+	// FrameRate (optional) Maximum frame rate in frames per second.
+	FrameRate *int `json:"frameRate,omitempty"`
+}
+
+// ProtoReq name
+func (m PageStartScreenRecording) ProtoReq() string { return "Page.startScreenRecording" }
+
+// Call the request
+func (m PageStartScreenRecording) Call(c Client) (*PageStartScreenRecordingResult, error) {
+	var res PageStartScreenRecordingResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageStartScreenRecordingResult (experimental) ...
+type PageStartScreenRecordingResult struct {
+	// Stream (experimental) A handle of the stream that holds resulting screencast data.
+	Stream IOStreamHandle `json:"stream"`
+}
+
+// PageStopScreenRecording (experimental) Stops screencast video recording.
+type PageStopScreenRecording struct{}
+
+// ProtoReq name
+func (m PageStopScreenRecording) ProtoReq() string { return "Page.stopScreenRecording" }
+
+// Call the request
+func (m PageStopScreenRecording) Call(c Client) (*PageStopScreenRecordingResult, error) {
+	var res PageStopScreenRecordingResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageStopScreenRecordingResult (experimental) ...
+type PageStopScreenRecordingResult struct {
+	// Stream (experimental) A handle of the stream that holds resulting screencast data.
+	Stream IOStreamHandle `json:"stream"`
 }
 
 // PageStopLoading Force the page stop all navigations and pending resource fetches.
 type PageStopLoading struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageStopLoading) ProtoReq() string { return "Page.stopLoading" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageStopLoading) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2754,10 +2996,10 @@ func (m PageStopLoading) Call(c Client) error {
 // PageCrash (experimental) Crashes renderer on the IO thread, generates minidumps.
 type PageCrash struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageCrash) ProtoReq() string { return "Page.crash" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageCrash) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2765,22 +3007,22 @@ func (m PageCrash) Call(c Client) error {
 // PageClose Tries to close page, running its beforeunload hooks, if any.
 type PageClose struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageClose) ProtoReq() string { return "Page.close" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageClose) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// PageSetWebLifecycleStateState enum.
+// PageSetWebLifecycleStateState enum
 type PageSetWebLifecycleStateState string
 
 const (
-	// PageSetWebLifecycleStateStateFrozen enum const.
+	// PageSetWebLifecycleStateStateFrozen enum const
 	PageSetWebLifecycleStateStateFrozen PageSetWebLifecycleStateState = "frozen"
 
-	// PageSetWebLifecycleStateStateActive enum const.
+	// PageSetWebLifecycleStateStateActive enum const
 	PageSetWebLifecycleStateStateActive PageSetWebLifecycleStateState = "active"
 )
 
@@ -2792,10 +3034,10 @@ type PageSetWebLifecycleState struct {
 	State PageSetWebLifecycleStateState `json:"state"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetWebLifecycleState) ProtoReq() string { return "Page.setWebLifecycleState" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetWebLifecycleState) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2803,10 +3045,10 @@ func (m PageSetWebLifecycleState) Call(c Client) error {
 // PageStopScreencast (experimental) Stops sending each frame in the `screencastFrame`.
 type PageStopScreencast struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageStopScreencast) ProtoReq() string { return "Page.stopScreencast" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageStopScreencast) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2822,10 +3064,10 @@ type PageProduceCompilationCache struct {
 	Scripts []*PageCompilationCacheParams `json:"scripts"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageProduceCompilationCache) ProtoReq() string { return "Page.produceCompilationCache" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageProduceCompilationCache) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2840,10 +3082,10 @@ type PageAddCompilationCache struct {
 	Data []byte `json:"data"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageAddCompilationCache) ProtoReq() string { return "Page.addCompilationCache" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageAddCompilationCache) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2851,40 +3093,74 @@ func (m PageAddCompilationCache) Call(c Client) error {
 // PageClearCompilationCache (experimental) Clears seeded compilation cache.
 type PageClearCompilationCache struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageClearCompilationCache) ProtoReq() string { return "Page.clearCompilationCache" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageClearCompilationCache) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
+
+// PageSetSPCTransactionModeMode enum
+type PageSetSPCTransactionModeMode string
+
+const (
+	// PageSetSPCTransactionModeModeNone enum const
+	PageSetSPCTransactionModeModeNone PageSetSPCTransactionModeMode = "none"
+
+	// PageSetSPCTransactionModeModeAutoAccept enum const
+	PageSetSPCTransactionModeModeAutoAccept PageSetSPCTransactionModeMode = "autoAccept"
+
+	// PageSetSPCTransactionModeModeAutoChooseToAuthAnotherWay enum const
+	PageSetSPCTransactionModeModeAutoChooseToAuthAnotherWay PageSetSPCTransactionModeMode = "autoChooseToAuthAnotherWay"
+
+	// PageSetSPCTransactionModeModeAutoReject enum const
+	PageSetSPCTransactionModeModeAutoReject PageSetSPCTransactionModeMode = "autoReject"
+
+	// PageSetSPCTransactionModeModeAutoOptOut enum const
+	PageSetSPCTransactionModeModeAutoOptOut PageSetSPCTransactionModeMode = "autoOptOut"
+)
 
 // PageSetSPCTransactionMode (experimental) Sets the Secure Payment Confirmation transaction mode.
 // https://w3c.github.io/secure-payment-confirmation/#sctn-automation-set-spc-transaction-mode
 type PageSetSPCTransactionMode struct {
 	// Mode ...
-	Mode PageAutoResponseMode `json:"mode"`
+	Mode PageSetSPCTransactionModeMode `json:"mode"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetSPCTransactionMode) ProtoReq() string { return "Page.setSPCTransactionMode" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetSPCTransactionMode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
+
+// PageSetRPHRegistrationModeMode enum
+type PageSetRPHRegistrationModeMode string
+
+const (
+	// PageSetRPHRegistrationModeModeNone enum const
+	PageSetRPHRegistrationModeModeNone PageSetRPHRegistrationModeMode = "none"
+
+	// PageSetRPHRegistrationModeModeAutoAccept enum const
+	PageSetRPHRegistrationModeModeAutoAccept PageSetRPHRegistrationModeMode = "autoAccept"
+
+	// PageSetRPHRegistrationModeModeAutoReject enum const
+	PageSetRPHRegistrationModeModeAutoReject PageSetRPHRegistrationModeMode = "autoReject"
+)
 
 // PageSetRPHRegistrationMode (experimental) Extensions for Custom Handlers API:
 // https://html.spec.whatwg.org/multipage/system-state.html#rph-automation
 type PageSetRPHRegistrationMode struct {
 	// Mode ...
-	Mode PageAutoResponseMode `json:"mode"`
+	Mode PageSetRPHRegistrationModeMode `json:"mode"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetRPHRegistrationMode) ProtoReq() string { return "Page.setRPHRegistrationMode" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetRPHRegistrationMode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2898,10 +3174,10 @@ type PageGenerateTestReport struct {
 	Group string `json:"group,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageGenerateTestReport) ProtoReq() string { return "Page.generateTestReport" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageGenerateTestReport) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2909,10 +3185,10 @@ func (m PageGenerateTestReport) Call(c Client) error {
 // PageWaitForDebugger (experimental) Pauses page execution. Can be resumed using generic Runtime.runIfWaitingForDebugger.
 type PageWaitForDebugger struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageWaitForDebugger) ProtoReq() string { return "Page.waitForDebugger" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageWaitForDebugger) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2923,14 +3199,19 @@ func (m PageWaitForDebugger) Call(c Client) error {
 type PageSetInterceptFileChooserDialog struct {
 	// Enabled ...
 	Enabled bool `json:"enabled"`
+
+	// Cancel (experimental) (optional) If true, cancels the dialog by emitting relevant events (if any)
+	// in addition to not showing it if the interception is enabled
+	// (default: false).
+	Cancel bool `json:"cancel,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetInterceptFileChooserDialog) ProtoReq() string {
 	return "Page.setInterceptFileChooserDialog"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetInterceptFileChooserDialog) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -2947,11 +3228,49 @@ type PageSetPrerenderingAllowed struct {
 	IsAllowed bool `json:"isAllowed"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m PageSetPrerenderingAllowed) ProtoReq() string { return "Page.setPrerenderingAllowed" }
 
-// Call sends the request.
+// Call sends the request
 func (m PageSetPrerenderingAllowed) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// PageGetAnnotatedPageContent (experimental) Get the annotated page content for the main frame.
+// This is an experimental command that is subject to change.
+type PageGetAnnotatedPageContent struct {
+	// IncludeActionableInformation (optional) Whether to include actionable information. Defaults to true.
+	IncludeActionableInformation bool `json:"includeActionableInformation,omitempty"`
+}
+
+// ProtoReq name
+func (m PageGetAnnotatedPageContent) ProtoReq() string { return "Page.getAnnotatedPageContent" }
+
+// Call the request
+func (m PageGetAnnotatedPageContent) Call(c Client) (*PageGetAnnotatedPageContentResult, error) {
+	var res PageGetAnnotatedPageContentResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// PageGetAnnotatedPageContentResult (experimental) ...
+type PageGetAnnotatedPageContentResult struct {
+	// Content The annotated page content as a base64 encoded protobuf.
+	// The format is defined by the `AnnotatedPageContent` message in
+	// components/optimization_guide/proto/features/common_quality_data.proto
+	Content []byte `json:"content"`
+}
+
+// PageSetInputVisualization (experimental) Configures input visualization on the page.
+type PageSetInputVisualization struct {
+	// Clicks (optional) Whether to enable click visualization.
+	Clicks bool `json:"clicks,omitempty"`
+}
+
+// ProtoReq name
+func (m PageSetInputVisualization) ProtoReq() string { return "Page.setInputVisualization" }
+
+// Call sends the request
+func (m PageSetInputVisualization) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -2961,19 +3280,19 @@ type PageDomContentEventFired struct {
 	Timestamp MonotonicTime `json:"timestamp"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageDomContentEventFired) ProtoEvent() string {
 	return "Page.domContentEventFired"
 }
 
-// PageFileChooserOpenedMode enum.
+// PageFileChooserOpenedMode enum
 type PageFileChooserOpenedMode string
 
 const (
-	// PageFileChooserOpenedModeSelectSingle enum const.
+	// PageFileChooserOpenedModeSelectSingle enum const
 	PageFileChooserOpenedModeSelectSingle PageFileChooserOpenedMode = "selectSingle"
 
-	// PageFileChooserOpenedModeSelectMultiple enum const.
+	// PageFileChooserOpenedModeSelectMultiple enum const
 	PageFileChooserOpenedModeSelectMultiple PageFileChooserOpenedMode = "selectMultiple"
 )
 
@@ -2989,7 +3308,7 @@ type PageFileChooserOpened struct {
 	BackendNodeID DOMBackendNodeID `json:"backendNodeId,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFileChooserOpened) ProtoEvent() string {
 	return "Page.fileChooserOpened"
 }
@@ -3006,7 +3325,7 @@ type PageFrameAttached struct {
 	Stack *RuntimeStackTrace `json:"stack,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameAttached) ProtoEvent() string {
 	return "Page.frameAttached"
 }
@@ -3017,19 +3336,19 @@ type PageFrameClearedScheduledNavigation struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameClearedScheduledNavigation) ProtoEvent() string {
 	return "Page.frameClearedScheduledNavigation"
 }
 
-// PageFrameDetachedReason enum.
+// PageFrameDetachedReason enum
 type PageFrameDetachedReason string
 
 const (
-	// PageFrameDetachedReasonRemove enum const.
+	// PageFrameDetachedReasonRemove enum const
 	PageFrameDetachedReasonRemove PageFrameDetachedReason = "remove"
 
-	// PageFrameDetachedReasonSwap enum const.
+	// PageFrameDetachedReasonSwap enum const
 	PageFrameDetachedReasonSwap PageFrameDetachedReason = "swap"
 )
 
@@ -3042,9 +3361,21 @@ type PageFrameDetached struct {
 	Reason PageFrameDetachedReason `json:"reason"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameDetached) ProtoEvent() string {
 	return "Page.frameDetached"
+}
+
+// PageFrameSubtreeWillBeDetached (experimental) Fired before frame subtree is detached. Emitted before any frame of the
+// subtree is actually detached.
+type PageFrameSubtreeWillBeDetached struct {
+	// FrameID Id of the frame that is the root of the subtree that will be detached.
+	FrameID PageFrameID `json:"frameId"`
+}
+
+// ProtoEvent name
+func (evt PageFrameSubtreeWillBeDetached) ProtoEvent() string {
+	return "Page.frameSubtreeWillBeDetached"
 }
 
 // PageFrameNavigated Fired once navigation of the frame has completed. Frame is now associated with the new loader.
@@ -3056,7 +3387,7 @@ type PageFrameNavigated struct {
 	Type PageNavigationType `json:"type"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameNavigated) ProtoEvent() string {
 	return "Page.frameNavigated"
 }
@@ -3067,7 +3398,7 @@ type PageDocumentOpened struct {
 	Frame *PageFrame `json:"frame"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageDocumentOpened) ProtoEvent() string {
 	return "Page.documentOpened"
 }
@@ -3075,9 +3406,67 @@ func (evt PageDocumentOpened) ProtoEvent() string {
 // PageFrameResized (experimental) ...
 type PageFrameResized struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameResized) ProtoEvent() string {
 	return "Page.frameResized"
+}
+
+// PageFrameStartedNavigatingNavigationType enum
+type PageFrameStartedNavigatingNavigationType string
+
+const (
+	// PageFrameStartedNavigatingNavigationTypeReload enum const
+	PageFrameStartedNavigatingNavigationTypeReload PageFrameStartedNavigatingNavigationType = "reload"
+
+	// PageFrameStartedNavigatingNavigationTypeReloadBypassingCache enum const
+	PageFrameStartedNavigatingNavigationTypeReloadBypassingCache PageFrameStartedNavigatingNavigationType = "reloadBypassingCache"
+
+	// PageFrameStartedNavigatingNavigationTypeRestore enum const
+	PageFrameStartedNavigatingNavigationTypeRestore PageFrameStartedNavigatingNavigationType = "restore"
+
+	// PageFrameStartedNavigatingNavigationTypeRestoreWithPost enum const
+	PageFrameStartedNavigatingNavigationTypeRestoreWithPost PageFrameStartedNavigatingNavigationType = "restoreWithPost"
+
+	// PageFrameStartedNavigatingNavigationTypeHistorySameDocument enum const
+	PageFrameStartedNavigatingNavigationTypeHistorySameDocument PageFrameStartedNavigatingNavigationType = "historySameDocument"
+
+	// PageFrameStartedNavigatingNavigationTypeHistoryDifferentDocument enum const
+	PageFrameStartedNavigatingNavigationTypeHistoryDifferentDocument PageFrameStartedNavigatingNavigationType = "historyDifferentDocument"
+
+	// PageFrameStartedNavigatingNavigationTypeSameDocument enum const
+	PageFrameStartedNavigatingNavigationTypeSameDocument PageFrameStartedNavigatingNavigationType = "sameDocument"
+
+	// PageFrameStartedNavigatingNavigationTypeDifferentDocument enum const
+	PageFrameStartedNavigatingNavigationTypeDifferentDocument PageFrameStartedNavigatingNavigationType = "differentDocument"
+)
+
+// PageFrameStartedNavigating (experimental) Fired when a navigation starts. This event is fired for both
+// renderer-initiated and browser-initiated navigations. For renderer-initiated
+// navigations, the event is fired after `frameRequestedNavigation`.
+// Navigation may still be cancelled after the event is issued. Multiple events
+// can be fired for a single navigation, for example, when a same-document
+// navigation becomes a cross-document navigation (such as in the case of a
+// frameset).
+type PageFrameStartedNavigating struct {
+	// FrameID ID of the frame that is being navigated.
+	FrameID PageFrameID `json:"frameId"`
+
+	// URL The URL the navigation started with. The final URL can be different.
+	URL string `json:"url"`
+
+	// LoaderID Loader identifier. Even though it is present in case of same-document
+	// navigation, the previously committed loaderId would not change unless
+	// the navigation changes from a same-document to a cross-document
+	// navigation.
+	LoaderID NetworkLoaderID `json:"loaderId"`
+
+	// NavigationType ...
+	NavigationType PageFrameStartedNavigatingNavigationType `json:"navigationType"`
+}
+
+// ProtoEvent name
+func (evt PageFrameStartedNavigating) ProtoEvent() string {
+	return "Page.frameStartedNavigating"
 }
 
 // PageFrameRequestedNavigation (experimental) Fired when a renderer-initiated navigation is requested.
@@ -3096,7 +3485,7 @@ type PageFrameRequestedNavigation struct {
 	Disposition PageClientNavigationDisposition `json:"disposition"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameRequestedNavigation) ProtoEvent() string {
 	return "Page.frameRequestedNavigation"
 }
@@ -3117,7 +3506,7 @@ type PageFrameScheduledNavigation struct {
 	URL string `json:"url"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameScheduledNavigation) ProtoEvent() string {
 	return "Page.frameScheduledNavigation"
 }
@@ -3128,7 +3517,7 @@ type PageFrameStartedLoading struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameStartedLoading) ProtoEvent() string {
 	return "Page.frameStartedLoading"
 }
@@ -3139,7 +3528,7 @@ type PageFrameStoppedLoading struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageFrameStoppedLoading) ProtoEvent() string {
 	return "Page.frameStoppedLoading"
 }
@@ -3160,22 +3549,22 @@ type PageDownloadWillBegin struct {
 	SuggestedFilename string `json:"suggestedFilename"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageDownloadWillBegin) ProtoEvent() string {
 	return "Page.downloadWillBegin"
 }
 
-// PageDownloadProgressState enum.
+// PageDownloadProgressState enum
 type PageDownloadProgressState string
 
 const (
-	// PageDownloadProgressStateInProgress enum const.
+	// PageDownloadProgressStateInProgress enum const
 	PageDownloadProgressStateInProgress PageDownloadProgressState = "inProgress"
 
-	// PageDownloadProgressStateCompleted enum const.
+	// PageDownloadProgressStateCompleted enum const
 	PageDownloadProgressStateCompleted PageDownloadProgressState = "completed"
 
-	// PageDownloadProgressStateCanceled enum const.
+	// PageDownloadProgressStateCanceled enum const
 	PageDownloadProgressStateCanceled PageDownloadProgressState = "canceled"
 )
 
@@ -3195,23 +3584,23 @@ type PageDownloadProgress struct {
 	State PageDownloadProgressState `json:"state"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageDownloadProgress) ProtoEvent() string {
 	return "Page.downloadProgress"
 }
 
-// PageInterstitialHidden Fired when interstitial page was hidden.
+// PageInterstitialHidden Fired when interstitial page was hidden
 type PageInterstitialHidden struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageInterstitialHidden) ProtoEvent() string {
 	return "Page.interstitialHidden"
 }
 
-// PageInterstitialShown Fired when interstitial page was shown.
+// PageInterstitialShown Fired when interstitial page was shown
 type PageInterstitialShown struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageInterstitialShown) ProtoEvent() string {
 	return "Page.interstitialShown"
 }
@@ -3219,6 +3608,9 @@ func (evt PageInterstitialShown) ProtoEvent() string {
 // PageJavascriptDialogClosed Fired when a JavaScript initiated dialog (alert, confirm, prompt, or onbeforeunload) has been
 // closed.
 type PageJavascriptDialogClosed struct {
+	// FrameID (experimental) Frame id.
+	FrameID PageFrameID `json:"frameId"`
+
 	// Result Whether dialog was confirmed.
 	Result bool `json:"result"`
 
@@ -3226,7 +3618,7 @@ type PageJavascriptDialogClosed struct {
 	UserInput string `json:"userInput"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageJavascriptDialogClosed) ProtoEvent() string {
 	return "Page.javascriptDialogClosed"
 }
@@ -3236,6 +3628,9 @@ func (evt PageJavascriptDialogClosed) ProtoEvent() string {
 type PageJavascriptDialogOpening struct {
 	// URL Frame url.
 	URL string `json:"url"`
+
+	// FrameID (experimental) Frame id.
+	FrameID PageFrameID `json:"frameId"`
 
 	// Message that will be displayed by the dialog.
 	Message string `json:"message"`
@@ -3252,47 +3647,48 @@ type PageJavascriptDialogOpening struct {
 	DefaultPrompt string `json:"defaultPrompt,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageJavascriptDialogOpening) ProtoEvent() string {
 	return "Page.javascriptDialogOpening"
 }
 
-// PageLifecycleEventName enum.
+// PageLifecycleEventName enum
 type PageLifecycleEventName string
 
 const (
-	// PageLifecycleEventNameInit enum const.
+	// PageLifecycleEventNameInit enum const
 	PageLifecycleEventNameInit PageLifecycleEventName = "init"
 
-	// PageLifecycleEventNameFirstPaint enum const.
+	// PageLifecycleEventNameFirstPaint enum const
 	PageLifecycleEventNameFirstPaint PageLifecycleEventName = "firstPaint"
 
-	// PageLifecycleEventNameFirstContentfulPaint enum const.
+	// PageLifecycleEventNameFirstContentfulPaint enum const
 	PageLifecycleEventNameFirstContentfulPaint PageLifecycleEventName = "firstContentfulPaint"
 
-	// PageLifecycleEventNameFirstImagePaint enum const.
+	// PageLifecycleEventNameFirstImagePaint enum const
 	PageLifecycleEventNameFirstImagePaint PageLifecycleEventName = "firstImagePaint"
 
-	// PageLifecycleEventNameFirstMeaningfulPaintCandidate enum const.
+	// PageLifecycleEventNameFirstMeaningfulPaintCandidate enum const
 	PageLifecycleEventNameFirstMeaningfulPaintCandidate PageLifecycleEventName = "firstMeaningfulPaintCandidate"
 
-	// PageLifecycleEventNameDOMContentLoaded enum const.
+	// PageLifecycleEventNameDOMContentLoaded enum const
 	PageLifecycleEventNameDOMContentLoaded PageLifecycleEventName = "DOMContentLoaded"
 
-	// PageLifecycleEventNameLoad enum const.
+	// PageLifecycleEventNameLoad enum const
 	PageLifecycleEventNameLoad PageLifecycleEventName = "load"
 
-	// PageLifecycleEventNameNetworkAlmostIdle enum const.
+	// PageLifecycleEventNameNetworkAlmostIdle enum const
 	PageLifecycleEventNameNetworkAlmostIdle PageLifecycleEventName = "networkAlmostIdle"
 
-	// PageLifecycleEventNameFirstMeaningfulPaint enum const.
+	// PageLifecycleEventNameFirstMeaningfulPaint enum const
 	PageLifecycleEventNameFirstMeaningfulPaint PageLifecycleEventName = "firstMeaningfulPaint"
 
-	// PageLifecycleEventNameNetworkIdle enum const.
+	// PageLifecycleEventNameNetworkIdle enum const
 	PageLifecycleEventNameNetworkIdle PageLifecycleEventName = "networkIdle"
 )
 
-// PageLifecycleEvent Fired for top level page lifecycle events such as navigation, load, paint, etc.
+// PageLifecycleEvent Fired for lifecycle events (navigation, load, paint, etc) in the current
+// target (including local frames).
 type PageLifecycleEvent struct {
 	// FrameID Id of the frame.
 	FrameID PageFrameID `json:"frameId"`
@@ -3307,7 +3703,7 @@ type PageLifecycleEvent struct {
 	Timestamp MonotonicTime `json:"timestamp"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageLifecycleEvent) ProtoEvent() string {
 	return "Page.lifecycleEvent"
 }
@@ -3330,7 +3726,7 @@ type PageBackForwardCacheNotUsed struct {
 	NotRestoredExplanationsTree *PageBackForwardCacheNotRestoredExplanationTree `json:"notRestoredExplanationsTree,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageBackForwardCacheNotUsed) ProtoEvent() string {
 	return "Page.backForwardCacheNotUsed"
 }
@@ -3341,10 +3737,24 @@ type PageLoadEventFired struct {
 	Timestamp MonotonicTime `json:"timestamp"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageLoadEventFired) ProtoEvent() string {
 	return "Page.loadEventFired"
 }
+
+// PageNavigatedWithinDocumentNavigationType enum
+type PageNavigatedWithinDocumentNavigationType string
+
+const (
+	// PageNavigatedWithinDocumentNavigationTypeFragment enum const
+	PageNavigatedWithinDocumentNavigationTypeFragment PageNavigatedWithinDocumentNavigationType = "fragment"
+
+	// PageNavigatedWithinDocumentNavigationTypeHistoryAPI enum const
+	PageNavigatedWithinDocumentNavigationTypeHistoryAPI PageNavigatedWithinDocumentNavigationType = "historyApi"
+
+	// PageNavigatedWithinDocumentNavigationTypeOther enum const
+	PageNavigatedWithinDocumentNavigationTypeOther PageNavigatedWithinDocumentNavigationType = "other"
+)
 
 // PageNavigatedWithinDocument (experimental) Fired when same-document navigation happens, e.g. due to history API usage or anchor navigation.
 type PageNavigatedWithinDocument struct {
@@ -3353,9 +3763,12 @@ type PageNavigatedWithinDocument struct {
 
 	// URL Frame's new url.
 	URL string `json:"url"`
+
+	// NavigationType Navigation type
+	NavigationType PageNavigatedWithinDocumentNavigationType `json:"navigationType"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageNavigatedWithinDocument) ProtoEvent() string {
 	return "Page.navigatedWithinDocument"
 }
@@ -3372,7 +3785,7 @@ type PageScreencastFrame struct {
 	SessionID int `json:"sessionId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageScreencastFrame) ProtoEvent() string {
 	return "Page.screencastFrame"
 }
@@ -3383,7 +3796,7 @@ type PageScreencastVisibilityChanged struct {
 	Visible bool `json:"visible"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageScreencastVisibilityChanged) ProtoEvent() string {
 	return "Page.screencastVisibilityChanged"
 }
@@ -3404,13 +3817,12 @@ type PageWindowOpen struct {
 	UserGesture bool `json:"userGesture"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageWindowOpen) ProtoEvent() string {
 	return "Page.windowOpen"
 }
 
-// PageCompilationCacheProduced (experimental) Issued for every compilation cache generated. Is only available
-// if Page.setGenerateCompilationCache is enabled.
+// PageCompilationCacheProduced (experimental) Issued for every compilation cache generated.
 type PageCompilationCacheProduced struct {
 	// URL ...
 	URL string `json:"url"`
@@ -3419,7 +3831,7 @@ type PageCompilationCacheProduced struct {
 	Data []byte `json:"data"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt PageCompilationCacheProduced) ProtoEvent() string {
 	return "Page.compilationCacheProduced"
 }

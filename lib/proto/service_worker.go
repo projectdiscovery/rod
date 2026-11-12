@@ -27,16 +27,16 @@ type ServiceWorkerServiceWorkerRegistration struct {
 type ServiceWorkerServiceWorkerVersionRunningStatus string
 
 const (
-	// ServiceWorkerServiceWorkerVersionRunningStatusStopped enum const.
+	// ServiceWorkerServiceWorkerVersionRunningStatusStopped enum const
 	ServiceWorkerServiceWorkerVersionRunningStatusStopped ServiceWorkerServiceWorkerVersionRunningStatus = "stopped"
 
-	// ServiceWorkerServiceWorkerVersionRunningStatusStarting enum const.
+	// ServiceWorkerServiceWorkerVersionRunningStatusStarting enum const
 	ServiceWorkerServiceWorkerVersionRunningStatusStarting ServiceWorkerServiceWorkerVersionRunningStatus = "starting"
 
-	// ServiceWorkerServiceWorkerVersionRunningStatusRunning enum const.
+	// ServiceWorkerServiceWorkerVersionRunningStatusRunning enum const
 	ServiceWorkerServiceWorkerVersionRunningStatusRunning ServiceWorkerServiceWorkerVersionRunningStatus = "running"
 
-	// ServiceWorkerServiceWorkerVersionRunningStatusStopping enum const.
+	// ServiceWorkerServiceWorkerVersionRunningStatusStopping enum const
 	ServiceWorkerServiceWorkerVersionRunningStatusStopping ServiceWorkerServiceWorkerVersionRunningStatus = "stopping"
 )
 
@@ -44,24 +44,102 @@ const (
 type ServiceWorkerServiceWorkerVersionStatus string
 
 const (
-	// ServiceWorkerServiceWorkerVersionStatusNew enum const.
+	// ServiceWorkerServiceWorkerVersionStatusNew enum const
 	ServiceWorkerServiceWorkerVersionStatusNew ServiceWorkerServiceWorkerVersionStatus = "new"
 
-	// ServiceWorkerServiceWorkerVersionStatusInstalling enum const.
+	// ServiceWorkerServiceWorkerVersionStatusInstalling enum const
 	ServiceWorkerServiceWorkerVersionStatusInstalling ServiceWorkerServiceWorkerVersionStatus = "installing"
 
-	// ServiceWorkerServiceWorkerVersionStatusInstalled enum const.
+	// ServiceWorkerServiceWorkerVersionStatusInstalled enum const
 	ServiceWorkerServiceWorkerVersionStatusInstalled ServiceWorkerServiceWorkerVersionStatus = "installed"
 
-	// ServiceWorkerServiceWorkerVersionStatusActivating enum const.
+	// ServiceWorkerServiceWorkerVersionStatusActivating enum const
 	ServiceWorkerServiceWorkerVersionStatusActivating ServiceWorkerServiceWorkerVersionStatus = "activating"
 
-	// ServiceWorkerServiceWorkerVersionStatusActivated enum const.
+	// ServiceWorkerServiceWorkerVersionStatusActivated enum const
 	ServiceWorkerServiceWorkerVersionStatusActivated ServiceWorkerServiceWorkerVersionStatus = "activated"
 
-	// ServiceWorkerServiceWorkerVersionStatusRedundant enum const.
+	// ServiceWorkerServiceWorkerVersionStatusRedundant enum const
 	ServiceWorkerServiceWorkerVersionStatusRedundant ServiceWorkerServiceWorkerVersionStatus = "redundant"
 )
+
+// ServiceWorkerServiceWorkerRouterCondition Mostly corresponds to `RouterCondition` in ServiceWorker spec
+// (https://www.w3.org/TR/service-workers/#dictdef-routercondition)
+type ServiceWorkerServiceWorkerRouterCondition struct {
+	// URLPattern (optional) Plain text, or JSON serialization of URLPatternInit or URLPattern
+	URLPattern string `json:"urlPattern,omitempty"`
+
+	// RequestMethod (optional) ...
+	RequestMethod string `json:"requestMethod,omitempty"`
+
+	// RequestMode (optional) ...
+	RequestMode string `json:"requestMode,omitempty"`
+
+	// RequestDestination (optional) ...
+	RequestDestination string `json:"requestDestination,omitempty"`
+
+	// RunningStatus (optional) ...
+	RunningStatus ServiceWorkerServiceWorkerVersionRunningStatus `json:"runningStatus,omitempty"`
+
+	// Or (optional) ...
+	Or []*ServiceWorkerServiceWorkerRouterCondition `json:"or,omitempty"`
+
+	// Not (optional) ...
+	Not *ServiceWorkerServiceWorkerRouterCondition `json:"not,omitempty"`
+}
+
+// ServiceWorkerServiceWorkerRouterSourceType ...
+type ServiceWorkerServiceWorkerRouterSourceType string
+
+const (
+	// ServiceWorkerServiceWorkerRouterSourceTypeCache enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeCache ServiceWorkerServiceWorkerRouterSourceType = "cache"
+
+	// ServiceWorkerServiceWorkerRouterSourceTypeFetchEvent enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeFetchEvent ServiceWorkerServiceWorkerRouterSourceType = "fetchEvent"
+
+	// ServiceWorkerServiceWorkerRouterSourceTypeNetwork enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeNetwork ServiceWorkerServiceWorkerRouterSourceType = "network"
+
+	// ServiceWorkerServiceWorkerRouterSourceTypeRaceNetworkAndFetchHandler enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeRaceNetworkAndFetchHandler ServiceWorkerServiceWorkerRouterSourceType = "raceNetworkAndFetchHandler"
+
+	// ServiceWorkerServiceWorkerRouterSourceTypeRaceNetworkAndCache enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeRaceNetworkAndCache ServiceWorkerServiceWorkerRouterSourceType = "raceNetworkAndCache"
+
+	// ServiceWorkerServiceWorkerRouterSourceTypeSourceDict enum const
+	ServiceWorkerServiceWorkerRouterSourceTypeSourceDict ServiceWorkerServiceWorkerRouterSourceType = "sourceDict"
+)
+
+// ServiceWorkerServiceWorkerRouterSourceDict https://www.w3.org/TR/service-workers/#dictdef-routersourcedict
+type ServiceWorkerServiceWorkerRouterSourceDict struct {
+	// CacheName ...
+	CacheName string `json:"cacheName"`
+}
+
+// ServiceWorkerServiceWorkerRouterSource Corresponds to `RouterSource` in the spec while the representation is different as follows.
+// (https://www.w3.org/TR/service-workers/#typedefdef-routersource)
+// - `RouterSourceEnum`: `type` equals `cache`, `sourceDict` is null.
+// - `RouterSourceDict`: `type` equals `sourceDict`, `sourceDict` has valid value.
+type ServiceWorkerServiceWorkerRouterSource struct {
+	// Type ...
+	Type ServiceWorkerServiceWorkerRouterSourceType `json:"type"`
+
+	// SourceDict (optional) Non-empty iff `type` equals "sourceDict".
+	SourceDict *ServiceWorkerServiceWorkerRouterSourceDict `json:"sourceDict,omitempty"`
+}
+
+// ServiceWorkerServiceWorkerRouterRule ...
+type ServiceWorkerServiceWorkerRouterRule struct {
+	// Condition ...
+	Condition *ServiceWorkerServiceWorkerRouterCondition `json:"condition"`
+
+	// Source ...
+	Source *ServiceWorkerServiceWorkerRouterSource `json:"source"`
+
+	// ID Rule ID assigned by the browser. Unique within each ServiceWorkerVersion.
+	ID int `json:"id"`
+}
 
 // ServiceWorkerServiceWorkerVersion ServiceWorker version.
 type ServiceWorkerServiceWorkerVersion struct {
@@ -93,8 +171,13 @@ type ServiceWorkerServiceWorkerVersion struct {
 	// TargetID (optional) ...
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 
-	// RouterRules (optional) ...
+	// RouterRules (optional) Migration to `typedRouterRules` is in progress. The browser sends either
+	// `routerRules` or `typedRouterRules`.
+	// TODO(crbug.com/540469610): Remove `routerRules` after the migration.
 	RouterRules string `json:"routerRules,omitempty"`
+
+	// TypedRouterRules (optional) ...
+	TypedRouterRules []*ServiceWorkerServiceWorkerRouterRule `json:"typedRouterRules,omitempty"`
 }
 
 // ServiceWorkerServiceWorkerErrorMessage ServiceWorker error message.
@@ -130,10 +213,10 @@ type ServiceWorkerDeliverPushMessage struct {
 	Data string `json:"data"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerDeliverPushMessage) ProtoReq() string { return "ServiceWorker.deliverPushMessage" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerDeliverPushMessage) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -141,10 +224,10 @@ func (m ServiceWorkerDeliverPushMessage) Call(c Client) error {
 // ServiceWorkerDisable ...
 type ServiceWorkerDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerDisable) ProtoReq() string { return "ServiceWorker.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -164,10 +247,10 @@ type ServiceWorkerDispatchSyncEvent struct {
 	LastChance bool `json:"lastChance"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerDispatchSyncEvent) ProtoReq() string { return "ServiceWorker.dispatchSyncEvent" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerDispatchSyncEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -184,12 +267,12 @@ type ServiceWorkerDispatchPeriodicSyncEvent struct {
 	Tag string `json:"tag"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerDispatchPeriodicSyncEvent) ProtoReq() string {
 	return "ServiceWorker.dispatchPeriodicSyncEvent"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerDispatchPeriodicSyncEvent) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -197,25 +280,11 @@ func (m ServiceWorkerDispatchPeriodicSyncEvent) Call(c Client) error {
 // ServiceWorkerEnable ...
 type ServiceWorkerEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerEnable) ProtoReq() string { return "ServiceWorker.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerEnable) Call(c Client) error {
-	return call(m.ProtoReq(), m, nil, c)
-}
-
-// ServiceWorkerInspectWorker ...
-type ServiceWorkerInspectWorker struct {
-	// VersionID ...
-	VersionID string `json:"versionId"`
-}
-
-// ProtoReq name.
-func (m ServiceWorkerInspectWorker) ProtoReq() string { return "ServiceWorker.inspectWorker" }
-
-// Call sends the request.
-func (m ServiceWorkerInspectWorker) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -225,12 +294,12 @@ type ServiceWorkerSetForceUpdateOnPageLoad struct {
 	ForceUpdateOnPageLoad bool `json:"forceUpdateOnPageLoad"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerSetForceUpdateOnPageLoad) ProtoReq() string {
 	return "ServiceWorker.setForceUpdateOnPageLoad"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerSetForceUpdateOnPageLoad) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -241,10 +310,10 @@ type ServiceWorkerSkipWaiting struct {
 	ScopeURL string `json:"scopeURL"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerSkipWaiting) ProtoReq() string { return "ServiceWorker.skipWaiting" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerSkipWaiting) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -255,10 +324,10 @@ type ServiceWorkerStartWorker struct {
 	ScopeURL string `json:"scopeURL"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerStartWorker) ProtoReq() string { return "ServiceWorker.startWorker" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerStartWorker) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -266,10 +335,10 @@ func (m ServiceWorkerStartWorker) Call(c Client) error {
 // ServiceWorkerStopAllWorkers ...
 type ServiceWorkerStopAllWorkers struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerStopAllWorkers) ProtoReq() string { return "ServiceWorker.stopAllWorkers" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerStopAllWorkers) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -280,10 +349,10 @@ type ServiceWorkerStopWorker struct {
 	VersionID string `json:"versionId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerStopWorker) ProtoReq() string { return "ServiceWorker.stopWorker" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerStopWorker) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -294,10 +363,10 @@ type ServiceWorkerUnregister struct {
 	ScopeURL string `json:"scopeURL"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerUnregister) ProtoReq() string { return "ServiceWorker.unregister" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerUnregister) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -308,10 +377,10 @@ type ServiceWorkerUpdateRegistration struct {
 	ScopeURL string `json:"scopeURL"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ServiceWorkerUpdateRegistration) ProtoReq() string { return "ServiceWorker.updateRegistration" }
 
-// Call sends the request.
+// Call sends the request
 func (m ServiceWorkerUpdateRegistration) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -322,7 +391,7 @@ type ServiceWorkerWorkerErrorReported struct {
 	ErrorMessage *ServiceWorkerServiceWorkerErrorMessage `json:"errorMessage"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ServiceWorkerWorkerErrorReported) ProtoEvent() string {
 	return "ServiceWorker.workerErrorReported"
 }
@@ -333,7 +402,7 @@ type ServiceWorkerWorkerRegistrationUpdated struct {
 	Registrations []*ServiceWorkerServiceWorkerRegistration `json:"registrations"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ServiceWorkerWorkerRegistrationUpdated) ProtoEvent() string {
 	return "ServiceWorker.workerRegistrationUpdated"
 }
@@ -344,7 +413,7 @@ type ServiceWorkerWorkerVersionUpdated struct {
 	Versions []*ServiceWorkerServiceWorkerVersion `json:"versions"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ServiceWorkerWorkerVersionUpdated) ProtoEvent() string {
 	return "ServiceWorker.workerVersionUpdated"
 }
