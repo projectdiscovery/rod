@@ -65,7 +65,7 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 		return "", fmt.Errorf("browser archive sha256 mismatch for %s", u)
 	}
 
-	staging, err := os.MkdirTemp(filepath.Dir(dir), ".rod-extract-*")
+	staging, err := osMkdirTemp(filepath.Dir(dir), ".rod-extract-*")
 	if err != nil {
 		return "", err
 	}
@@ -80,12 +80,19 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 	}
 
 	_ = os.RemoveAll(dir)
-	if err := os.Rename(root, dir); err != nil {
+	if err := osRename(root, dir); err != nil {
 		return "", err
 	}
 	logger.Println("Downloaded:", dir)
 	return got, nil
 }
+
+// osMkdirTemp and osRename are variables so tests can simulate a failing
+// staging dir and a failing move.
+var (
+	osMkdirTemp = os.MkdirTemp
+	osRename    = os.Rename
+)
 
 // fastest returns the first successful response and cancels the others.
 func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Response, string, error) {
@@ -120,9 +127,6 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 	for range urls {
 		r := <-ch
 		if r.err != nil || winner != nil {
-			if r.res != nil {
-				_ = r.res.Body.Close()
-			}
 			r.cancel()
 			if r.err != nil {
 				errs = append(errs, r.err)

@@ -9,6 +9,13 @@ import (
 	"syscall"
 )
 
+// osPipe and execCommand are variables so tests can simulate a failing
+// watchdog start.
+var (
+	osPipe      = os.Pipe
+	execCommand = exec.Command
+)
+
 // afterStart starts a /bin/sh watchdog that SIGKILLs the browser's process
 // group once it reads EOF on a pipe only this process holds open, which
 // happens when this process dies, even by SIGKILL. The watchdog has its own
@@ -20,12 +27,12 @@ func afterStart(cmd *exec.Cmd) (stop func()) {
 	if cmd.Process == nil {
 		return
 	}
-	r, w, err := os.Pipe()
+	r, w, err := osPipe()
 	if err != nil {
 		return
 	}
 	script := fmt.Sprintf("trap '' INT TERM HUP; read x <&3; kill -9 -%d 2>/dev/null", cmd.Process.Pid)
-	wd := exec.Command("/bin/sh", "-c", script)
+	wd := execCommand("/bin/sh", "-c", script)
 	wd.ExtraFiles = []*os.File{r}
 	wd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	err = wd.Start()

@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 )
 
+// lockFileFn is a variable so tests can simulate a failing lock.
+var lockFileFn = lockFile
+
 func lockDownload(dir string) (func(), error) {
 	if dir == "" {
 		dir = DefaultBrowserDir
@@ -16,7 +19,7 @@ func lockDownload(dir string) (func(), error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := lockFile(f); err != nil {
+	if err := lockFileFn(f); err != nil {
 		_ = f.Close()
 		return nil, err
 	}

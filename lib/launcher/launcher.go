@@ -526,7 +526,7 @@ func (l *Launcher) Launch() (string, error) {
 func startLocked(l *Launcher, cmd *exec.Cmd) error {
 	started := make(chan error, 1)
 	go func() {
-		if runtime.GOOS == "linux" {
+		if lockOSThread() {
 			runtime.LockOSThread()
 		}
 		err := cmd.Start()
@@ -689,6 +689,13 @@ func (l *Launcher) Cleanup() {
 	removeAllRetry(dir)
 }
 
+// lockOSThread and removeAll are variables so tests can cover the Linux
+// thread pin and the retry loop on any platform.
+var (
+	lockOSThread = func() bool { return runtime.GOOS == "linux" }
+	removeAll    = os.RemoveAll
+)
+
 // removeAllRetry retries while the browser's children release their files,
 // which matters on Windows where open files cannot be deleted.
 func removeAllRetry(dir string) {
@@ -696,7 +703,7 @@ func removeAllRetry(dir string) {
 		return
 	}
 	for i := 0; i < 20; i++ {
-		if err := os.RemoveAll(dir); err == nil {
+		if err := removeAll(dir); err == nil {
 			return
 		}
 		time.Sleep(time.Duration(i+1) * 50 * time.Millisecond)

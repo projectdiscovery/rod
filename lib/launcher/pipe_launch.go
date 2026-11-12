@@ -16,6 +16,9 @@ func PipeSupported() bool {
 	return runtime.GOOS != "windows"
 }
 
+// newPipePair is a variable so tests can simulate a failing pipe.
+var newPipePair = cdp.NewPipePair
+
 // LaunchPipe starts the browser with --remote-debugging-pipe and returns a
 // CDP client on that pipe. No debugging port is opened. Closing the client
 // closes the pipe, which makes Chrome exit.
@@ -32,7 +35,7 @@ func (l *Launcher) LaunchPipe() (*cdp.Client, error) {
 	}
 	l.Delete(flags.RemoteDebuggingPort)
 
-	pair, err := cdp.NewPipePair()
+	pair, err := newPipePair()
 	if err != nil {
 		return nil, err
 	}

@@ -42,7 +42,8 @@ type chromeForTesting struct {
 	headlessShell bool
 }
 
-func cftPlatform() (string, error) {
+// cftPlatform is a variable so tests can simulate an unsupported platform.
+var cftPlatform = func() (string, error) {
 	return cftPlatformFor(runtime.GOOS, runtime.GOARCH)
 }
 
@@ -76,13 +77,18 @@ func (c *chromeForTesting) dirName() string {
 }
 
 func (c *chromeForTesting) binName() string {
+	return c.binNameFor(runtime.GOOS)
+}
+
+// binNameFor is binName for a given platform, so tests can cover them all.
+func (c *chromeForTesting) binNameFor(goos string) string {
 	if c.headlessShell {
-		if runtime.GOOS == "windows" {
+		if goos == "windows" {
 			return "chrome-headless-shell.exe"
 		}
 		return "chrome-headless-shell"
 	}
-	switch runtime.GOOS {
+	switch goos {
 	case "darwin":
 		return "Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
 	case "windows":

@@ -293,7 +293,7 @@ func (lc *Browser) pinKey(t *chromeForTesting) string {
 // [ErrMuslNoBrowser].
 func (lc *Browser) Get() (string, error) {
 	if hostUsesMusl() {
-		if bin, has := LookPath(); has {
+		if bin, has := lookPath(); has {
 			return bin, nil
 		}
 		return "", ErrMuslNoBrowser
@@ -412,12 +412,15 @@ func LookPath() (found string, has bool) {
 // interface for testing.
 var openExec = exec.Command
 
+// lookPath is a variable so tests can simulate a machine without a browser.
+var lookPath = LookPath
+
 // Open tries to open the url via system's default browser.
 func Open(url string) {
 	// Windows doesn't support format [::]
 	url = strings.Replace(url, "[::]", "[::1]", 1)
 
-	if bin, has := LookPath(); has {
+	if bin, has := lookPath(); has {
 		p := openExec(bin, url)
 		_ = p.Start()
 		_ = p.Process.Release()
