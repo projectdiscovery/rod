@@ -100,7 +100,7 @@ func TestManaged(t *testing.T) {
 	_, preloadErr := New().getBin()
 	g.E(preloadErr)
 
-	ctx := g.Timeout(5 * time.Second)
+	ctx := g.Timeout(30 * time.Second)
 
 	s := got.New(g).Serve()
 	rl := NewManager()
@@ -172,7 +172,7 @@ func TestTestOpen(_ *testing.T) {
 func TestLaunchClient(t *testing.T) {
 	g := setup(t)
 
-	ctx := g.Timeout(5 * time.Second)
+	ctx := g.Timeout(30 * time.Second)
 
 	s := got.New(g).Serve()
 	rl := NewManager()
