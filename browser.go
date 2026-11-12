@@ -203,6 +203,13 @@ func (b *Browser) Compliant(enable bool) *Browser {
 	return b
 }
 
+// pipeSupported and newLauncher are variables so tests can cover the
+// port-launch fallback on any platform.
+var (
+	pipeSupported = launcher.PipeSupported
+	newLauncher   = launcher.New
+)
+
 // Connect to the browser and start to control it.
 // If fails to connect, try to launch a local browser, if local browser not found try to download one.
 //
@@ -218,14 +225,14 @@ func (b *Browser) Connect() error {
 		u := b.controlURL
 		var l *launcher.Launcher
 		if u == "" {
-			l = launcher.New().Context(b.ctx)
+			l = newLauncher().Context(b.ctx)
 			if b.compliant {
 				l.Compliant(true)
 			}
 		}
 
 		var c CDPClient
-		if l != nil && launcher.PipeSupported() {
+		if l != nil && pipeSupported() {
 			pc, err := l.LaunchPipe()
 			if err != nil {
 				return err
@@ -305,9 +312,14 @@ func (b *Browser) Close() error {
 var BrowserExitTimeout = 10 * time.Second
 
 func reapBrowser(l *launcher.Launcher, timeout time.Duration) {
+	reap(l.Cleanup, l.Kill, timeout)
+}
+
+// reap waits for cleanup, then kills and waits again after timeout.
+func reap(cleanup, kill func(), timeout time.Duration) {
 	done := make(chan struct{})
 	go func() {
-		l.Cleanup()
+		cleanup()
 		close(done)
 	}()
 	t := time.NewTimer(timeout)
@@ -315,7 +327,7 @@ func reapBrowser(l *launcher.Launcher, timeout time.Duration) {
 	select {
 	case <-done:
 	case <-t.C:
-		l.Kill()
+		kill()
 		<-done
 	}
 }
@@ -591,7 +603,8 @@ func (b *Browser) initEvents() {
 	if b.autoAttach == nil {
 		b.autoAttach = &atomic.Bool{}
 	}
-	event := b.client.Event()
+	client := b.client
+	event := client.Event()
 
 	go func() {
 		for e := range event {
@@ -611,7 +624,7 @@ func (b *Browser) initEvents() {
 			}
 			b.router.publish(msg)
 		}
-		cause := b.Err()
+		cause := errOf(client)
 		if cause == nil {
 			cause = cdp.ErrConnClosed
 		}

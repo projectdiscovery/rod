@@ -21,6 +21,9 @@ const compliantHintJS = `(() => {
 	]).then(hints => JSON.stringify({ua, hints}))
 })()`
 
+// compliantRetryDelay is how long to wait before reading the client hints again.
+var compliantRetryDelay = 100 * time.Millisecond
+
 // compliantProfile is the browser's own client hints, read once.
 type compliantProfile struct {
 	once sync.Once
@@ -96,7 +99,7 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 		} else {
 			last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(compliantRetryDelay)
 	}
 	return "", nil, last
 }

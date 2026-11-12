@@ -111,7 +111,7 @@ func (s *HijackResponseStage) c() proto.Client {
 // response headers for requests matching pattern. The handler should call
 // one of Continue, Fulfill, or Fail; otherwise the original response is sent.
 func (r *HijackRouter) AddResponse(pattern string, resourceType proto.NetworkResourceType, handler func(*HijackResponseStage)) error {
-	reg, err := regexp.Compile(proto.PatternToReg(pattern))
+	reg, err := compilePattern(proto.PatternToReg(pattern))
 	if err != nil {
 		return err
 	}

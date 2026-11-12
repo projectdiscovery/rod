@@ -90,7 +90,11 @@ func (b *Browser) Disconnected() <-chan struct{} {
 
 // Err returns why the CDP connection ended, or nil while it is alive.
 func (b *Browser) Err() error {
-	if c, ok := b.client.(interface{ Err() error }); ok {
+	return errOf(b.client)
+}
+
+func errOf(c CDPClient) error {
+	if c, ok := c.(interface{ Err() error }); ok {
 		return c.Err()
 	}
 	return nil

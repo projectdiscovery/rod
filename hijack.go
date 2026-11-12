@@ -171,9 +171,12 @@ func (r *HijackRouter) apply() error {
 	return enable.Call(r.client)
 }
 
+// compilePattern is a variable so tests can cover the invalid pattern error.
+var compilePattern = regexp.Compile
+
 // Add a hijack handler to router, the doc of the pattern is the same as "proto.FetchRequestPattern.URLPattern".
 func (r *HijackRouter) Add(pattern string, resourceType proto.NetworkResourceType, handler func(*Hijack)) error {
-	reg, err := regexp.Compile(proto.PatternToReg(pattern))
+	reg, err := compilePattern(proto.PatternToReg(pattern))
 	if err != nil {
 		return err
 	}
