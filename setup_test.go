@@ -198,7 +198,7 @@ running goroutines: %s`, g.Name(), *TimeoutEach, t))
 			if info.TargetID == g.page.TargetID {
 				continue
 			}
-			closeErr := proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser)
+			_, closeErr := proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser)
 			var gone *cdp.Error
 			if errors.As(closeErr, &gone) && gone.Code == -32602 {
 				continue

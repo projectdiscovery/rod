@@ -7,6 +7,7 @@
   "ignorePaths": [
     "**/*.{out,sketch,svg}",
     "fixtures/fonts.html",
+    "fixtures/icon.pxd",
     "**/tmp/**",
     "lib/devices/list.go",
     "lib/js/helper.go",
