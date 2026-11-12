@@ -15,8 +15,6 @@ import (
 	"github.com/go-rod/rod/lib/js"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
-	"github.com/ysmood/goob"
-	"github.com/ysmood/got/lib/lcs"
 	"github.com/ysmood/gson"
 )
 
@@ -51,20 +49,22 @@ type Page struct {
 
 	// Used to abort all ongoing actions when a page closes.
 	sessionCancel func()
+	cancelCause   context.CancelCauseFunc
+	session       context.Context // lifetime of the target session, shared by clones
 
 	root *Page
 
 	sleeper func() utils.Sleeper
 
 	browser *Browser
-	event   *goob.Observable
 
 	// devices
 	Mouse    *Mouse
 	Keyboard *Keyboard
 	Touch    *Touch
 
-	element *Element // iframe only
+	element  *Element // iframe only
+	referrer string   // sent with the next Navigate calls
 
 	jsCtxLock   *sync.Mutex
 	jsCtxID     *proto.RuntimeRemoteObjectID // use pointer so that page clones can share the change
@@ -177,7 +177,7 @@ func (p *Page) Navigate(url string) error {
 	// try to stop loading
 	_ = p.StopLoading()
 
-	res, err := proto.PageNavigate{URL: url}.Call(p)
+	res, err := proto.PageNavigate{URL: url, Referrer: p.referrer}.Call(p)
 	if err != nil {
 		return err
 	}
@@ -188,6 +188,14 @@ func (p *Page) Navigate(url string) error {
 	p.root.unsetJSCtxID()
 
 	return nil
+}
+
+// WithReferrer returns a clone that sends referrer on Navigate.
+// An empty referrer clears it.
+func (p *Page) WithReferrer(referrer string) *Page {
+	clone := *p
+	clone.referrer = referrer
+	return &clone
 }
 
 // NavigateBack history.
@@ -315,20 +323,47 @@ func (p *Page) StopLoading() error {
 
 // Close tries to close page, running its beforeunload hooks, if has any.
 func (p *Page) Close() error {
-	p.browser.targetsLock.Lock()
-	defer p.browser.targetsLock.Unlock()
+	return p.closeWith(30 * time.Second)
+}
+
+// ForceClose closes the page with its own timeout, including after the page
+// context has already been cancelled.
+func (p *Page) ForceClose(timeout time.Duration) error {
+	if timeout <= 0 {
+		timeout = 5 * time.Second
+	}
+	return p.closeWith(timeout)
+}
+
+func (p *Page) closeWith(timeout time.Duration) error {
+	// Closing the target ends the page session, and Chrome may report that
+	// before answering Page.close, so the close must not depend on it. A
+	// shorter deadline on the page context still applies.
+	if dl, ok := p.ctx.Deadline(); ok {
+		if d := time.Until(dl); d < timeout {
+			timeout = d
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(p.ctx), timeout)
+	defer cancel()
 
 	success := true
-	ctx, cancel := context.WithCancel(p.ctx)
-	defer cancel()
-	messages := p.browser.Context(ctx).Event()
+	messages := p.browser.listen(ctx, "", map[string]struct{}{
+		(proto.TargetTargetDestroyed{}).ProtoEvent():      {},
+		(proto.PageJavascriptDialogClosed{}).ProtoEvent(): {},
+	})
 
 	for {
-		err := proto.PageClose{}.Call(p)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		err := proto.PageClose{}.Call(p.Context(ctx))
 		if errors.Is(err, cdp.ErrNotAttachedToActivePage) {
-			// TODO: I don't know why chromium doesn't allow us to close a page while it's navigating.
-			// Looks like a bug in chromium.
-			utils.Sleep(0.1)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(100 * time.Millisecond):
+			}
 			continue
 		} else if err != nil {
 			return err
@@ -336,25 +371,30 @@ func (p *Page) Close() error {
 		break
 	}
 
+	stopped := false
 	for msg := range messages {
-		stop := false
-
 		destroyed := proto.TargetTargetDestroyed{}
 		closed := proto.PageJavascriptDialogClosed{}
 		if msg.Load(&destroyed) {
-			stop = destroyed.TargetID == p.TargetID
+			stopped = destroyed.TargetID == p.TargetID
 		} else if msg.SessionID == p.SessionID && msg.Load(&closed) {
 			success = closed.Result
-			stop = !success
+			stopped = !success
 		}
 
-		if stop {
+		if stopped {
 			break
 		}
+	}
+	if _, attached := p.browser.states.Load(sessionPageKey(p.SessionID)); !stopped && attached {
+		return ctx.Err()
 	}
 
 	if success {
 		p.cleanupStates()
+		if p.sessionCancel != nil {
+			p.sessionCancel()
+		}
 	} else {
 		return &PageCloseCanceledError{}
 	}
@@ -681,13 +721,23 @@ func (p *Page) WaitOpen() func() (*Page, error) {
 //	    _ = proto.PageHandleJavaScriptDialog{ Accept: false, PromptText: ""}.Call(page)
 //	})()
 func (p *Page) EachEvent(callbacks ...interface{}) (wait func()) {
-	return p.browser.Context(p.ctx).eachEvent(p.SessionID, callbacks...)
+	ctx, release := p.lifetime()
+	w := p.browser.Context(ctx).eachEvent(p.SessionID, callbacks...)
+	return func() {
+		defer release()
+		w()
+	}
 }
 
 // WaitEvent waits for the next event for one time. It will also load the data into the event object.
 func (p *Page) WaitEvent(e proto.Event) (wait func()) {
 	defer p.tryTrace(TraceTypeWait, "event", e.ProtoEvent())()
-	return p.browser.Context(p.ctx).waitEvent(p.SessionID, e)
+	ctx, release := p.lifetime()
+	w := p.browser.Context(ctx).waitEvent(p.SessionID, e)
+	return func() {
+		defer release()
+		w()
+	}
 }
 
 // WaitNavigation wait for a page lifecycle event when navigating.
@@ -803,18 +853,36 @@ func (p *Page) WaitDOMStable(d time.Duration, diff float64) error {
 			return err
 		}
 
-		xs := lcs.NewWords(domSnapshot.Strings)
-		ys := lcs.NewWords(currentDomSnapshot.Strings)
-		lcs := xs.YadLCS(p.ctx, ys)
-
-		df := 1 - float64(len(lcs))/float64(len(ys))
-		if df <= diff {
+		if domDiff(domSnapshot.Strings, currentDomSnapshot.Strings) <= diff {
 			break
 		}
 
 		domSnapshot = currentDomSnapshot
 	}
 	return nil
+}
+
+// domDiff returns the fraction of ys strings that are not present in xs,
+// counting duplicates.
+func domDiff(xs, ys []string) float64 {
+	if len(ys) == 0 {
+		if len(xs) == 0 {
+			return 0
+		}
+		return 1
+	}
+	seen := make(map[string]int, len(xs))
+	for _, x := range xs {
+		seen[x]++
+	}
+	common := 0
+	for _, y := range ys {
+		if seen[y] > 0 {
+			seen[y]--
+			common++
+		}
+	}
+	return 1 - float64(common)/float64(len(ys))
 }
 
 // WaitStable waits until the page is stable for d duration.
@@ -847,15 +915,53 @@ func (p *Page) WaitIdle(timeout time.Duration) (err error) {
 // WaitRepaint waits until the next repaint.
 // Doc: https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
 func (p *Page) WaitRepaint() error {
-	// we use root here because iframe doesn't trigger requestAnimationFrame
-	_, err := p.root.Eval(`() => new Promise(r => requestAnimationFrame(r))`)
+	// An iframe does not fire requestAnimationFrame, so the evaluation runs in
+	// the top frame. The timeout is still the caller's.
+	root := p.root
+	if root == nil {
+		root = p
+	}
+	_, err := root.Context(p.ctx).Eval(`() => new Promise(r => requestAnimationFrame(r))`)
 	return err
 }
 
 // WaitLoad waits for the `window.onload` event, it returns immediately if the event is already fired.
 func (p *Page) WaitLoad() error {
 	defer p.tryTrace(TraceTypeWait, "load")()
-	_, err := p.Evaluate(evalHelper(js.WaitLoad).ByPromise())
+	// A navigation can replace the document while the helper waits; the new
+	// document has its own load event, so wait for that one instead.
+	for i := 0; ; i++ {
+		_, err := p.Evaluate(evalHelper(js.WaitLoad).ByPromise())
+		if err == nil || i >= 10 || !errors.Is(err, cdp.ErrCtxDestroyed) {
+			return err
+		}
+		p.unsetJSCtxID()
+		select {
+		case <-p.ctx.Done():
+			return p.ctx.Err()
+		case <-time.After(50 * time.Millisecond):
+		}
+	}
+}
+
+// WaitDOMIdle waits until the DOM has not changed for d, observed in the page
+// with a MutationObserver. It is cheaper than [Page.WaitDOMStable] on large
+// documents because nothing is copied out of the page.
+func (p *Page) WaitDOMIdle(d time.Duration) error {
+	defer p.tryTrace(TraceTypeWait, "dom-idle")()
+	_, err := p.Evaluate(Eval(`(ms) => new Promise((resolve) => {
+		let timer
+		const observer = new MutationObserver(() => {
+			clearTimeout(timer)
+			timer = setTimeout(done, ms)
+		})
+		function done() {
+			observer.disconnect()
+			resolve()
+		}
+		observer.observe(document, { subtree: true, childList: true, attributes: true, characterData: true })
+		timer = setTimeout(done, ms)
+	})`, d.Milliseconds()).ByPromise())
 	return err
 }
 
@@ -1006,56 +1112,12 @@ func (p *Page) Release(obj *proto.RuntimeRemoteObject) error {
 
 // Call implements the [proto.Client].
 func (p *Page) Call(ctx context.Context, sessionID, methodName string, params interface{}) (res []byte, err error) {
-	return p.browser.Call(ctx, sessionID, methodName, params)
+	res, err = p.browser.Call(ctx, sessionID, methodName, params)
+	return res, p.translate(err)
 }
 
 // Event of the page.
 func (p *Page) Event() <-chan *Message {
-	dst := make(chan *Message)
-	s := p.event.Subscribe(p.ctx)
-
-	go func() {
-		defer close(dst)
-		for {
-			select {
-			case <-p.ctx.Done():
-				return
-			case msg, ok := <-s:
-				if !ok {
-					return
-				}
-				select {
-				case <-p.ctx.Done():
-					return
-				case dst <- msg.(*Message): //nolint: forcetypeassert
-				}
-			}
-		}
-	}()
-
-	return dst
-}
-
-func (p *Page) initEvents() {
-	p.event = goob.New(p.ctx)
-	event := p.browser.Context(p.ctx).Event()
-
-	go func() {
-		for msg := range event {
-			detached := proto.TargetDetachedFromTarget{}
-			destroyed := proto.TargetTargetDestroyed{}
-
-			if (msg.Load(&detached) && detached.SessionID == p.SessionID) ||
-				(msg.Load(destroyed) && destroyed.TargetID == p.TargetID) {
-				p.sessionCancel()
-				return
-			}
-
-			if msg.SessionID != p.SessionID {
-				continue
-			}
-
-			p.event.Publish(msg)
-		}
-	}()
+	ctx, _ := p.lifetime()
+	return p.browser.listen(ctx, p.SessionID, nil)
 }

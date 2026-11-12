@@ -51,20 +51,20 @@ type IndexedDBObjectStoreIndex struct {
 	MultiEntry bool `json:"multiEntry"`
 }
 
-// IndexedDBKeyType enum.
+// IndexedDBKeyType enum
 type IndexedDBKeyType string
 
 const (
-	// IndexedDBKeyTypeNumber enum const.
+	// IndexedDBKeyTypeNumber enum const
 	IndexedDBKeyTypeNumber IndexedDBKeyType = "number"
 
-	// IndexedDBKeyTypeString enum const.
+	// IndexedDBKeyTypeString enum const
 	IndexedDBKeyTypeString IndexedDBKeyType = "string"
 
-	// IndexedDBKeyTypeDate enum const.
+	// IndexedDBKeyTypeDate enum const
 	IndexedDBKeyTypeDate IndexedDBKeyType = "date"
 
-	// IndexedDBKeyTypeArray enum const.
+	// IndexedDBKeyTypeArray enum const
 	IndexedDBKeyTypeArray IndexedDBKeyType = "array"
 )
 
@@ -113,17 +113,17 @@ type IndexedDBDataEntry struct {
 	Value *RuntimeRemoteObject `json:"value"`
 }
 
-// IndexedDBKeyPathType enum.
+// IndexedDBKeyPathType enum
 type IndexedDBKeyPathType string
 
 const (
-	// IndexedDBKeyPathTypeNull enum const.
+	// IndexedDBKeyPathTypeNull enum const
 	IndexedDBKeyPathTypeNull IndexedDBKeyPathType = "null"
 
-	// IndexedDBKeyPathTypeString enum const.
+	// IndexedDBKeyPathTypeString enum const
 	IndexedDBKeyPathTypeString IndexedDBKeyPathType = "string"
 
-	// IndexedDBKeyPathTypeArray enum const.
+	// IndexedDBKeyPathTypeArray enum const
 	IndexedDBKeyPathTypeArray IndexedDBKeyPathType = "array"
 )
 
@@ -158,10 +158,10 @@ type IndexedDBClearObjectStore struct {
 	ObjectStoreName string `json:"objectStoreName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBClearObjectStore) ProtoReq() string { return "IndexedDB.clearObjectStore" }
 
-// Call sends the request.
+// Call sends the request
 func (m IndexedDBClearObjectStore) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -182,15 +182,15 @@ type IndexedDBDeleteDatabase struct {
 	DatabaseName string `json:"databaseName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBDeleteDatabase) ProtoReq() string { return "IndexedDB.deleteDatabase" }
 
-// Call sends the request.
+// Call sends the request
 func (m IndexedDBDeleteDatabase) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// IndexedDBDeleteObjectStoreEntries Delete a range of entries from an object store.
+// IndexedDBDeleteObjectStoreEntries Delete a range of entries from an object store
 type IndexedDBDeleteObjectStoreEntries struct {
 	// SecurityOrigin (optional) At least and at most one of securityOrigin, storageKey, or storageBucket must be specified.
 	// Security origin.
@@ -212,12 +212,12 @@ type IndexedDBDeleteObjectStoreEntries struct {
 	KeyRange *IndexedDBKeyRange `json:"keyRange"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBDeleteObjectStoreEntries) ProtoReq() string {
 	return "IndexedDB.deleteObjectStoreEntries"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m IndexedDBDeleteObjectStoreEntries) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -225,10 +225,10 @@ func (m IndexedDBDeleteObjectStoreEntries) Call(c Client) error {
 // IndexedDBDisable Disables events from backend.
 type IndexedDBDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBDisable) ProtoReq() string { return "IndexedDB.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m IndexedDBDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -236,10 +236,10 @@ func (m IndexedDBDisable) Call(c Client) error {
 // IndexedDBEnable Enables events from backend.
 type IndexedDBEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBEnable) ProtoReq() string { return "IndexedDB.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m IndexedDBEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -262,8 +262,8 @@ type IndexedDBRequestData struct {
 	// ObjectStoreName Object store name.
 	ObjectStoreName string `json:"objectStoreName"`
 
-	// IndexName Index name, empty string for object store data requests.
-	IndexName string `json:"indexName"`
+	// IndexName (optional) Index name. If not specified, it performs an object store data request.
+	IndexName string `json:"indexName,omitempty"`
 
 	// SkipCount Number of records to skip.
 	SkipCount int `json:"skipCount"`
@@ -275,10 +275,10 @@ type IndexedDBRequestData struct {
 	KeyRange *IndexedDBKeyRange `json:"keyRange,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBRequestData) ProtoReq() string { return "IndexedDB.requestData" }
 
-// Call the request.
+// Call the request
 func (m IndexedDBRequestData) Call(c Client) (*IndexedDBRequestDataResult, error) {
 	var res IndexedDBRequestDataResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -312,10 +312,10 @@ type IndexedDBGetMetadata struct {
 	ObjectStoreName string `json:"objectStoreName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBGetMetadata) ProtoReq() string { return "IndexedDB.getMetadata" }
 
-// Call the request.
+// Call the request
 func (m IndexedDBGetMetadata) Call(c Client) (*IndexedDBGetMetadataResult, error) {
 	var res IndexedDBGetMetadataResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -348,10 +348,10 @@ type IndexedDBRequestDatabase struct {
 	DatabaseName string `json:"databaseName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBRequestDatabase) ProtoReq() string { return "IndexedDB.requestDatabase" }
 
-// Call the request.
+// Call the request
 func (m IndexedDBRequestDatabase) Call(c Client) (*IndexedDBRequestDatabaseResult, error) {
 	var res IndexedDBRequestDatabaseResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -376,10 +376,10 @@ type IndexedDBRequestDatabaseNames struct {
 	StorageBucket *StorageStorageBucket `json:"storageBucket,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IndexedDBRequestDatabaseNames) ProtoReq() string { return "IndexedDB.requestDatabaseNames" }
 
-// Call the request.
+// Call the request
 func (m IndexedDBRequestDatabaseNames) Call(c Client) (*IndexedDBRequestDatabaseNamesResult, error) {
 	var res IndexedDBRequestDatabaseNamesResult
 	return &res, call(m.ProtoReq(), m, &res, c)

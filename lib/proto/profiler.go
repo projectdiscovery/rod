@@ -97,10 +97,10 @@ type ProfilerScriptCoverage struct {
 // ProfilerDisable ...
 type ProfilerDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerDisable) ProtoReq() string { return "Profiler.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m ProfilerDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -108,10 +108,10 @@ func (m ProfilerDisable) Call(c Client) error {
 // ProfilerEnable ...
 type ProfilerEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerEnable) ProtoReq() string { return "Profiler.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m ProfilerEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -120,10 +120,10 @@ func (m ProfilerEnable) Call(c Client) error {
 // garbage collection.
 type ProfilerGetBestEffortCoverage struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerGetBestEffortCoverage) ProtoReq() string { return "Profiler.getBestEffortCoverage" }
 
-// Call the request.
+// Call the request
 func (m ProfilerGetBestEffortCoverage) Call(c Client) (*ProfilerGetBestEffortCoverageResult, error) {
 	var res ProfilerGetBestEffortCoverageResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -141,10 +141,10 @@ type ProfilerSetSamplingInterval struct {
 	Interval int `json:"interval"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerSetSamplingInterval) ProtoReq() string { return "Profiler.setSamplingInterval" }
 
-// Call sends the request.
+// Call sends the request
 func (m ProfilerSetSamplingInterval) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -152,10 +152,10 @@ func (m ProfilerSetSamplingInterval) Call(c Client) error {
 // ProfilerStart ...
 type ProfilerStart struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerStart) ProtoReq() string { return "Profiler.start" }
 
-// Call sends the request.
+// Call sends the request
 func (m ProfilerStart) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -174,10 +174,10 @@ type ProfilerStartPreciseCoverage struct {
 	AllowTriggeredUpdates bool `json:"allowTriggeredUpdates,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerStartPreciseCoverage) ProtoReq() string { return "Profiler.startPreciseCoverage" }
 
-// Call the request.
+// Call the request
 func (m ProfilerStartPreciseCoverage) Call(c Client) (*ProfilerStartPreciseCoverageResult, error) {
 	var res ProfilerStartPreciseCoverageResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -192,10 +192,10 @@ type ProfilerStartPreciseCoverageResult struct {
 // ProfilerStop ...
 type ProfilerStop struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerStop) ProtoReq() string { return "Profiler.stop" }
 
-// Call the request.
+// Call the request
 func (m ProfilerStop) Call(c Client) (*ProfilerStopResult, error) {
 	var res ProfilerStopResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -211,10 +211,10 @@ type ProfilerStopResult struct {
 // executing optimized code.
 type ProfilerStopPreciseCoverage struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerStopPreciseCoverage) ProtoReq() string { return "Profiler.stopPreciseCoverage" }
 
-// Call sends the request.
+// Call sends the request
 func (m ProfilerStopPreciseCoverage) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -223,10 +223,10 @@ func (m ProfilerStopPreciseCoverage) Call(c Client) error {
 // coverage needs to have started.
 type ProfilerTakePreciseCoverage struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m ProfilerTakePreciseCoverage) ProtoReq() string { return "Profiler.takePreciseCoverage" }
 
-// Call the request.
+// Call the request
 func (m ProfilerTakePreciseCoverage) Call(c Client) (*ProfilerTakePreciseCoverageResult, error) {
 	var res ProfilerTakePreciseCoverageResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -256,7 +256,7 @@ type ProfilerConsoleProfileFinished struct {
 	Title string `json:"title,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ProfilerConsoleProfileFinished) ProtoEvent() string {
 	return "Profiler.consoleProfileFinished"
 }
@@ -273,7 +273,7 @@ type ProfilerConsoleProfileStarted struct {
 	Title string `json:"title,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ProfilerConsoleProfileStarted) ProtoEvent() string {
 	return "Profiler.consoleProfileStarted"
 }
@@ -293,7 +293,7 @@ type ProfilerPreciseCoverageDeltaUpdate struct {
 	Result []*ProfilerScriptCoverage `json:"result"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt ProfilerPreciseCoverageDeltaUpdate) ProtoEvent() string {
 	return "Profiler.preciseCoverageDeltaUpdate"
 }

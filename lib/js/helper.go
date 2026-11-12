@@ -110,7 +110,7 @@ var RemoveOverlay = &Function{
 // WaitIdle ...
 var WaitIdle = &Function{
 	Name:         "waitIdle",
-	Definition:   `function(t){return new Promise(e=>{window.requestIdleCallback(e,{timeout:t})})}`,
+	Definition:   `function(t){return new Promise(e=>{window.requestIdleCallback(e,{timeout:t}),window.requestAnimationFrame(()=>window.requestIdleCallback(e,{timeout:t}))})}`,
 	Dependencies: []*Function{},
 }
 

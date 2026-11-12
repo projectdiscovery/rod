@@ -18,12 +18,12 @@ type EventBreakpointsSetInstrumentationBreakpoint struct {
 	EventName string `json:"eventName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EventBreakpointsSetInstrumentationBreakpoint) ProtoReq() string {
 	return "EventBreakpoints.setInstrumentationBreakpoint"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EventBreakpointsSetInstrumentationBreakpoint) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -34,23 +34,23 @@ type EventBreakpointsRemoveInstrumentationBreakpoint struct {
 	EventName string `json:"eventName"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EventBreakpointsRemoveInstrumentationBreakpoint) ProtoReq() string {
 	return "EventBreakpoints.removeInstrumentationBreakpoint"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EventBreakpointsRemoveInstrumentationBreakpoint) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// EventBreakpointsDisable Removes all breakpoints.
+// EventBreakpointsDisable Removes all breakpoints
 type EventBreakpointsDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EventBreakpointsDisable) ProtoReq() string { return "EventBreakpoints.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m EventBreakpointsDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }

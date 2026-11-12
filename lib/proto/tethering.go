@@ -16,10 +16,10 @@ type TetheringBind struct {
 	Port int `json:"port"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m TetheringBind) ProtoReq() string { return "Tethering.bind" }
 
-// Call sends the request.
+// Call sends the request
 func (m TetheringBind) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -30,10 +30,10 @@ type TetheringUnbind struct {
 	Port int `json:"port"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m TetheringUnbind) ProtoReq() string { return "Tethering.unbind" }
 
-// Call sends the request.
+// Call sends the request
 func (m TetheringUnbind) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -47,7 +47,7 @@ type TetheringAccepted struct {
 	ConnectionID string `json:"connectionId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt TetheringAccepted) ProtoEvent() string {
 	return "Tethering.accepted"
 }
