@@ -96,6 +96,13 @@ func TestGetURLErr(t *testing.T) {
 func TestManaged(t *testing.T) {
 	g := setup(t)
 
+	// The default browser is fetched on first use. Do it before the timed
+	// section so a slow download cannot look like a hang.
+	for _, headless := range []bool{true, false} {
+		_, err := New().Headless(headless).getBin()
+		g.E(err)
+	}
+
 	ctx := g.Timeout(30 * time.Second)
 
 	s := got.New(g).Serve()
