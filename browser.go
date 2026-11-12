@@ -336,7 +336,25 @@ func (b *Browser) Page(opts proto.TargetCreateTarget) (p *Page, err error) {
 		if err != nil {
 			closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(b.Context(closeCtx))
+			// A target stuck in navigation can ignore the first close.
+			for closeCtx.Err() == nil {
+				_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(b.Context(closeCtx))
+				list, listErr := proto.TargetGetTargets{}.Call(b.Context(closeCtx))
+				if listErr != nil {
+					return
+				}
+				gone := true
+				for _, info := range list.TargetInfos {
+					if info.TargetID == target.TargetID {
+						gone = false
+						break
+					}
+				}
+				if gone {
+					return
+				}
+				time.Sleep(50 * time.Millisecond)
+			}
 		}
 	}()
 
