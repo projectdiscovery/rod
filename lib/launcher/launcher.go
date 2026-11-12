@@ -606,6 +606,9 @@ func (l *Launcher) setupCmd(cmd *exec.Cmd) {
 
 	cmd.Stdout = io.MultiWriter(l.logger, l.parser, l.output)
 	cmd.Stderr = io.MultiWriter(l.logger, l.parser, l.output)
+	// A child that inherited the pipe, which a crashed browser leaves
+	// behind, would otherwise keep Wait and Cleanup blocked forever.
+	cmd.WaitDelay = 3 * time.Second
 }
 
 func (l *Launcher) getBin() (string, error) {
