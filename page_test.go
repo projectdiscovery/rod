@@ -601,7 +601,9 @@ func TestPageWaitIdle(t *testing.T) {
 
 	p := g.page.MustNavigate(g.srcFile("fixtures/click.html"))
 	p.MustElement("button").MustClick()
-	p.MustWaitIdle()
+	// Shorter than the test budget. MustWaitIdle waits a full minute, which
+	// is the same as the suite's per-test limit.
+	g.E(p.WaitIdle(10 * time.Second))
 
 	g.True(p.MustHas("[a=ok]"))
 }
