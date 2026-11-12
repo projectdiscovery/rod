@@ -243,7 +243,7 @@ func TestElementContext(t *testing.T) {
 func TestElementCancelContext(t *testing.T) {
 	g := setup(t)
 
-	p := g.page.MustNavigate(g.srcFile("fixtures/click.html"))
+	p := g.page.MustNavigate(g.srcFile("fixtures/click.html")).MustWaitLoad()
 	el := p.Timeout(time.Second).MustElement("button")
 	el = el.CancelTimeout()
 	utils.Sleep(1.1)
@@ -663,9 +663,16 @@ func TestWaitStable(t *testing.T) {
 
 	p := g.page.MustNavigate(g.srcFile("fixtures/wait-stable.html"))
 	el := p.MustElement("button")
+	// A CSS animation can miss its first frames on a busy runner, so WaitStable
+	// sees two equal shapes and returns early. Move the box from JS instead.
+	el.MustEval(`() => {
+		this.style.position = 'relative'
+		let n = 0
+		this._move = setInterval(() => { n += 15; this.style.left = n + 'px' }, 50)
+	}`)
 	go func() {
-		utils.Sleep(1)
-		el.MustEval(`() => this.classList.remove("play")`)
+		utils.Sleep(1.2)
+		el.MustEval(`() => { clearInterval(this._move); this.classList.remove("play") }`)
 	}()
 	start := time.Now()
 	el.MustWaitStable()

@@ -461,6 +461,18 @@ func (el *Element) Frame() (*Page, error) {
 		return nil, err
 	}
 
+	// A cross-site iframe runs in its own target and has no content document
+	// in this session, so it is driven through its own session instead.
+	if node.ContentDocument == nil && node.FrameID != "" {
+		frame, err := el.page.browser.Context(el.ctx).framePage(proto.TargetTargetID(node.FrameID))
+		if err != nil {
+			return nil, err
+		}
+		if frame != nil {
+			return frame.Sleeper(el.sleeper), nil
+		}
+	}
+
 	clone := *el.page
 	clone.FrameID = node.FrameID
 	clone.jsCtxID = new(proto.RuntimeRemoteObjectID)
@@ -626,7 +638,7 @@ func (el *Element) WaitEnabled() error {
 // Doc for disabled: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled
 func (el *Element) WaitWritable() error {
 	defer el.tryTrace(TraceTypeWait, "writable")()
-	return el.Wait(Eval(`() => !this.readonly`))
+	return el.Wait(Eval(`() => !this.readOnly`))
 }
 
 // WaitInvisible until the element invisible.
@@ -696,12 +708,20 @@ func (el *Element) Screenshot(format proto.PageCaptureScreenshotFormat, quality 
 
 	box := shape.Box()
 
+	// The capture is in device pixels while the shape is in CSS pixels.
+	scale := 1.0
+	if res, err := el.page.Context(el.ctx).Eval(`() => window.devicePixelRatio`); err == nil {
+		if v := res.Value.Num(); v > 0 {
+			scale = v
+		}
+	}
+
 	// TODO: proto.PageCaptureScreenshot has a Clip option, but it's buggy, so now we do in Go.
 	return utils.CropImage(bin, quality,
-		int(box.X),
-		int(box.Y),
-		int(box.Width),
-		int(box.Height),
+		int(box.X*scale),
+		int(box.Y*scale),
+		int(box.Width*scale),
+		int(box.Height*scale),
 	)
 }
 

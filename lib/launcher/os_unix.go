@@ -23,4 +23,11 @@ func (l *Launcher) osSetupCmd(cmd *exec.Cmd) {
 		*cmd = *exec.Command("xvfb-run", command...)
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setPdeathsig(cmd.SysProcAttr)
+	if l.dropPriv {
+		cmd.SysProcAttr.Credential = &syscall.Credential{
+			Uid: uint32(l.uid),
+			Gid: uint32(l.gid),
+		}
+	}
 }

@@ -317,6 +317,12 @@ func (p *Page) setHelper(jsCtxID proto.RuntimeRemoteObjectID, name string, fnID 
 	p.helpersLock.Lock()
 	defer p.helpersLock.Unlock()
 
+	if p.helpers == nil {
+		p.helpers = map[proto.RuntimeRemoteObjectID]map[string]proto.RuntimeRemoteObjectID{}
+	}
+	if p.helpers[jsCtxID] == nil {
+		p.helpers[jsCtxID] = map[string]proto.RuntimeRemoteObjectID{}
+	}
 	p.helpers[jsCtxID][name] = fnID
 }
 
@@ -345,6 +351,9 @@ func (p *Page) getJSCtxID() (proto.RuntimeRemoteObjectID, error) {
 	node, err := p.element.Describe(1, true)
 	if err != nil {
 		return "", err
+	}
+	if node.ContentDocument == nil {
+		return "", errors.New("cross-origin frame has no content document; attach to its target")
 	}
 
 	obj, err := proto.DOMResolveNode{BackendNodeID: node.ContentDocument.BackendNodeID}.Call(p)

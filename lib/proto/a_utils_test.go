@@ -20,7 +20,7 @@ func (t T) PatternToReg() {
 	t.Eq(`\A.*\z`, proto.PatternToReg("*"))
 	t.Eq(`\A.\z`, proto.PatternToReg("?"))
 	t.Eq(`\Aa\z`, proto.PatternToReg("a"))
-	t.Eq(`\Aa.com/.*/test\z`, proto.PatternToReg("a.com/*/test"))
+	t.Eq(`\Aa\.com/.*/test\z`, proto.PatternToReg("a.com/*/test"))
 	t.Eq(`\A\?\*\z`, proto.PatternToReg(`\?\*`))
-	t.Eq(`\Aa.com\?a=10&b=\*\z`, proto.PatternToReg(`a.com\?a=10&b=\*`))
+	t.Eq(`\Aa\.com\?a=10&b=\*\z`, proto.PatternToReg(`a.com\?a=10&b=\*`))
 }

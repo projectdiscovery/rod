@@ -31,6 +31,8 @@ type AutofillCreditCard struct {
 // AutofillAddressField ...
 type AutofillAddressField struct {
 	// Name address field name, for example GIVEN_NAME.
+	// The full list of supported field names:
+	// https://source.chromium.org/chromium/chromium/src/+/main:components/autofill/core/browser/field_types.cc;l=38
 	Name string `json:"name"`
 
 	// Value address field value, for example Jon Doe.
@@ -55,7 +57,7 @@ type AutofillAddress struct {
 // [[{name: "GIVE_NAME", value: "Jon"}, {name: "FAMILY_NAME", value: "Doe"}], [{name: "CITY", value: "Munich"}, {name: "ZIP", value: "81456"}]]
 // should allow the receiver to render:
 // Jon Doe
-// Munich 81456.
+// Munich 81456
 type AutofillAddressUI struct {
 	// AddressFields A two dimension array containing the representation of values from an address profile.
 	AddressFields []*AutofillAddressFields `json:"addressFields"`
@@ -65,10 +67,10 @@ type AutofillAddressUI struct {
 type AutofillFillingStrategy string
 
 const (
-	// AutofillFillingStrategyAutocompleteAttribute enum const.
+	// AutofillFillingStrategyAutocompleteAttribute enum const
 	AutofillFillingStrategyAutocompleteAttribute AutofillFillingStrategy = "autocompleteAttribute"
 
-	// AutofillFillingStrategyAutofillInferred enum const.
+	// AutofillFillingStrategyAutofillInferred enum const
 	AutofillFillingStrategyAutofillInferred AutofillFillingStrategy = "autofillInferred"
 )
 
@@ -108,14 +110,17 @@ type AutofillTrigger struct {
 	// FrameID (optional) Identifies the frame that field belongs to.
 	FrameID PageFrameID `json:"frameId,omitempty"`
 
-	// Card Credit card information to fill out the form. Credit card data is not saved.
-	Card *AutofillCreditCard `json:"card"`
+	// Card (optional) Credit card information to fill out the form. Credit card data is not saved.  Mutually exclusive with `address`.
+	Card *AutofillCreditCard `json:"card,omitempty"`
+
+	// Address (optional) Address to fill out the form. Address data is not saved. Mutually exclusive with `card`.
+	Address *AutofillAddress `json:"address,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AutofillTrigger) ProtoReq() string { return "Autofill.trigger" }
 
-// Call sends the request.
+// Call sends the request
 func (m AutofillTrigger) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -126,10 +131,10 @@ type AutofillSetAddresses struct {
 	Addresses []*AutofillAddress `json:"addresses"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AutofillSetAddresses) ProtoReq() string { return "Autofill.setAddresses" }
 
-// Call sends the request.
+// Call sends the request
 func (m AutofillSetAddresses) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -137,10 +142,10 @@ func (m AutofillSetAddresses) Call(c Client) error {
 // AutofillDisable Disables autofill domain notifications.
 type AutofillDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AutofillDisable) ProtoReq() string { return "Autofill.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AutofillDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -148,10 +153,10 @@ func (m AutofillDisable) Call(c Client) error {
 // AutofillEnable Enables autofill domain notifications.
 type AutofillEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AutofillEnable) ProtoReq() string { return "Autofill.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AutofillEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -166,7 +171,7 @@ type AutofillAddressFormFilled struct {
 	AddressUI *AutofillAddressUI `json:"addressUi"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AutofillAddressFormFilled) ProtoEvent() string {
 	return "Autofill.addressFormFilled"
 }

@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,8 +22,38 @@ import (
 	"github.com/ysmood/gson"
 )
 
-// This example opens https://github.com/, searches for "git",
-// and then gets the header element which gives the description for Git.
+// localFixture is a page served from this repo, so examples do not depend on
+// a live site.
+func localFixture(name string) string {
+	p, err := filepath.Abs(filepath.Join("fixtures", name))
+	if err != nil {
+		panic(err)
+	}
+	return "file://" + p
+}
+
+// serveLocal serves html at / and any extra paths from this process.
+func serveLocal(html string, files map[string]string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = io.WriteString(w, html)
+			return
+		}
+		body, ok := files[r.URL.Path]
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		if strings.HasSuffix(r.URL.Path, ".js") {
+			w.Header().Set("Content-Type", "application/javascript")
+		}
+		_, _ = io.WriteString(w, body)
+	}))
+}
+
+// This example opens a local search page, searches for "git",
+// and then gets the element which gives the description for Git.
 func Example_basic() {
 	// Launch a new browser with default options, and connect to it.
 	browser := rod.New().MustConnect()
@@ -29,7 +62,7 @@ func Example_basic() {
 	defer browser.MustClose()
 
 	// Create a new page
-	page := browser.MustPage("https://github.com").MustWaitStable()
+	page := browser.MustPage(localFixture("search.html")).MustWaitStable()
 
 	// Trigger the search input with hotkey "/"
 	page.Keyboard.MustType(input.Slash)
@@ -57,9 +90,9 @@ func Example_basic() {
 
 	// Output:
 	// Git is the most widely used version control system.
-	// Found 9 input elements
+	// Found 10 input elements
 	// 1 + 2 = 3
-	// Repository search results · GitHub
+	// Repository search results
 }
 
 // Shows how to disable headless mode and debug.
@@ -92,7 +125,7 @@ func Example_disable_headless_to_debug() {
 
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://github.com/")
+	page := browser.MustPage(localFixture("search.html"))
 
 	page.MustElement("input").MustInput("git").MustType(input.Enter)
 
@@ -110,7 +143,7 @@ func Example_disable_headless_to_debug() {
 // [Page.Timeout] or [Page.WithCancel] is just a shortcut for Page.Context.
 // Of course, Browser or Element works the same way.
 func Example_context_and_timeout() {
-	page := rod.New().MustConnect().MustPage("https://github.com")
+	page := rod.New().MustConnect().MustPage(localFixture("search.html"))
 
 	page.
 		// Set a 5-second timeout for all chained methods
@@ -148,7 +181,7 @@ func Example_context_and_EachEvent() {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://github.com").MustWaitLoad()
+	page := browser.MustPage(localFixture("search.html")).MustWaitLoad()
 
 	page, cancel := page.WithCancel()
 
@@ -169,7 +202,7 @@ func Example_context_and_EachEvent() {
 // the no-prefix version of them.
 // About why we use "Must" as the prefix, it's similar to https://golang.org/pkg/regexp/#MustCompile
 func Example_error_handling() {
-	page := rod.New().MustConnect().MustPage("https://mdn.dev")
+	page := rod.New().MustConnect().MustPage(localFixture("search.html"))
 
 	// We use Go's standard way to check error types, no magic.
 	check := func(err error) {
@@ -219,9 +252,9 @@ func Example_search() {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe")
+	page := browser.MustPage(localFixture("map.html"))
 
-	// Click the zoom-in button of the OpenStreetMap
+	// The control sits inside an iframe, which Search crosses.
 	page.MustSearch(".leaflet-control-zoom-in").MustClick()
 
 	fmt.Println("done")
@@ -230,7 +263,7 @@ func Example_search() {
 }
 
 func Example_page_screenshot() {
-	page := rod.New().MustConnect().MustPage("https://github.com").MustWaitLoad()
+	page := rod.New().MustConnect().MustPage(localFixture("search.html")).MustWaitLoad()
 
 	// simple version
 	page.MustScreenshot("my.png")
@@ -255,7 +288,7 @@ func Example_page_scroll_screenshot() {
 	browser := rod.New().MustConnect()
 
 	// capture entire browser viewport, returning jpg with quality=90
-	img, err := browser.MustPage("https://desktop.github.com/").MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
+	img, err := browser.MustPage(localFixture("search.html")).MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
 		Format:  proto.PageCaptureScreenshotFormatJpeg,
 		Quality: gson.Int(90),
 	})
@@ -267,7 +300,7 @@ func Example_page_scroll_screenshot() {
 }
 
 func Example_page_pdf() {
-	page := rod.New().MustConnect().MustPage("https://github.com").MustWaitLoad()
+	page := rod.New().MustConnect().MustPage(localFixture("search.html")).MustWaitLoad()
 
 	// simple version
 	page.MustPDF("my.pdf")
@@ -289,7 +322,7 @@ func Example_race_selectors() {
 
 	browser := rod.New().MustConnect()
 
-	page := browser.MustPage("https://leetcode.com/accounts/login/")
+	page := browser.MustPage(localFixture("login.html"))
 
 	page.MustElement("#id_login").MustInput(username)
 	page.MustElement("#id_password").MustInput(password).MustType(input.Enter)
@@ -312,7 +345,7 @@ func Example_wait_for_animation() {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://getbootstrap.com/docs/4.0/components/modal/")
+	page := browser.MustPage(localFixture("modal.html"))
 
 	page.MustWaitLoad().MustElement("[data-target='#exampleModalLive']").MustClick()
 
@@ -331,7 +364,19 @@ func Example_wait_for_request() {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://www.wikipedia.org/").MustWaitLoad()
+	site := serveLocal(`<!doctype html>
+<input id="searchInput">
+<div id="out"></div>
+<script>
+document.getElementById("searchInput").addEventListener("input", () => {
+  fetch("/suggest").then(r => r.text()).then(() => {
+    document.getElementById("out").innerHTML = '<a class="suggestion-link">lisp</a>';
+  });
+});
+</script>`, map[string]string{"/suggest": "lisp"})
+	defer site.Close()
+
+	page := browser.MustPage(site.URL).MustWaitLoad()
 
 	// Start to analyze request events
 	wait := page.MustWaitRequestIdle()
@@ -355,7 +400,7 @@ func Example_customize_retry_strategy() {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage("https://github.com")
+	page := browser.MustPage(localFixture("search.html"))
 
 	// sleep for 0.5 seconds before every retry
 	sleeper := func() utils.Sleeper {
@@ -404,7 +449,7 @@ func Example_customize_browser_launch() {
 
 	// mitmproxy needs a cert config to support https. We use http here instead,
 	// for example
-	fmt.Println(browser.MustPage("https://mdn.dev/").MustElement("title").MustText())
+	fmt.Println(browser.MustPage(localFixture("titled.html")).MustElement("title").MustText())
 }
 
 // When rod doesn't have a feature that you need. You can easily call the cdp to achieve it.
@@ -449,7 +494,7 @@ func Example_handle_events() {
 	})()
 
 	wait := page.WaitEvent(&proto.PageLoadEventFired{})
-	page.MustNavigate("https://mdn.dev")
+	page.MustNavigate(localFixture("blank.html"))
 	wait()
 
 	// EachEvent allows us to achieve the same functionality as above.
@@ -459,13 +504,13 @@ func Example_handle_events() {
 		wait := page.EachEvent(func(_ *proto.PageLoadEventFired) (stop bool) {
 			return true
 		})
-		page.MustNavigate("https://mdn.dev")
+		page.MustNavigate(localFixture("blank.html"))
 		wait()
 	}
 
 	// Or the for-loop style to handle events to do the same thing above.
 	if false {
-		page.MustNavigate("https://mdn.dev")
+		page.MustNavigate(localFixture("blank.html"))
 
 		for msg := range page.Event() {
 			e := proto.PageLoadEventFired{}
@@ -485,7 +530,7 @@ func Example_handle_events() {
 
 func Example_download_file() {
 	browser := rod.New().MustConnect()
-	page := browser.MustPage("https://file-examples.com/index.php/sample-documents-download/sample-pdf-download/")
+	page := browser.MustPage(localFixture("download.html"))
 
 	wait := browser.MustWaitDownload()
 
@@ -527,7 +572,12 @@ func Example_hijack_requests() {
 
 	go router.Run()
 
-	browser.MustPage("https://go-rod.github.io").MustWait(`() => document.title === 'hi'`)
+	site := serveLocal(`<!doctype html><script src="/app.js"></script>`, map[string]string{
+		"/app.js": "",
+	})
+	defer site.Close()
+
+	browser.MustPage(site.URL).MustWait(`() => document.title === 'hi'`)
 
 	fmt.Println("done")
 
@@ -588,7 +638,7 @@ func ExamplePage_pool() {
 		// so the instance can be reused by other goroutines.
 		defer pool.Put(page)
 
-		page.MustNavigate("http://mdn.dev").MustWaitLoad()
+		page.MustNavigate(localFixture("titled.html")).MustWaitLoad()
 		fmt.Println(page.MustInfo().Title)
 	}
 
@@ -607,10 +657,10 @@ func ExamplePage_pool() {
 	pool.Cleanup(func(p *rod.Page) { p.MustClose() })
 
 	// Output:
-	// MDN Web Docs
-	// MDN Web Docs
-	// MDN Web Docs
-	// MDN Web Docs
+	// Local page
+	// Local page
+	// Local page
+	// Local page
 }
 
 // We can use [rod.BrowserPool] to concurrently control and reuse browsers.
@@ -639,7 +689,7 @@ func ExampleBrowser_pool() {
 			defer pool.Put(browser)
 
 			// Use the browser instance
-			page := browser.MustPage("https://www.google.com")
+			page := browser.MustPage(localFixture("titled.html"))
 			fmt.Println(page.MustInfo().Title)
 		}()
 	}
@@ -665,7 +715,10 @@ func Example_load_extension() {
 		Headless(false).
 		MustLaunch()
 
-	page := rod.New().ControlURL(u).MustConnect().MustPage("http://mdn.dev")
+	site := serveLocal(`<!doctype html><title>plain</title>`, nil)
+	defer site.Close()
+
+	page := rod.New().ControlURL(u).MustConnect().MustPage(site.URL)
 
 	page.MustWait(`() => document.title === 'test-extension'`)
 
@@ -686,5 +739,5 @@ func Example_log_cdp_traffic() {
 		})).
 		Start(cdp.MustConnectWS(launcher.New().MustLaunch()))
 
-	rod.New().Client(cdp).MustConnect().MustPage("http://mdn.dev")
+	rod.New().Client(cdp).MustConnect().MustPage(localFixture("blank.html"))
 }

@@ -57,7 +57,9 @@ func (msg *Message) Load(e proto.Event) bool {
 		return true
 	}
 
-	utils.E(json.Unmarshal(msg.data, e))
+	if err := json.Unmarshal(msg.data, e); err != nil {
+		return false
+	}
 	msg.event = eVal
 	msg.data = nil
 	return true

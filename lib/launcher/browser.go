@@ -15,8 +15,6 @@ import (
 
 	"github.com/go-rod/rod/lib/defaults"
 	"github.com/go-rod/rod/lib/utils"
-	"github.com/ysmood/fetchup"
-	"github.com/ysmood/leakless"
 )
 
 // Host formats a revision number to a downloadable URL for the browser.
@@ -74,15 +72,32 @@ var DefaultBrowserDir = filepath.Join(map[string]string{
 }[runtime.GOOS], "rod", "browser")
 
 // Browser is a helper to download browser smartly.
+//
+// By default it downloads the latest stable full Chrome from Chrome for
+// Testing. Set HeadlessShell for the smaller chrome-headless-shell build, or
+// Revision for a Chromium snapshot.
 type Browser struct {
 	Context context.Context
 
 	// Hosts are the candidates to download the browser.
-	// Such as [HostGoogle] or [HostNPM].
+	// Such as [HostGoogle] or [HostNPM]. When nil, the default hosts for the
+	// selected browser are used. An empty non-nil list downloads nothing.
 	Hosts []Host
 
-	// Revision of the browser to use
+	// Revision of a Chromium snapshot to download, such as [RevisionDefault].
+	// When zero, the latest stable Chrome for Testing build is downloaded.
 	Revision int
+
+	// HeadlessShell downloads chrome-headless-shell instead of full Chrome.
+	// The shell cannot show a window, so [Browser.Headful] wins. Only applies
+	// when Revision is zero and the browser was not created by
+	// [NewChromeForTesting].
+	HeadlessShell bool
+
+	// Headful downloads the full Chrome build, because chrome-headless-shell
+	// cannot show a window. Only applies when Revision is zero and the browser
+	// was not created by [NewChromeForTesting].
+	Headful bool
 
 	// RootDir to download different browser versions.
 	RootDir string
@@ -95,74 +110,214 @@ type Browser struct {
 
 	// HTTPClient to download the browser
 	HTTPClient *http.Client
+
+	// SHA256 of the downloaded archive. When set, a mismatching download is
+	// rejected before extraction.
+	SHA256 string
+
+	cft *chromeForTesting
 }
 
-// NewBrowser with default values.
+// NewBrowser with default values. The default is the latest stable full
+// Chrome from Chrome for Testing.
 func NewBrowser() *Browser {
 	return &Browser{
 		Context:  context.Background(),
-		Revision: RevisionDefault,
-		Hosts:    []Host{HostGoogle, HostNPM, HostPlaywright},
 		RootDir:  DefaultBrowserDir,
 		Logger:   log.New(os.Stdout, "[launcher.Browser]", log.LstdFlags),
 		LockPort: defaults.LockPort,
 	}
 }
 
-// Dir to download the browser.
-func (lc *Browser) Dir() string {
+// target is the Chrome for Testing build this browser uses. It is nil when a
+// Chromium snapshot of Revision is selected. The latest stable version is
+// looked up once per [latestTTL]. When the lookup fails, the newest build
+// already in RootDir is used, so an offline machine keeps working.
+func (lc *Browser) target() (*chromeForTesting, error) {
+	if lc.Revision != 0 {
+		return nil, nil
+	}
+	if lc.cft != nil {
+		return lc.cft, nil
+	}
+	if _, err := cftPlatform(); err != nil {
+		return nil, err
+	}
+
+	ctx := lc.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	t := &chromeForTesting{headlessShell: lc.useShell()}
+	version, err := latestStable(ctx, lc.HTTPClient)
+	if err == nil {
+		t.version = version
+		return t, nil
+	}
+	installed, ok := newestInstalled(lc.RootDir, t)
+	if !ok {
+		return nil, err
+	}
+	t.version = installed
+	return t, nil
+}
+
+// resolved is target for the path helpers, which cannot return an error.
+// When the target can't be resolved, the path has an empty version and the
+// caller fails in [Browser.Get] or [Browser.Download] with the real error.
+func (lc *Browser) resolved() *chromeForTesting {
+	t, err := lc.target()
+	if err != nil {
+		return &chromeForTesting{headlessShell: lc.useShell()}
+	}
+	return t
+}
+
+// useShell reports whether the download is chrome-headless-shell. A headful
+// launch always gets full Chrome, because the shell cannot show a window.
+func (lc *Browser) useShell() bool {
+	return lc.HeadlessShell && !lc.Headful
+}
+
+func (lc *Browser) dirFor(t *chromeForTesting) string {
+	if t != nil {
+		return filepath.Join(lc.RootDir, t.dirName())
+	}
 	return filepath.Join(lc.RootDir, fmt.Sprintf("chromium-%d", lc.Revision))
 }
 
-// BinPath to download the browser executable.
-func (lc *Browser) BinPath() string {
+func (lc *Browser) binFor(t *chromeForTesting) string {
+	if t != nil {
+		return filepath.Join(lc.dirFor(t), filepath.FromSlash(t.binName()))
+	}
 	bin := map[string]string{
 		"darwin":  "Chromium.app/Contents/MacOS/Chromium",
 		"linux":   "chrome",
 		"windows": "chrome.exe",
 	}[runtime.GOOS]
 
-	return filepath.Join(lc.Dir(), filepath.FromSlash(bin))
+	return filepath.Join(lc.dirFor(t), filepath.FromSlash(bin))
+}
+
+// Dir to download the browser.
+func (lc *Browser) Dir() string {
+	return lc.dirFor(lc.resolved())
+}
+
+// BinPath to download the browser executable.
+func (lc *Browser) BinPath() string {
+	return lc.binFor(lc.resolved())
+}
+
+// defaultHosts are the download candidates for the target t.
+func defaultHosts(t *chromeForTesting) []Host {
+	if t == nil {
+		return []Host{HostGoogle, HostNPM, HostPlaywright}
+	}
+	return []Host{HostChromeForTesting(t.version, t.headlessShell)}
 }
 
 // Download browser from the fastest host.
 // It will race downloading a TCP packet from each host and use the fastest host.
 func (lc *Browser) Download() error {
+	t, err := lc.target()
+	if err != nil {
+		return err
+	}
+	return lc.download(t)
+}
+
+func (lc *Browser) download(t *chromeForTesting) error {
+	hosts := lc.Hosts
+	if hosts == nil {
+		hosts = defaultHosts(t)
+	}
 	us := []string{}
-	for _, host := range lc.Hosts {
+	for _, host := range hosts {
 		us = append(us, host(lc.Revision))
 	}
 
-	dir := lc.Dir()
-
-	fu := fetchup.New(dir, us...)
-	fu.Ctx = lc.Context
-	fu.Logger = lc.Logger
-	if lc.HTTPClient != nil {
-		fu.HttpClient = lc.HTTPClient
+	ctx := lc.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	logger := lc.Logger
+	if logger == nil {
+		logger = utils.LoggerQuiet
 	}
 
-	err := fu.Fetch()
+	dir := lc.dirFor(t)
+	sum := lc.SHA256
+	if sum == "" {
+		if b, err := os.ReadFile(dir + ".sha256"); err == nil {
+			sum = strings.TrimSpace(string(b))
+		}
+	}
+	if sum == "" {
+		sum = ChromeForTestingPins[lc.pinKey(t)]
+	}
+
+	got, err := fetchArchive(ctx, lc.HTTPClient, logger, dir, sum, us)
 	if err != nil {
 		return fmt.Errorf("can't find a browser binary for your OS, the doc might help https://go-rod.github.io/#/compatibility?id=os : %w", err) //nolint: lll
 	}
+	if err := os.WriteFile(dir+".sha256", []byte(got+"\n"), 0o644); err != nil {
+		return err
+	}
 
-	return fetchup.StripFirstDir(dir)
+	// Only the latest-stable path keeps one build per product. An explicit
+	// version from NewChromeForTesting is never pruned.
+	if t != nil && lc.cft == nil {
+		if n, err := PruneOlderBrowsers(lc.RootDir, dir); err == nil && n > 0 {
+			logger.Println("Removed older browsers:", n)
+		}
+	}
+	return nil
+}
+
+// pinKey is the ChromeForTestingPins key for the target t.
+func (lc *Browser) pinKey(t *chromeForTesting) string {
+	if t == nil {
+		return fmt.Sprintf("chromium/%d", lc.Revision)
+	}
+	platform, err := cftPlatform()
+	if err != nil {
+		return ""
+	}
+	return t.product() + "/" + platform + "/" + t.version
 }
 
 // Get is a smart helper to get the browser executable path.
 // If [Browser.BinPath] is not valid it will auto download the browser to [Browser.BinPath].
+// On a musl host it returns the browser found by [LookPath] instead, or
+// [ErrMuslNoBrowser].
 func (lc *Browser) Get() (string, error) {
-	defer leakless.LockPort(lc.LockPort)()
+	if hostUsesMusl() {
+		if bin, has := LookPath(); has {
+			return bin, nil
+		}
+		return "", ErrMuslNoBrowser
+	}
 
-	if lc.Validate() == nil {
-		return lc.BinPath(), nil
+	unlock, err := lockDownload(lc.RootDir)
+	if err != nil {
+		return "", err
+	}
+	defer unlock()
+
+	t, err := lc.target()
+	if err != nil {
+		return "", err
+	}
+	bin := lc.binFor(t)
+	if validateBin(bin) == nil {
+		return bin, nil
 	}
 
 	// Try to cleanup before downloading
-	_ = os.RemoveAll(lc.Dir())
+	_ = os.RemoveAll(lc.dirFor(t))
 
-	return lc.BinPath(), lc.Download()
+	return bin, lc.download(t)
 }
 
 // MustGet is similar with Get.
@@ -175,12 +330,16 @@ func (lc *Browser) MustGet() string {
 // Validate returns nil if the browser executable is valid.
 // If the executable is malformed it will return error.
 func (lc *Browser) Validate() error {
-	_, err := os.Stat(lc.BinPath())
+	return validateBin(lc.BinPath())
+}
+
+func validateBin(bin string) error {
+	_, err := os.Stat(bin)
 	if err != nil {
 		return err
 	}
 
-	cmd := exec.Command(lc.BinPath(), "--headless", "--no-sandbox",
+	cmd := exec.Command(bin, "--headless", "--no-sandbox",
 		"--use-mock-keychain", "--disable-dev-shm-usage",
 		"--disable-gpu", "--dump-dom", "about:blank")
 	b, err := cmd.CombinedOutput()

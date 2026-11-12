@@ -59,6 +59,18 @@ func (p *Page) Context(ctx context.Context) *Page {
 	newObj := *p
 	p.helpersLock.Unlock()
 	newObj.ctx = ctx
+	// Input helpers hold the page they were created with. Rebind them so
+	// timeouts on this clone apply to mouse, keyboard and touch calls, while
+	// position, buttons, and pressed keys stay shared with the original.
+	if p.Mouse != nil {
+		newObj.Mouse = &Mouse{page: &newObj, root: p.Mouse.state()}
+	}
+	if p.Keyboard != nil {
+		newObj.Keyboard = &Keyboard{page: &newObj, root: p.Keyboard.state()}
+	}
+	if p.Touch != nil {
+		newObj.Touch = &Touch{page: &newObj}
+	}
 	return &newObj
 }
 

@@ -10,7 +10,7 @@ import (
 
 Media
 
-This domain allows detailed inspection of media elements
+This domain allows detailed inspection of media elements.
 
 */
 
@@ -20,25 +20,25 @@ type MediaPlayerID string
 // MediaTimestamp ...
 type MediaTimestamp float64
 
-// MediaPlayerMessageLevel enum.
+// MediaPlayerMessageLevel enum
 type MediaPlayerMessageLevel string
 
 const (
-	// MediaPlayerMessageLevelError enum const.
+	// MediaPlayerMessageLevelError enum const
 	MediaPlayerMessageLevelError MediaPlayerMessageLevel = "error"
 
-	// MediaPlayerMessageLevelWarning enum const.
+	// MediaPlayerMessageLevelWarning enum const
 	MediaPlayerMessageLevelWarning MediaPlayerMessageLevel = "warning"
 
-	// MediaPlayerMessageLevelInfo enum const.
+	// MediaPlayerMessageLevelInfo enum const
 	MediaPlayerMessageLevelInfo MediaPlayerMessageLevel = "info"
 
-	// MediaPlayerMessageLevelDebug enum const.
+	// MediaPlayerMessageLevelDebug enum const
 	MediaPlayerMessageLevelDebug MediaPlayerMessageLevel = "debug"
 )
 
 // MediaPlayerMessage Have one type per entry in MediaLogRecord::Type
-// Corresponds to kMessage.
+// Corresponds to kMessage
 type MediaPlayerMessage struct {
 	// Level Keep in sync with MediaLogMessageLevel
 	// We are currently keeping the message level 'error' separate from the
@@ -55,7 +55,7 @@ type MediaPlayerMessage struct {
 	Message string `json:"message"`
 }
 
-// MediaPlayerProperty Corresponds to kMediaPropertyChange.
+// MediaPlayerProperty Corresponds to kMediaPropertyChange
 type MediaPlayerProperty struct {
 	// Name ...
 	Name string `json:"name"`
@@ -64,7 +64,7 @@ type MediaPlayerProperty struct {
 	Value string `json:"value"`
 }
 
-// MediaPlayerEvent Corresponds to kMediaEventTriggered.
+// MediaPlayerEvent Corresponds to kMediaEventTriggered
 type MediaPlayerEvent struct {
 	// Timestamp ...
 	Timestamp MediaTimestamp `json:"timestamp"`
@@ -83,7 +83,7 @@ type MediaPlayerErrorSourceLocation struct {
 	Line int `json:"line"`
 }
 
-// MediaPlayerError Corresponds to kMediaError.
+// MediaPlayerError Corresponds to kMediaError
 type MediaPlayerError struct {
 	// ErrorType ...
 	ErrorType string `json:"errorType"`
@@ -103,13 +103,22 @@ type MediaPlayerError struct {
 	Data map[string]gson.JSON `json:"data"`
 }
 
-// MediaEnable Enables the Media domain.
+// MediaPlayer ...
+type MediaPlayer struct {
+	// PlayerID ...
+	PlayerID MediaPlayerID `json:"playerId"`
+
+	// DomNodeID (optional) ...
+	DomNodeID DOMBackendNodeID `json:"domNodeId,omitempty"`
+}
+
+// MediaEnable Enables the Media domain
 type MediaEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MediaEnable) ProtoReq() string { return "Media.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m MediaEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -117,10 +126,10 @@ func (m MediaEnable) Call(c Client) error {
 // MediaDisable Disables the Media domain.
 type MediaDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MediaDisable) ProtoReq() string { return "Media.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m MediaDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -135,7 +144,7 @@ type MediaPlayerPropertiesChanged struct {
 	Properties []*MediaPlayerProperty `json:"properties"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt MediaPlayerPropertiesChanged) ProtoEvent() string {
 	return "Media.playerPropertiesChanged"
 }
@@ -150,7 +159,7 @@ type MediaPlayerEventsAdded struct {
 	Events []*MediaPlayerEvent `json:"events"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt MediaPlayerEventsAdded) ProtoEvent() string {
 	return "Media.playerEventsAdded"
 }
@@ -164,7 +173,7 @@ type MediaPlayerMessagesLogged struct {
 	Messages []*MediaPlayerMessage `json:"messages"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt MediaPlayerMessagesLogged) ProtoEvent() string {
 	return "Media.playerMessagesLogged"
 }
@@ -178,20 +187,20 @@ type MediaPlayerErrorsRaised struct {
 	Errors []*MediaPlayerError `json:"errors"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt MediaPlayerErrorsRaised) ProtoEvent() string {
 	return "Media.playerErrorsRaised"
 }
 
-// MediaPlayersCreated Called whenever a player is created, or when a new agent joins and receives
-// a list of active players. If an agent is restored, it will receive the full
-// list of player ids and all events again.
-type MediaPlayersCreated struct {
-	// Players ...
-	Players []MediaPlayerID `json:"players"`
+// MediaPlayerCreated Called whenever a player is created, or when a new agent joins and receives
+// a list of active players. If an agent is restored, it will receive one
+// event for each active player.
+type MediaPlayerCreated struct {
+	// Player ...
+	Player *MediaPlayer `json:"player"`
 }
 
-// ProtoEvent name.
-func (evt MediaPlayersCreated) ProtoEvent() string {
-	return "Media.playersCreated"
+// ProtoEvent name
+func (evt MediaPlayerCreated) ProtoEvent() string {
+	return "Media.playerCreated"
 }

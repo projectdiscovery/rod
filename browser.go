@@ -9,9 +9,12 @@ package rod
 
 import (
 	"context"
+	"errors"
+	"io"
 	"reflect"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-rod/rod/lib/cdp"
@@ -20,7 +23,6 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
-	"github.com/ysmood/goob"
 )
 
 // Browser implements these interfaces.
@@ -51,10 +53,20 @@ type Browser struct {
 
 	defaultDevice devices.Device
 
+	// compliant skips the default device and aligns the user agent with the
+	// browser. The launcher must also be started with [launcher.Launcher.Compliant].
+	compliant bool
+	profile   *compliantProfile
+
 	controlURL  string
 	client      CDPClient
-	event       *goob.Observable // all the browser events from cdp client
+	launcher    *launcher.Launcher // set when Connect started the browser itself
+	router      *router            // all the browser events from cdp client
+	eventQueue  int
 	targetsLock *sync.Mutex
+	domainMu    *sync.Mutex
+	domains     map[stateKey]int
+	autoAttach  *atomic.Bool
 
 	// stores all the previous cdp call of same type. Browser doesn't have enough API
 	// for us to retrieve all its internal states. This is an workaround to map them to local.
@@ -77,21 +89,59 @@ func New() *Browser {
 		logger:        DefaultLogger,
 		defaultDevice: devices.LaptopWithMDPIScreen.Landscape(),
 		targetsLock:   &sync.Mutex{},
+		domainMu:      &sync.Mutex{},
+		domains:       map[stateKey]int{},
+		autoAttach:    &atomic.Bool{},
 		states:        &sync.Map{},
+		profile:       &compliantProfile{},
 	}).WithPanic(utils.Panic)
 }
 
 // Incognito creates a new incognito browser.
 func (b *Browser) Incognito() (*Browser, error) {
-	res, err := proto.TargetCreateBrowserContext{}.Call(b)
+	return b.IncognitoContext(b.ctx, BrowserContextOptions{})
+}
+
+// BrowserContextOptions configures an incognito browser context.
+type BrowserContextOptions struct {
+	ProxyServer     string
+	ProxyBypassList string
+	DisposeOnDetach bool
+}
+
+// IncognitoContext creates an incognito browser context. The call honours ctx.
+func (b *Browser) IncognitoContext(ctx context.Context, opts BrowserContextOptions) (*Browser, error) {
+	res, err := proto.TargetCreateBrowserContext{
+		ProxyServer:     opts.ProxyServer,
+		ProxyBypassList: opts.ProxyBypassList,
+		DisposeOnDetach: opts.DisposeOnDetach,
+	}.Call(b.Context(ctx))
 	if err != nil {
 		return nil, err
 	}
 
 	incognito := *b
 	incognito.BrowserContextID = res.BrowserContextID
-
 	return &incognito, nil
+}
+
+// Alive reports whether the browser still answers CDP.
+func (b *Browser) Alive() error {
+	_, err := proto.BrowserGetVersion{}.Call(b)
+	return err
+}
+
+// AutoAttach turns on flattened auto-attach so cross-origin iframes and
+// workers get their own sessions. New targets are paused until
+// Runtime.runIfWaitingForDebugger, which initEvents sends for attached targets
+// when this was enabled.
+func (b *Browser) AutoAttach() error {
+	b.autoAttach.Store(true)
+	return proto.TargetSetAutoAttach{
+		AutoAttach:             true,
+		WaitForDebuggerOnStart: true,
+		Flatten:                true,
+	}.Call(b)
 }
 
 // ControlURL set the url to remote control browser.
@@ -143,26 +193,66 @@ func (b *Browser) NoDefaultDevice() *Browser {
 	return b.DefaultDevice(devices.Clear)
 }
 
+// Compliant makes pages report this browser's own user agent and client hints,
+// with the HeadlessChrome token removed. It also skips the default device,
+// which would force a Chrome 114 user agent. The browser has to be launched
+// with [launcher.Launcher.Compliant], which turns navigator.webdriver off.
+// Without that launch, the user agent is aligned and webdriver stays true.
+func (b *Browser) Compliant(enable bool) *Browser {
+	b.compliant = enable
+	return b
+}
+
 // Connect to the browser and start to control it.
 // If fails to connect, try to launch a local browser, if local browser not found try to download one.
+//
+// A local launch talks CDP over --remote-debugging-pipe, so no debugging port
+// is opened and other local processes cannot reach the browser. Where pipes
+// are not available (Windows), the browser is launched on a port instead.
 func (b *Browser) Connect() error {
 	if b.client == nil {
+		// Pipe launches do not wait on the context, so check it here.
+		if err := b.ctx.Err(); err != nil {
+			return err
+		}
 		u := b.controlURL
+		var l *launcher.Launcher
 		if u == "" {
-			var err error
-			u, err = launcher.New().Context(b.ctx).Launch()
-			if err != nil {
-				return err
+			l = launcher.New().Context(b.ctx)
+			if b.compliant {
+				l.Compliant(true)
 			}
 		}
 
-		c, err := cdp.StartWithURL(b.ctx, u, nil)
-		if err != nil {
-			return err
+		var c CDPClient
+		if l != nil && launcher.PipeSupported() {
+			pc, err := l.LaunchPipe()
+			if err != nil {
+				return err
+			}
+			c = pc
+		} else {
+			if l != nil {
+				var err error
+				u, err = l.Launch()
+				if err != nil {
+					return err
+				}
+			}
+			cc, err := cdp.StartWithURL(b.ctx, u, nil)
+			if err != nil {
+				if l != nil {
+					l.Kill()
+					l.Cleanup()
+				}
+				return err
+			}
+			c = cc
 		}
+		b.launcher = l
 		b.client = c
 	} else if b.controlURL != "" {
-		panic("Browser.Client and Browser.ControlURL can't be set at the same time")
+		return errors.New("Browser.Client and Browser.ControlURL can't be set at the same time")
 	}
 
 	b.initEvents()
@@ -171,15 +261,63 @@ func (b *Browser) Connect() error {
 		launcher.Open(b.ServeMonitor(b.monitor))
 	}
 
-	return proto.TargetSetDiscoverTargets{Discover: true}.Call(b)
+	if err := (proto.TargetSetDiscoverTargets{Discover: true}).Call(b); err != nil {
+		if b.launcher != nil {
+			b.abandonLaunch()
+		}
+		return err
+	}
+	return nil
 }
 
-// Close the browser.
+// abandonLaunch tears down a browser that Connect started but could not
+// finish connecting to. Closing the client also ends the event loop.
+func (b *Browser) abandonLaunch() {
+	if c, ok := b.client.(io.Closer); ok && c != nil {
+		_ = c.Close()
+	}
+	b.launcher.Kill()
+	b.launcher.Cleanup()
+	b.client = nil
+	b.launcher = nil
+}
+
+// Close the browser and, when this instance owns the connection, the CDP transport.
+// A browser that Connect launched itself is also waited for and its profile
+// directory removed.
 func (b *Browser) Close() error {
+	var err error
 	if b.BrowserContextID == "" {
-		return proto.BrowserClose{}.Call(b)
+		err = proto.BrowserClose{}.Call(b)
+		if c, ok := b.client.(io.Closer); ok && c != nil {
+			_ = c.Close()
+		}
+		if b.launcher != nil {
+			reapBrowser(b.launcher, BrowserExitTimeout)
+		}
+		return err
 	}
 	return proto.TargetDisposeBrowserContext{BrowserContextID: b.BrowserContextID}.Call(b)
+}
+
+// BrowserExitTimeout is how long Close waits for a browser that Connect
+// launched to exit on its own before killing it.
+var BrowserExitTimeout = 10 * time.Second
+
+func reapBrowser(l *launcher.Launcher, timeout time.Duration) {
+	done := make(chan struct{})
+	go func() {
+		l.Cleanup()
+		close(done)
+	}()
+	t := time.NewTimer(timeout)
+	defer t.Stop()
+	select {
+	case <-done:
+	case <-t.C:
+		l.Kill()
+		<-done
+	}
 }
 
 // Page creates a new browser tab. If opts.URL is empty, the default target will be "about:blank".
@@ -193,9 +331,30 @@ func (b *Browser) Page(opts proto.TargetCreateTarget) (p *Page, err error) {
 		return nil, err
 	}
 	defer func() {
-		// If Navigate or PageFromTarget fails we should close the target to prevent leak
+		// If Navigate or PageFromTarget fails we should close the target to prevent leak.
+		// Use a fresh timeout so a cancelled caller context still closes the target.
 		if err != nil {
-			_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(b)
+			closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			// A target stuck in navigation can ignore the first close.
+			for closeCtx.Err() == nil {
+				_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(b.Context(closeCtx))
+				list, listErr := proto.TargetGetTargets{}.Call(b.Context(closeCtx))
+				if listErr != nil {
+					return
+				}
+				gone := true
+				for _, info := range list.TargetInfos {
+					if info.TargetID == target.TargetID {
+						gone = false
+						break
+					}
+				}
+				if gone {
+					return
+				}
+				time.Sleep(50 * time.Millisecond)
+			}
 		}
 	}()
 
@@ -249,19 +408,33 @@ func (b *Browser) Call(ctx context.Context, sessionID, methodName string, params
 
 // PageFromSession is used for low-level debugging.
 func (b *Browser) PageFromSession(sessionID proto.TargetSessionID) *Page {
-	sessionCtx, cancel := context.WithCancel(b.ctx)
-	return &Page{
+	sessionCtx, cancel, cancelCause := b.sessionContext()
+	page := &Page{
 		e:             b.e,
 		ctx:           sessionCtx,
+		session:       sessionCtx,
 		sessionCancel: cancel,
+		cancelCause:   cancelCause,
 		sleeper:       b.sleeper,
 		browser:       b,
 		SessionID:     sessionID,
+		jsCtxLock:     &sync.Mutex{},
+		jsCtxID:       new(proto.RuntimeRemoteObjectID),
+		helpersLock:   &sync.Mutex{},
 	}
+	page.root = page
+	page.newKeyboard().newMouse().newTouch()
+	return page
 }
 
 // PageFromTarget gets or creates a Page instance.
 func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
+	if b.compliant {
+		if err := b.ensureCompliant(); err != nil {
+			return nil, err
+		}
+	}
+
 	b.targetsLock.Lock()
 	defer b.targetsLock.Unlock()
 
@@ -278,12 +451,14 @@ func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 		return nil, err
 	}
 
-	sessionCtx, cancel := context.WithCancel(b.ctx)
+	sessionCtx, cancel, cancelCause := b.sessionContext()
 
 	page = &Page{
 		e:             b.e,
 		ctx:           sessionCtx,
+		session:       sessionCtx,
 		sessionCancel: cancel,
+		cancelCause:   cancelCause,
 		sleeper:       b.sleeper,
 		browser:       b,
 		TargetID:      targetID,
@@ -297,7 +472,12 @@ func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 	page.root = page
 	page.newKeyboard().newMouse().newTouch()
 
-	if !b.defaultDevice.IsClear() {
+	if b.compliant {
+		err = page.applyCompliant()
+		if err != nil {
+			return nil, err
+		}
+	} else if !b.defaultDevice.IsClear() {
 		err = page.Emulate(b.defaultDevice)
 		if err != nil {
 			return nil, err
@@ -305,8 +485,6 @@ func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 	}
 
 	b.cachePage(page)
-
-	page.initEvents()
 
 	// If we don't enable it, it will cause a lot of unexpected browser behavior.
 	// Such as proto.PageAddScriptToEvaluateOnNewDocument won't work.
@@ -327,31 +505,18 @@ func (b *Browser) WaitEvent(e proto.Event) (wait func()) {
 
 // waits for the next event for one time. It will also load the data into the event object.
 func (b *Browser) waitEvent(sessionID proto.TargetSessionID, e proto.Event) (wait func()) {
-	valE := reflect.ValueOf(e)
-	valTrue := reflect.ValueOf(true)
-
-	if valE.Kind() != reflect.Ptr {
-		valE = reflect.New(valE.Type())
-	}
-
-	// dynamically creates a function on runtime:
-	//
-	// func(ee proto.Event) bool {
-	//   *e = *ee
-	//   return true
-	// }
-	fnType := reflect.FuncOf([]reflect.Type{valE.Type()}, []reflect.Type{valTrue.Type()}, false)
-	fnVal := reflect.MakeFunc(fnType, func(args []reflect.Value) []reflect.Value {
-		valE.Elem().Set(args[0].Elem())
-		return []reflect.Value{valTrue}
-	})
-
-	return b.eachEvent(sessionID, fnVal.Interface())
+	return b.eachEvent(sessionID, eventLoader(e))
 }
 
 // If the any callback returns true the event loop will stop.
 // It will enable the related domains if not enabled, and restore them after wait ends.
 func (b *Browser) eachEvent(sessionID proto.TargetSessionID, callbacks ...interface{}) (wait func()) {
+	w := b.eachEventStop(sessionID, callbacks...)
+	return func() { w() }
+}
+
+// eachEventStop is eachEvent whose wait reports whether a callback stopped it.
+func (b *Browser) eachEventStop(sessionID proto.TargetSessionID, callbacks ...interface{}) (wait func() bool) {
 	cbMap := map[string]reflect.Value{}
 	restores := []func(){}
 
@@ -371,12 +536,17 @@ func (b *Browser) eachEvent(sessionID proto.TargetSessionID, callbacks ...interf
 		}
 	}
 
-	b, cancel := b.WithCancel()
-	messages := b.Event()
+	methods := make(map[string]struct{}, len(cbMap))
+	for name := range cbMap {
+		methods[name] = struct{}{}
+	}
 
-	return func() {
+	b, cancel := b.WithCancel()
+	messages := b.listen(b.ctx, sessionID, methods)
+
+	return func() bool {
 		if messages == nil {
-			panic("can't use wait function twice")
+			return false
 		}
 
 		defer func() {
@@ -388,10 +558,6 @@ func (b *Browser) eachEvent(sessionID proto.TargetSessionID, callbacks ...interf
 		}()
 
 		for msg := range messages {
-			if !(sessionID == "" || msg.SessionID == sessionID) {
-				continue
-			}
-
 			if cbVal, has := cbMap[msg.Method]; has {
 				e := reflect.New(proto.GetType(msg.Method))
 				msg.Load(e.Interface().(proto.Event)) //nolint: forcetypeassert
@@ -402,54 +568,72 @@ func (b *Browser) eachEvent(sessionID proto.TargetSessionID, callbacks ...interf
 				res := cbVal.Call(args)
 				if len(res) > 0 {
 					if res[0].Bool() {
-						return
+						return true
 					}
 				}
 			}
 		}
+		return false
 	}
 }
 
 // Event of the browser.
 func (b *Browser) Event() <-chan *Message {
-	src := b.event.Subscribe(b.ctx)
-	dst := make(chan *Message)
-	go func() {
-		defer close(dst)
-		for {
-			select {
-			case <-b.ctx.Done():
-				return
-			case e, ok := <-src:
-				if !ok {
-					return
-				}
-				select {
-				case <-b.ctx.Done():
-					return
-				case dst <- e.(*Message): //nolint: forcetypeassert
-				}
-			}
-		}
-	}()
-	return dst
+	return b.listen(b.ctx, "", nil)
+}
+
+// listen returns a channel of events. An empty sessionID means every session.
+// When methods is non-nil only those methods are delivered. The channel is
+// closed when ctx ends.
+func (b *Browser) listen(ctx context.Context, sessionID proto.TargetSessionID, methods map[string]struct{}) <-chan *Message {
+	if b.router == nil {
+		ch := make(chan *Message)
+		close(ch)
+		return ch
+	}
+	return b.router.subscribe(ctx, sessionID, methods)
 }
 
 func (b *Browser) initEvents() {
-	ctx, cancel := context.WithCancel(b.ctx)
-	b.event = goob.New(ctx)
+	queue := b.eventQueue
+	if queue == 0 {
+		queue = DefaultEventQueue
+	}
+	b.router = newRouter(queue)
+	if b.domains == nil {
+		b.domains = map[stateKey]int{}
+	}
+	if b.domainMu == nil {
+		b.domainMu = &sync.Mutex{}
+	}
+	if b.autoAttach == nil {
+		b.autoAttach = &atomic.Bool{}
+	}
 	event := b.client.Event()
 
 	go func() {
-		defer cancel()
 		for e := range event {
-			b.event.Publish(&Message{
+			msg := &Message{
 				SessionID: proto.TargetSessionID(e.SessionID),
 				Method:    e.Method,
 				lock:      &sync.Mutex{},
 				data:      e.Params,
-			})
+			}
+			switch e.Method {
+			case "Target.attachedToTarget":
+				if b.autoAttach.Load() {
+					go b.resumeAttached(e.Params)
+				}
+			case "Target.detachedFromTarget", "Target.targetDestroyed":
+				b.targetGone(e.Method, e.Params)
+			}
+			b.router.publish(msg)
 		}
+		cause := b.Err()
+		if cause == nil {
+			cause = cdp.ErrConnClosed
+		}
+		b.cancelPages(cause)
 	}()
 }
 

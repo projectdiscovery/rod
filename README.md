@@ -1,4 +1,22 @@
-# Overview
+# ProjectDiscovery fork of go-rod
+
+This repository is a fork of [go-rod/rod](https://github.com/go-rod/rod) v0.116.2, maintained by ProjectDiscovery for the headless browser needs of [nuclei](https://github.com/projectdiscovery/nuclei), [katana](https://github.com/projectdiscovery/katana), [httpx](https://github.com/projectdiscovery/httpx) and related tools. The module path is unchanged, so existing code moves to the fork with a `replace` directive and no import edits.
+
+## Fork changes
+
+Upstream go-rod is no longer released. These changes are the reason for the fork.
+
+- **Local browsers talk over a pipe.** `Browser.Connect` launches Chrome with `--remote-debugging-pipe` on Linux and macOS, so no debugging port is open for other local processes to attach to. Windows falls back to a port, since Go does not pass extra file descriptors to child processes there. `Launcher.Launch` still returns a URL for callers that need one.
+- **Connect cleans up after itself.** A cancelled context fails before a browser starts, and a browser that cannot finish connecting is closed rather than left running.
+- **A page pool that checks its pages.** `NewHealthPagePool` hands out at most N pages. Before reuse, each page is checked: the browser answers, the target still exists, and the renderer runs script. A failed page is closed and its slot is freed, so a closed target is never handed out again. Returned pages go back to `about:blank` and popups they opened are closed. Cookies and storage are kept, so use a separate browser context when that state must not carry over.
+- **Access to the paused network request.** `HijackRequest.Event()` returns the paused `Fetch.requestPaused` event, including the request id, the frame and the resource type.
+- **Service worker requests.** A router attached to one page does not see requests that page's service worker makes itself, because those belong to the worker target. `Browser.HijackRequests` does see them. This is documented on `Page.HijackRequests` and covered by a test.
+- **Chrome for Testing by default.** Without a `Bin`, the launcher downloads the latest Stable full Chrome, and the archive hash is pinned on first download. `HeadlessShell(true)` selects the smaller headless-shell build. Musl hosts use the installed browser instead of a download that will not run.
+- **Browser exits with its parent.** Linux uses `Pdeathsig`, Windows a job object, and macOS and the BSDs a watchdog process. A crashed test run no longer leaves browsers behind.
+- **Opt-in compliant mode.** `Compliant(true)` removes the automation switch, so `navigator.webdriver` is false, and makes the user agent and client hints match the real browser, without the `HeadlessChrome` token.
+- **Examples and page tests run offline.** They use local fixture pages and a local HTTP server instead of live sites. Some launcher tests still download a browser and need network access.
+
+## Upstream overview
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/go-rod/rod.svg)](https://pkg.go.dev/github.com/go-rod/rod)
 [![Discord Chat](https://img.shields.io/discord/719933559456006165.svg)][discord room]

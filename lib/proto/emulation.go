@@ -10,20 +10,47 @@ This domain emulates different environments for the page.
 
 */
 
-// EmulationScreenOrientationType enum.
+// EmulationSafeAreaInsets (experimental) ...
+type EmulationSafeAreaInsets struct {
+	// Top (optional) Overrides safe-area-inset-top.
+	Top *int `json:"top,omitempty"`
+
+	// TopMax (optional) Overrides safe-area-max-inset-top.
+	TopMax *int `json:"topMax,omitempty"`
+
+	// Left (optional) Overrides safe-area-inset-left.
+	Left *int `json:"left,omitempty"`
+
+	// LeftMax (optional) Overrides safe-area-max-inset-left.
+	LeftMax *int `json:"leftMax,omitempty"`
+
+	// Bottom (optional) Overrides safe-area-inset-bottom.
+	Bottom *int `json:"bottom,omitempty"`
+
+	// BottomMax (optional) Overrides safe-area-max-inset-bottom.
+	BottomMax *int `json:"bottomMax,omitempty"`
+
+	// Right (optional) Overrides safe-area-inset-right.
+	Right *int `json:"right,omitempty"`
+
+	// RightMax (optional) Overrides safe-area-max-inset-right.
+	RightMax *int `json:"rightMax,omitempty"`
+}
+
+// EmulationScreenOrientationType enum
 type EmulationScreenOrientationType string
 
 const (
-	// EmulationScreenOrientationTypePortraitPrimary enum const.
+	// EmulationScreenOrientationTypePortraitPrimary enum const
 	EmulationScreenOrientationTypePortraitPrimary EmulationScreenOrientationType = "portraitPrimary"
 
-	// EmulationScreenOrientationTypePortraitSecondary enum const.
+	// EmulationScreenOrientationTypePortraitSecondary enum const
 	EmulationScreenOrientationTypePortraitSecondary EmulationScreenOrientationType = "portraitSecondary"
 
-	// EmulationScreenOrientationTypeLandscapePrimary enum const.
+	// EmulationScreenOrientationTypeLandscapePrimary enum const
 	EmulationScreenOrientationTypeLandscapePrimary EmulationScreenOrientationType = "landscapePrimary"
 
-	// EmulationScreenOrientationTypeLandscapeSecondary enum const.
+	// EmulationScreenOrientationTypeLandscapeSecondary enum const
 	EmulationScreenOrientationTypeLandscapeSecondary EmulationScreenOrientationType = "landscapeSecondary"
 )
 
@@ -36,14 +63,14 @@ type EmulationScreenOrientation struct {
 	Angle int `json:"angle"`
 }
 
-// EmulationDisplayFeatureOrientation enum.
+// EmulationDisplayFeatureOrientation enum
 type EmulationDisplayFeatureOrientation string
 
 const (
-	// EmulationDisplayFeatureOrientationVertical enum const.
+	// EmulationDisplayFeatureOrientationVertical enum const
 	EmulationDisplayFeatureOrientationVertical EmulationDisplayFeatureOrientation = "vertical"
 
-	// EmulationDisplayFeatureOrientationHorizontal enum const.
+	// EmulationDisplayFeatureOrientationHorizontal enum const
 	EmulationDisplayFeatureOrientationHorizontal EmulationDisplayFeatureOrientation = "horizontal"
 )
 
@@ -62,14 +89,14 @@ type EmulationDisplayFeature struct {
 	MaskLength int `json:"maskLength"`
 }
 
-// EmulationDevicePostureType enum.
+// EmulationDevicePostureType enum
 type EmulationDevicePostureType string
 
 const (
-	// EmulationDevicePostureTypeContinuous enum const.
+	// EmulationDevicePostureTypeContinuous enum const
 	EmulationDevicePostureTypeContinuous EmulationDevicePostureType = "continuous"
 
-	// EmulationDevicePostureTypeFolded enum const.
+	// EmulationDevicePostureTypeFolded enum const
 	EmulationDevicePostureTypeFolded EmulationDevicePostureType = "folded"
 )
 
@@ -95,13 +122,13 @@ type EmulationMediaFeature struct {
 type EmulationVirtualTimePolicy string
 
 const (
-	// EmulationVirtualTimePolicyAdvance enum const.
+	// EmulationVirtualTimePolicyAdvance enum const
 	EmulationVirtualTimePolicyAdvance EmulationVirtualTimePolicy = "advance"
 
-	// EmulationVirtualTimePolicyPause enum const.
+	// EmulationVirtualTimePolicyPause enum const
 	EmulationVirtualTimePolicyPause EmulationVirtualTimePolicy = "pause"
 
-	// EmulationVirtualTimePolicyPauseIfNetworkFetchesPending enum const.
+	// EmulationVirtualTimePolicyPauseIfNetworkFetchesPending enum const
 	EmulationVirtualTimePolicyPauseIfNetworkFetchesPending EmulationVirtualTimePolicy = "pauseIfNetworkFetchesPending"
 )
 
@@ -146,6 +173,10 @@ type EmulationUserAgentMetadata struct {
 
 	// Wow64 (optional) ...
 	Wow64 bool `json:"wow64,omitempty"`
+
+	// FormFactors (optional) Used to specify User Agent form-factor values.
+	// See https://wicg.github.io/ua-client-hints/#sec-ch-ua-form-factors
+	FormFactors []string `json:"formFactors,omitempty"`
 }
 
 // EmulationSensorType (experimental) Used to specify sensor types to emulate.
@@ -153,31 +184,28 @@ type EmulationUserAgentMetadata struct {
 type EmulationSensorType string
 
 const (
-	// EmulationSensorTypeAbsoluteOrientation enum const.
+	// EmulationSensorTypeAbsoluteOrientation enum const
 	EmulationSensorTypeAbsoluteOrientation EmulationSensorType = "absolute-orientation"
 
-	// EmulationSensorTypeAccelerometer enum const.
+	// EmulationSensorTypeAccelerometer enum const
 	EmulationSensorTypeAccelerometer EmulationSensorType = "accelerometer"
 
-	// EmulationSensorTypeAmbientLight enum const.
+	// EmulationSensorTypeAmbientLight enum const
 	EmulationSensorTypeAmbientLight EmulationSensorType = "ambient-light"
 
-	// EmulationSensorTypeGravity enum const.
+	// EmulationSensorTypeGravity enum const
 	EmulationSensorTypeGravity EmulationSensorType = "gravity"
 
-	// EmulationSensorTypeGyroscope enum const.
+	// EmulationSensorTypeGyroscope enum const
 	EmulationSensorTypeGyroscope EmulationSensorType = "gyroscope"
 
-	// EmulationSensorTypeLinearAcceleration enum const.
+	// EmulationSensorTypeLinearAcceleration enum const
 	EmulationSensorTypeLinearAcceleration EmulationSensorType = "linear-acceleration"
 
-	// EmulationSensorTypeMagnetometer enum const.
+	// EmulationSensorTypeMagnetometer enum const
 	EmulationSensorTypeMagnetometer EmulationSensorType = "magnetometer"
 
-	// EmulationSensorTypeProximity enum const.
-	EmulationSensorTypeProximity EmulationSensorType = "proximity"
-
-	// EmulationSensorTypeRelativeOrientation enum const.
+	// EmulationSensorTypeRelativeOrientation enum const
 	EmulationSensorTypeRelativeOrientation EmulationSensorType = "relative-orientation"
 )
 
@@ -238,24 +266,128 @@ type EmulationSensorReading struct {
 	Quaternion *EmulationSensorReadingQuaternion `json:"quaternion,omitempty"`
 }
 
+// EmulationPressureSource (experimental) ...
+type EmulationPressureSource string
+
+const (
+	// EmulationPressureSourceCPU enum const
+	EmulationPressureSourceCPU EmulationPressureSource = "cpu"
+)
+
+// EmulationPressureState (experimental) ...
+type EmulationPressureState string
+
+const (
+	// EmulationPressureStateNominal enum const
+	EmulationPressureStateNominal EmulationPressureState = "nominal"
+
+	// EmulationPressureStateFair enum const
+	EmulationPressureStateFair EmulationPressureState = "fair"
+
+	// EmulationPressureStateSerious enum const
+	EmulationPressureStateSerious EmulationPressureState = "serious"
+
+	// EmulationPressureStateCritical enum const
+	EmulationPressureStateCritical EmulationPressureState = "critical"
+)
+
+// EmulationPressureMetadata (experimental) ...
+type EmulationPressureMetadata struct {
+	// Available (optional) ...
+	Available bool `json:"available,omitempty"`
+}
+
+// EmulationWorkAreaInsets (experimental) ...
+type EmulationWorkAreaInsets struct {
+	// Top (optional) Work area top inset in pixels. Default is 0;
+	Top *int `json:"top,omitempty"`
+
+	// Left (optional) Work area left inset in pixels. Default is 0;
+	Left *int `json:"left,omitempty"`
+
+	// Bottom (optional) Work area bottom inset in pixels. Default is 0;
+	Bottom *int `json:"bottom,omitempty"`
+
+	// Right (optional) Work area right inset in pixels. Default is 0;
+	Right *int `json:"right,omitempty"`
+}
+
+// EmulationScreenID (experimental) ...
+type EmulationScreenID string
+
+// EmulationScreenInfo (experimental) Screen information similar to the one returned by window.getScreenDetails() method,
+// see https://w3c.github.io/window-management/#screendetailed.
+type EmulationScreenInfo struct {
+	// Left Offset of the left edge of the screen.
+	Left int `json:"left"`
+
+	// Top Offset of the top edge of the screen.
+	Top int `json:"top"`
+
+	// Width of the screen.
+	Width int `json:"width"`
+
+	// Height of the screen.
+	Height int `json:"height"`
+
+	// AvailLeft Offset of the left edge of the available screen area.
+	AvailLeft int `json:"availLeft"`
+
+	// AvailTop Offset of the top edge of the available screen area.
+	AvailTop int `json:"availTop"`
+
+	// AvailWidth Width of the available screen area.
+	AvailWidth int `json:"availWidth"`
+
+	// AvailHeight Height of the available screen area.
+	AvailHeight int `json:"availHeight"`
+
+	// DevicePixelRatio Specifies the screen's device pixel ratio.
+	DevicePixelRatio float64 `json:"devicePixelRatio"`
+
+	// Orientation Specifies the screen's orientation.
+	Orientation *EmulationScreenOrientation `json:"orientation"`
+
+	// ColorDepth Specifies the screen's color depth in bits.
+	ColorDepth int `json:"colorDepth"`
+
+	// IsExtended Indicates whether the device has multiple screens.
+	IsExtended bool `json:"isExtended"`
+
+	// IsInternal Indicates whether the screen is internal to the device or external, attached to the device.
+	IsInternal bool `json:"isInternal"`
+
+	// IsPrimary Indicates whether the screen is set as the the operating system primary screen.
+	IsPrimary bool `json:"isPrimary"`
+
+	// Label Specifies the descriptive label for the screen.
+	Label string `json:"label"`
+
+	// ID Specifies the unique identifier of the screen.
+	ID EmulationScreenID `json:"id"`
+}
+
 // EmulationDisabledImageType (experimental) Enum of image types that can be disabled.
 type EmulationDisabledImageType string
 
 const (
-	// EmulationDisabledImageTypeAvif enum const.
+	// EmulationDisabledImageTypeAvif enum const
 	EmulationDisabledImageTypeAvif EmulationDisabledImageType = "avif"
 
-	// EmulationDisabledImageTypeWebp enum const.
+	// EmulationDisabledImageTypeJxl enum const
+	EmulationDisabledImageTypeJxl EmulationDisabledImageType = "jxl"
+
+	// EmulationDisabledImageTypeWebp enum const
 	EmulationDisabledImageTypeWebp EmulationDisabledImageType = "webp"
 )
 
 // EmulationCanEmulate (deprecated) Tells whether emulation is supported.
 type EmulationCanEmulate struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationCanEmulate) ProtoReq() string { return "Emulation.canEmulate" }
 
-// Call the request.
+// Call the request
 func (m EmulationCanEmulate) Call(c Client) (*EmulationCanEmulateResult, error) {
 	var res EmulationCanEmulateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -270,12 +402,12 @@ type EmulationCanEmulateResult struct {
 // EmulationClearDeviceMetricsOverride Clears the overridden device metrics.
 type EmulationClearDeviceMetricsOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationClearDeviceMetricsOverride) ProtoReq() string {
 	return "Emulation.clearDeviceMetricsOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationClearDeviceMetricsOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -283,12 +415,12 @@ func (m EmulationClearDeviceMetricsOverride) Call(c Client) error {
 // EmulationClearGeolocationOverride Clears the overridden Geolocation Position and Error.
 type EmulationClearGeolocationOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationClearGeolocationOverride) ProtoReq() string {
 	return "Emulation.clearGeolocationOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationClearGeolocationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -296,10 +428,10 @@ func (m EmulationClearGeolocationOverride) Call(c Client) error {
 // EmulationResetPageScaleFactor (experimental) Requests that page scale factor is reset to initial values.
 type EmulationResetPageScaleFactor struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationResetPageScaleFactor) ProtoReq() string { return "Emulation.resetPageScaleFactor" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationResetPageScaleFactor) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -310,12 +442,12 @@ type EmulationSetFocusEmulationEnabled struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetFocusEmulationEnabled) ProtoReq() string {
 	return "Emulation.setFocusEmulationEnabled"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetFocusEmulationEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -327,12 +459,12 @@ type EmulationSetAutoDarkModeOverride struct {
 	Enabled bool `json:"enabled,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetAutoDarkModeOverride) ProtoReq() string {
 	return "Emulation.setAutoDarkModeOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetAutoDarkModeOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -343,10 +475,10 @@ type EmulationSetCPUThrottlingRate struct {
 	Rate float64 `json:"rate"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetCPUThrottlingRate) ProtoReq() string { return "Emulation.setCPUThrottlingRate" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetCPUThrottlingRate) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -359,15 +491,86 @@ type EmulationSetDefaultBackgroundColorOverride struct {
 	Color *DOMRGBA `json:"color,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetDefaultBackgroundColorOverride) ProtoReq() string {
 	return "Emulation.setDefaultBackgroundColorOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetDefaultBackgroundColorOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
+
+// EmulationSetSafeAreaInsetsOverride (experimental) Overrides the values for env(safe-area-inset-*) and env(safe-area-max-inset-*). Unset values will cause the
+// respective variables to be undefined, even if previously overridden.
+type EmulationSetSafeAreaInsetsOverride struct {
+	// Insets ...
+	Insets *EmulationSafeAreaInsets `json:"insets"`
+}
+
+// ProtoReq name
+func (m EmulationSetSafeAreaInsetsOverride) ProtoReq() string {
+	return "Emulation.setSafeAreaInsetsOverride"
+}
+
+// Call sends the request
+func (m EmulationSetSafeAreaInsetsOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetVirtualKeyboardGeometryOverride (experimental) Overrides virtual keyboard geometry in CSS pixels, relative to the top-level viewport. The
+// provided rect is used for navigator.virtualKeyboard.boundingRect, geometrychange events, and
+// env(keyboard-inset-*) values on the inspected frame. The override applies independently of
+// navigator.virtualKeyboard.overlaysContent so clients can preview overlay geometry without
+// mutating page state. Values are rounded to the nearest CSS pixel. Omitting the rect clears the
+// override.
+type EmulationSetVirtualKeyboardGeometryOverride struct {
+	// KeyboardRect (optional) ...
+	KeyboardRect *DOMRect `json:"keyboardRect,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationSetVirtualKeyboardGeometryOverride) ProtoReq() string {
+	return "Emulation.setVirtualKeyboardGeometryOverride"
+}
+
+// Call sends the request
+func (m EmulationSetVirtualKeyboardGeometryOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetDeviceMetricsOverrideScrollbarType enum
+type EmulationSetDeviceMetricsOverrideScrollbarType string
+
+const (
+	// EmulationSetDeviceMetricsOverrideScrollbarTypeOverlay enum const
+	EmulationSetDeviceMetricsOverrideScrollbarTypeOverlay EmulationSetDeviceMetricsOverrideScrollbarType = "overlay"
+
+	// EmulationSetDeviceMetricsOverrideScrollbarTypeDefault enum const
+	EmulationSetDeviceMetricsOverrideScrollbarTypeDefault EmulationSetDeviceMetricsOverrideScrollbarType = "default"
+)
+
+// EmulationSetDeviceMetricsOverrideViewportMeta enum
+type EmulationSetDeviceMetricsOverrideViewportMeta string
+
+const (
+	// EmulationSetDeviceMetricsOverrideViewportMetaEnable enum const
+	EmulationSetDeviceMetricsOverrideViewportMetaEnable EmulationSetDeviceMetricsOverrideViewportMeta = "enable"
+
+	// EmulationSetDeviceMetricsOverrideViewportMetaDefault enum const
+	EmulationSetDeviceMetricsOverrideViewportMetaDefault EmulationSetDeviceMetricsOverrideViewportMeta = "default"
+)
+
+// EmulationSetDeviceMetricsOverrideTextLayoutMode enum
+type EmulationSetDeviceMetricsOverrideTextLayoutMode string
+
+const (
+	// EmulationSetDeviceMetricsOverrideTextLayoutModeMobile enum const
+	EmulationSetDeviceMetricsOverrideTextLayoutModeMobile EmulationSetDeviceMetricsOverrideTextLayoutMode = "mobile"
+
+	// EmulationSetDeviceMetricsOverrideTextLayoutModeDefault enum const
+	EmulationSetDeviceMetricsOverrideTextLayoutModeDefault EmulationSetDeviceMetricsOverrideTextLayoutMode = "default"
+)
 
 // EmulationSetDeviceMetricsOverride Overrides the values of device screen dimensions (window.screen.width, window.screen.height,
 // window.innerWidth, window.innerHeight, and "device-width"/"device-height"-related CSS media
@@ -411,22 +614,41 @@ type EmulationSetDeviceMetricsOverride struct {
 	// change is not observed by the page, e.g. viewport-relative elements do not change positions.
 	Viewport *PageViewport `json:"viewport,omitempty"`
 
-	// DisplayFeature (experimental) (optional) If set, the display feature of a multi-segment screen. If not set, multi-segment support
+	// DisplayFeature (deprecated) (experimental) (optional) If set, the display feature of a multi-segment screen. If not set, multi-segment support
 	// is turned-off.
+	// Deprecated, use Emulation.setDisplayFeaturesOverride.
 	DisplayFeature *EmulationDisplayFeature `json:"displayFeature,omitempty"`
 
 	// DevicePosture (deprecated) (experimental) (optional) If set, the posture of a foldable device. If not set the posture is set
 	// to continuous.
 	// Deprecated, use Emulation.setDevicePostureOverride.
 	DevicePosture *EmulationDevicePosture `json:"devicePosture,omitempty"`
+
+	// ScrollbarType (experimental) (optional) Scrollbar type. Default: `default`.
+	ScrollbarType EmulationSetDeviceMetricsOverrideScrollbarType `json:"scrollbarType,omitempty"`
+
+	// ScreenOrientationLockEmulation (experimental) (optional) If set to true, enables screen orientation lock emulation, which
+	// intercepts screen.orientation.lock() calls from the page and reports
+	// orientation changes via screenOrientationLockChanged events. This is
+	// useful for emulating mobile device orientation lock behavior in
+	// responsive design mode.
+	ScreenOrientationLockEmulation bool `json:"screenOrientationLockEmulation,omitempty"`
+
+	// ViewportMeta (experimental) (optional) Viewport meta tag behavior. Default: `default`. Note: if `mobile` is `true`,
+	// the viewport meta tag is always enabled.
+	ViewportMeta EmulationSetDeviceMetricsOverrideViewportMeta `json:"viewportMeta,omitempty"`
+
+	// TextLayoutMode (experimental) (optional) Text layout mode. Default: `default`. Note: if `mobile` is `true`,
+	// mobile text layout mode (text autosizing) is always enabled.
+	TextLayoutMode EmulationSetDeviceMetricsOverrideTextLayoutMode `json:"textLayoutMode,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetDeviceMetricsOverride) ProtoReq() string {
 	return "Emulation.setDeviceMetricsOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetDeviceMetricsOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -438,12 +660,12 @@ type EmulationSetDevicePostureOverride struct {
 	Posture *EmulationDevicePosture `json:"posture"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetDevicePostureOverride) ProtoReq() string {
 	return "Emulation.setDevicePostureOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetDevicePostureOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -454,13 +676,46 @@ func (m EmulationSetDevicePostureOverride) Call(c Client) error {
 // Does nothing if no override is set.
 type EmulationClearDevicePostureOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationClearDevicePostureOverride) ProtoReq() string {
 	return "Emulation.clearDevicePostureOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationClearDevicePostureOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetDisplayFeaturesOverride (experimental) Start using the given display features to pupulate the Viewport Segments API.
+// This override can also be set in setDeviceMetricsOverride().
+type EmulationSetDisplayFeaturesOverride struct {
+	// Features ...
+	Features []*EmulationDisplayFeature `json:"features"`
+}
+
+// ProtoReq name
+func (m EmulationSetDisplayFeaturesOverride) ProtoReq() string {
+	return "Emulation.setDisplayFeaturesOverride"
+}
+
+// Call sends the request
+func (m EmulationSetDisplayFeaturesOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationClearDisplayFeaturesOverride (experimental) Clears the display features override set with either setDeviceMetricsOverride()
+// or setDisplayFeaturesOverride() and starts using display features from the
+// platform again.
+// Does nothing if no override is set.
+type EmulationClearDisplayFeaturesOverride struct{}
+
+// ProtoReq name
+func (m EmulationClearDisplayFeaturesOverride) ProtoReq() string {
+	return "Emulation.clearDisplayFeaturesOverride"
+}
+
+// Call sends the request
+func (m EmulationClearDisplayFeaturesOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -470,10 +725,10 @@ type EmulationSetScrollbarsHidden struct {
 	Hidden bool `json:"hidden"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetScrollbarsHidden) ProtoReq() string { return "Emulation.setScrollbarsHidden" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetScrollbarsHidden) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -484,24 +739,24 @@ type EmulationSetDocumentCookieDisabled struct {
 	Disabled bool `json:"disabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetDocumentCookieDisabled) ProtoReq() string {
 	return "Emulation.setDocumentCookieDisabled"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetDocumentCookieDisabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// EmulationSetEmitTouchEventsForMouseConfiguration enum.
+// EmulationSetEmitTouchEventsForMouseConfiguration enum
 type EmulationSetEmitTouchEventsForMouseConfiguration string
 
 const (
-	// EmulationSetEmitTouchEventsForMouseConfigurationMobile enum const.
+	// EmulationSetEmitTouchEventsForMouseConfigurationMobile enum const
 	EmulationSetEmitTouchEventsForMouseConfigurationMobile EmulationSetEmitTouchEventsForMouseConfiguration = "mobile"
 
-	// EmulationSetEmitTouchEventsForMouseConfigurationDesktop enum const.
+	// EmulationSetEmitTouchEventsForMouseConfigurationDesktop enum const
 	EmulationSetEmitTouchEventsForMouseConfigurationDesktop EmulationSetEmitTouchEventsForMouseConfiguration = "desktop"
 )
 
@@ -514,12 +769,12 @@ type EmulationSetEmitTouchEventsForMouse struct {
 	Configuration EmulationSetEmitTouchEventsForMouseConfiguration `json:"configuration,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetEmitTouchEventsForMouse) ProtoReq() string {
 	return "Emulation.setEmitTouchEventsForMouse"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetEmitTouchEventsForMouse) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -533,37 +788,37 @@ type EmulationSetEmulatedMedia struct {
 	Features []*EmulationMediaFeature `json:"features,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetEmulatedMedia) ProtoReq() string { return "Emulation.setEmulatedMedia" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetEmulatedMedia) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// EmulationSetEmulatedVisionDeficiencyType enum.
+// EmulationSetEmulatedVisionDeficiencyType enum
 type EmulationSetEmulatedVisionDeficiencyType string
 
 const (
-	// EmulationSetEmulatedVisionDeficiencyTypeNone enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeNone enum const
 	EmulationSetEmulatedVisionDeficiencyTypeNone EmulationSetEmulatedVisionDeficiencyType = "none"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeBlurredVision enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeBlurredVision enum const
 	EmulationSetEmulatedVisionDeficiencyTypeBlurredVision EmulationSetEmulatedVisionDeficiencyType = "blurredVision"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeReducedContrast enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeReducedContrast enum const
 	EmulationSetEmulatedVisionDeficiencyTypeReducedContrast EmulationSetEmulatedVisionDeficiencyType = "reducedContrast"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeAchromatopsia enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeAchromatopsia enum const
 	EmulationSetEmulatedVisionDeficiencyTypeAchromatopsia EmulationSetEmulatedVisionDeficiencyType = "achromatopsia"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeDeuteranopia enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeDeuteranopia enum const
 	EmulationSetEmulatedVisionDeficiencyTypeDeuteranopia EmulationSetEmulatedVisionDeficiencyType = "deuteranopia"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeProtanopia enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeProtanopia enum const
 	EmulationSetEmulatedVisionDeficiencyTypeProtanopia EmulationSetEmulatedVisionDeficiencyType = "protanopia"
 
-	// EmulationSetEmulatedVisionDeficiencyTypeTritanopia enum const.
+	// EmulationSetEmulatedVisionDeficiencyTypeTritanopia enum const
 	EmulationSetEmulatedVisionDeficiencyTypeTritanopia EmulationSetEmulatedVisionDeficiencyType = "tritanopia"
 )
 
@@ -574,18 +829,32 @@ type EmulationSetEmulatedVisionDeficiency struct {
 	Type EmulationSetEmulatedVisionDeficiencyType `json:"type"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetEmulatedVisionDeficiency) ProtoReq() string {
 	return "Emulation.setEmulatedVisionDeficiency"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetEmulatedVisionDeficiency) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// EmulationSetGeolocationOverride Overrides the Geolocation Position or Error. Omitting any of the parameters emulates position
-// unavailable.
+// EmulationSetEmulatedOSTextScale Emulates the given OS text scale.
+type EmulationSetEmulatedOSTextScale struct {
+	// Scale (optional) ...
+	Scale *float64 `json:"scale,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationSetEmulatedOSTextScale) ProtoReq() string { return "Emulation.setEmulatedOSTextScale" }
+
+// Call sends the request
+func (m EmulationSetEmulatedOSTextScale) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetGeolocationOverride Overrides the Geolocation Position or Error. Omitting latitude, longitude or
+// accuracy emulates position unavailable.
 type EmulationSetGeolocationOverride struct {
 	// Latitude (optional) Mock latitude
 	Latitude *float64 `json:"latitude,omitempty"`
@@ -595,12 +864,24 @@ type EmulationSetGeolocationOverride struct {
 
 	// Accuracy (optional) Mock accuracy
 	Accuracy *float64 `json:"accuracy,omitempty"`
+
+	// Altitude (optional) Mock altitude
+	Altitude *float64 `json:"altitude,omitempty"`
+
+	// AltitudeAccuracy (optional) Mock altitudeAccuracy
+	AltitudeAccuracy *float64 `json:"altitudeAccuracy,omitempty"`
+
+	// Heading (optional) Mock heading
+	Heading *float64 `json:"heading,omitempty"`
+
+	// Speed (optional) Mock speed
+	Speed *float64 `json:"speed,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetGeolocationOverride) ProtoReq() string { return "Emulation.setGeolocationOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetGeolocationOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -611,12 +892,12 @@ type EmulationGetOverriddenSensorInformation struct {
 	Type EmulationSensorType `json:"type"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationGetOverriddenSensorInformation) ProtoReq() string {
 	return "Emulation.getOverriddenSensorInformation"
 }
 
-// Call the request.
+// Call the request
 func (m EmulationGetOverriddenSensorInformation) Call(c Client) (*EmulationGetOverriddenSensorInformationResult, error) {
 	var res EmulationGetOverriddenSensorInformationResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -644,12 +925,12 @@ type EmulationSetSensorOverrideEnabled struct {
 	Metadata *EmulationSensorMetadata `json:"metadata,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetSensorOverrideEnabled) ProtoReq() string {
 	return "Emulation.setSensorOverrideEnabled"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetSensorOverrideEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -664,13 +945,59 @@ type EmulationSetSensorOverrideReadings struct {
 	Reading *EmulationSensorReading `json:"reading"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetSensorOverrideReadings) ProtoReq() string {
 	return "Emulation.setSensorOverrideReadings"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetSensorOverrideReadings) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetPressureSourceOverrideEnabled (experimental) Overrides a pressure source of a given type, as used by the Compute
+// Pressure API, so that updates to PressureObserver.observe() are provided
+// via setPressureStateOverride instead of being retrieved from
+// platform-provided telemetry data.
+type EmulationSetPressureSourceOverrideEnabled struct {
+	// Enabled ...
+	Enabled bool `json:"enabled"`
+
+	// Source ...
+	Source EmulationPressureSource `json:"source"`
+
+	// Metadata (optional) ...
+	Metadata *EmulationPressureMetadata `json:"metadata,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationSetPressureSourceOverrideEnabled) ProtoReq() string {
+	return "Emulation.setPressureSourceOverrideEnabled"
+}
+
+// Call sends the request
+func (m EmulationSetPressureSourceOverrideEnabled) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetPressureStateOverride (experimental) Provides a given pressure state that will be processed and eventually be
+// delivered to PressureObserver users. |source| must have been previously
+// overridden by setPressureSourceOverrideEnabled.
+type EmulationSetPressureStateOverride struct {
+	// Source ...
+	Source EmulationPressureSource `json:"source"`
+
+	// State ...
+	State EmulationPressureState `json:"state"`
+}
+
+// ProtoReq name
+func (m EmulationSetPressureStateOverride) ProtoReq() string {
+	return "Emulation.setPressureStateOverride"
+}
+
+// Call sends the request
+func (m EmulationSetPressureStateOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -683,10 +1010,10 @@ type EmulationSetIdleOverride struct {
 	IsScreenUnlocked bool `json:"isScreenUnlocked"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetIdleOverride) ProtoReq() string { return "Emulation.setIdleOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetIdleOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -694,10 +1021,10 @@ func (m EmulationSetIdleOverride) Call(c Client) error {
 // EmulationClearIdleOverride Clears Idle state overrides.
 type EmulationClearIdleOverride struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationClearIdleOverride) ProtoReq() string { return "Emulation.clearIdleOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationClearIdleOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -708,10 +1035,10 @@ type EmulationSetNavigatorOverrides struct {
 	Platform string `json:"platform"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetNavigatorOverrides) ProtoReq() string { return "Emulation.setNavigatorOverrides" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetNavigatorOverrides) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -722,10 +1049,10 @@ type EmulationSetPageScaleFactor struct {
 	PageScaleFactor float64 `json:"pageScaleFactor"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetPageScaleFactor) ProtoReq() string { return "Emulation.setPageScaleFactor" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetPageScaleFactor) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -736,12 +1063,12 @@ type EmulationSetScriptExecutionDisabled struct {
 	Value bool `json:"value"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetScriptExecutionDisabled) ProtoReq() string {
 	return "Emulation.setScriptExecutionDisabled"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetScriptExecutionDisabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -755,12 +1082,12 @@ type EmulationSetTouchEmulationEnabled struct {
 	MaxTouchPoints *int `json:"maxTouchPoints,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetTouchEmulationEnabled) ProtoReq() string {
 	return "Emulation.setTouchEmulationEnabled"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetTouchEmulationEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -783,10 +1110,10 @@ type EmulationSetVirtualTimePolicy struct {
 	InitialVirtualTime TimeSinceEpoch `json:"initialVirtualTime,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetVirtualTimePolicy) ProtoReq() string { return "Emulation.setVirtualTimePolicy" }
 
-// Call the request.
+// Call the request
 func (m EmulationSetVirtualTimePolicy) Call(c Client) (*EmulationSetVirtualTimePolicyResult, error) {
 	var res EmulationSetVirtualTimePolicyResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -805,10 +1132,10 @@ type EmulationSetLocaleOverride struct {
 	Locale string `json:"locale,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetLocaleOverride) ProtoReq() string { return "Emulation.setLocaleOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetLocaleOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -821,10 +1148,10 @@ type EmulationSetTimezoneOverride struct {
 	TimezoneID string `json:"timezoneId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetTimezoneOverride) ProtoReq() string { return "Emulation.setTimezoneOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetTimezoneOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -840,10 +1167,10 @@ type EmulationSetVisibleSize struct {
 	Height int `json:"height"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetVisibleSize) ProtoReq() string { return "Emulation.setVisibleSize" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetVisibleSize) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -854,11 +1181,25 @@ type EmulationSetDisabledImageTypes struct {
 	ImageTypes []EmulationDisabledImageType `json:"imageTypes"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetDisabledImageTypes) ProtoReq() string { return "Emulation.setDisabledImageTypes" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetDisabledImageTypes) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetDataSaverOverride (experimental) Override the value of navigator.connection.saveData
+type EmulationSetDataSaverOverride struct {
+	// DataSaverEnabled (optional) Override value. Omitting the parameter disables the override.
+	DataSaverEnabled bool `json:"dataSaverEnabled,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationSetDataSaverOverride) ProtoReq() string { return "Emulation.setDataSaverOverride" }
+
+// Call sends the request
+func (m EmulationSetDataSaverOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -868,13 +1209,49 @@ type EmulationSetHardwareConcurrencyOverride struct {
 	HardwareConcurrency int `json:"hardwareConcurrency"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetHardwareConcurrencyOverride) ProtoReq() string {
 	return "Emulation.setHardwareConcurrencyOverride"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetHardwareConcurrencyOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetCPUPerformanceOverridePerformanceTier enum
+type EmulationSetCPUPerformanceOverridePerformanceTier string
+
+const (
+	// EmulationSetCPUPerformanceOverridePerformanceTierUnknown enum const
+	EmulationSetCPUPerformanceOverridePerformanceTierUnknown EmulationSetCPUPerformanceOverridePerformanceTier = "unknown"
+
+	// EmulationSetCPUPerformanceOverridePerformanceTierLow enum const
+	EmulationSetCPUPerformanceOverridePerformanceTierLow EmulationSetCPUPerformanceOverridePerformanceTier = "low"
+
+	// EmulationSetCPUPerformanceOverridePerformanceTierMid enum const
+	EmulationSetCPUPerformanceOverridePerformanceTierMid EmulationSetCPUPerformanceOverridePerformanceTier = "mid"
+
+	// EmulationSetCPUPerformanceOverridePerformanceTierHigh enum const
+	EmulationSetCPUPerformanceOverridePerformanceTierHigh EmulationSetCPUPerformanceOverridePerformanceTier = "high"
+
+	// EmulationSetCPUPerformanceOverridePerformanceTierUltra enum const
+	EmulationSetCPUPerformanceOverridePerformanceTierUltra EmulationSetCPUPerformanceOverridePerformanceTier = "ultra"
+)
+
+// EmulationSetCPUPerformanceOverride (experimental) Overrides the value of navigator.cpuPerformance
+type EmulationSetCPUPerformanceOverride struct {
+	// PerformanceTier (optional) Override value. Omitting the parameter disables the override.
+	PerformanceTier EmulationSetCPUPerformanceOverridePerformanceTier `json:"performanceTier,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationSetCPUPerformanceOverride) ProtoReq() string {
+	return "Emulation.setCPUPerformanceOverride"
+}
+
+// Call sends the request
+func (m EmulationSetCPUPerformanceOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -894,10 +1271,10 @@ type EmulationSetUserAgentOverride struct {
 	UserAgentMetadata *EmulationUserAgentMetadata `json:"userAgentMetadata,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetUserAgentOverride) ProtoReq() string { return "Emulation.setUserAgentOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetUserAgentOverride) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -908,18 +1285,201 @@ type EmulationSetAutomationOverride struct {
 	Enabled bool `json:"enabled"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m EmulationSetAutomationOverride) ProtoReq() string { return "Emulation.setAutomationOverride" }
 
-// Call sends the request.
+// Call sends the request
 func (m EmulationSetAutomationOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetSmallViewportHeightDifferenceOverride (experimental) Allows overriding the difference between the small and large viewport sizes, which determine the
+// value of the `svh` and `lvh` unit, respectively. Only supported for top-level frames.
+type EmulationSetSmallViewportHeightDifferenceOverride struct {
+	// Difference This will cause an element of size 100svh to be `difference` pixels smaller than an element
+	// of size 100lvh.
+	Difference int `json:"difference"`
+}
+
+// ProtoReq name
+func (m EmulationSetSmallViewportHeightDifferenceOverride) ProtoReq() string {
+	return "Emulation.setSmallViewportHeightDifferenceOverride"
+}
+
+// Call sends the request
+func (m EmulationSetSmallViewportHeightDifferenceOverride) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationGetScreenInfos (experimental) Returns device's screen configuration. In headful mode, the physical screens configuration is returned,
+// whereas in headless mode, a virtual headless screen configuration is provided instead.
+type EmulationGetScreenInfos struct{}
+
+// ProtoReq name
+func (m EmulationGetScreenInfos) ProtoReq() string { return "Emulation.getScreenInfos" }
+
+// Call the request
+func (m EmulationGetScreenInfos) Call(c Client) (*EmulationGetScreenInfosResult, error) {
+	var res EmulationGetScreenInfosResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// EmulationGetScreenInfosResult (experimental) ...
+type EmulationGetScreenInfosResult struct {
+	// ScreenInfos ...
+	ScreenInfos []*EmulationScreenInfo `json:"screenInfos"`
+}
+
+// EmulationAddScreen (experimental) Add a new screen to the device. Only supported in headless mode.
+type EmulationAddScreen struct {
+	// Left Offset of the left edge of the screen in pixels.
+	Left int `json:"left"`
+
+	// Top Offset of the top edge of the screen in pixels.
+	Top int `json:"top"`
+
+	// Width The width of the screen in pixels.
+	Width int `json:"width"`
+
+	// Height The height of the screen in pixels.
+	Height int `json:"height"`
+
+	// WorkAreaInsets (optional) Specifies the screen's work area. Default is entire screen.
+	WorkAreaInsets *EmulationWorkAreaInsets `json:"workAreaInsets,omitempty"`
+
+	// DevicePixelRatio (optional) Specifies the screen's device pixel ratio. Default is 1.
+	DevicePixelRatio *float64 `json:"devicePixelRatio,omitempty"`
+
+	// Rotation (optional) Specifies the screen's rotation angle. Available values are 0, 90, 180 and 270. Default is 0.
+	Rotation *int `json:"rotation,omitempty"`
+
+	// ColorDepth (optional) Specifies the screen's color depth in bits. Default is 24.
+	ColorDepth *int `json:"colorDepth,omitempty"`
+
+	// Label (optional) Specifies the descriptive label for the screen. Default is none.
+	Label string `json:"label,omitempty"`
+
+	// IsInternal (optional) Indicates whether the screen is internal to the device or external, attached to the device. Default is false.
+	IsInternal bool `json:"isInternal,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationAddScreen) ProtoReq() string { return "Emulation.addScreen" }
+
+// Call the request
+func (m EmulationAddScreen) Call(c Client) (*EmulationAddScreenResult, error) {
+	var res EmulationAddScreenResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// EmulationAddScreenResult (experimental) ...
+type EmulationAddScreenResult struct {
+	// ScreenInfo ...
+	ScreenInfo *EmulationScreenInfo `json:"screenInfo"`
+}
+
+// EmulationUpdateScreen (experimental) Updates specified screen parameters. Only supported in headless mode.
+type EmulationUpdateScreen struct {
+	// ScreenID Target screen identifier.
+	ScreenID EmulationScreenID `json:"screenId"`
+
+	// Left (optional) Offset of the left edge of the screen in pixels.
+	Left *int `json:"left,omitempty"`
+
+	// Top (optional) Offset of the top edge of the screen in pixels.
+	Top *int `json:"top,omitempty"`
+
+	// Width (optional) The width of the screen in pixels.
+	Width *int `json:"width,omitempty"`
+
+	// Height (optional) The height of the screen in pixels.
+	Height *int `json:"height,omitempty"`
+
+	// WorkAreaInsets (optional) Specifies the screen's work area.
+	WorkAreaInsets *EmulationWorkAreaInsets `json:"workAreaInsets,omitempty"`
+
+	// DevicePixelRatio (optional) Specifies the screen's device pixel ratio.
+	DevicePixelRatio *float64 `json:"devicePixelRatio,omitempty"`
+
+	// Rotation (optional) Specifies the screen's rotation angle. Available values are 0, 90, 180 and 270.
+	Rotation *int `json:"rotation,omitempty"`
+
+	// ColorDepth (optional) Specifies the screen's color depth in bits.
+	ColorDepth *int `json:"colorDepth,omitempty"`
+
+	// Label (optional) Specifies the descriptive label for the screen.
+	Label string `json:"label,omitempty"`
+
+	// IsInternal (optional) Indicates whether the screen is internal to the device or external, attached to the device. Default is false.
+	IsInternal bool `json:"isInternal,omitempty"`
+}
+
+// ProtoReq name
+func (m EmulationUpdateScreen) ProtoReq() string { return "Emulation.updateScreen" }
+
+// Call the request
+func (m EmulationUpdateScreen) Call(c Client) (*EmulationUpdateScreenResult, error) {
+	var res EmulationUpdateScreenResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// EmulationUpdateScreenResult (experimental) ...
+type EmulationUpdateScreenResult struct {
+	// ScreenInfo ...
+	ScreenInfo *EmulationScreenInfo `json:"screenInfo"`
+}
+
+// EmulationRemoveScreen (experimental) Remove screen from the device. Only supported in headless mode.
+type EmulationRemoveScreen struct {
+	// ScreenID ...
+	ScreenID EmulationScreenID `json:"screenId"`
+}
+
+// ProtoReq name
+func (m EmulationRemoveScreen) ProtoReq() string { return "Emulation.removeScreen" }
+
+// Call sends the request
+func (m EmulationRemoveScreen) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// EmulationSetPrimaryScreen (experimental) Set primary screen. Only supported in headless mode.
+// Note that this changes the coordinate system origin to the top-left
+// of the new primary screen, updating the bounds and work areas
+// of all existing screens accordingly.
+type EmulationSetPrimaryScreen struct {
+	// ScreenID ...
+	ScreenID EmulationScreenID `json:"screenId"`
+}
+
+// ProtoReq name
+func (m EmulationSetPrimaryScreen) ProtoReq() string { return "Emulation.setPrimaryScreen" }
+
+// Call sends the request
+func (m EmulationSetPrimaryScreen) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
 // EmulationVirtualTimeBudgetExpired (experimental) Notification sent after the virtual time budget for the current VirtualTimePolicy has run out.
 type EmulationVirtualTimeBudgetExpired struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt EmulationVirtualTimeBudgetExpired) ProtoEvent() string {
 	return "Emulation.virtualTimeBudgetExpired"
+}
+
+// EmulationScreenOrientationLockChanged (experimental) Fired when a page calls screen.orientation.lock() or screen.orientation.unlock()
+// while device emulation is enabled. This allows the DevTools frontend to update the
+// emulated device orientation accordingly.
+type EmulationScreenOrientationLockChanged struct {
+	// Locked Whether the screen orientation is currently locked.
+	Locked bool `json:"locked"`
+
+	// Orientation (optional) The orientation lock type requested by the page. Only set when locked is true.
+	Orientation *EmulationScreenOrientation `json:"orientation,omitempty"`
+}
+
+// ProtoEvent name
+func (evt EmulationScreenOrientationLockChanged) ProtoEvent() string {
+	return "Emulation.screenOrientationLockChanged"
 }

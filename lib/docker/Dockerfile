@@ -16,7 +16,8 @@ RUN go run ./lib/utils/get-browser
 FROM ubuntu:noble
 
 COPY --from=go /root/.cache/rod /root/.cache/rod
-RUN ln -s /root/.cache/rod/browser/$(ls /root/.cache/rod/browser)/chrome /usr/bin/chrome
+# the cache also holds a .sha256 file next to each browser directory
+RUN ln -s "$(find /root/.cache/rod/browser -type f -name chrome | head -n 1)" /usr/bin/chrome
 
 RUN touch /.dockerenv
 
