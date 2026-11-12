@@ -268,7 +268,9 @@ func TestForkWaitWritableReadOnly(t *testing.T) {
 	start := time.Now()
 	el := p.MustElement("input")
 	g.E(el.Timeout(10 * time.Second).WaitWritable())
-	g.Gt(time.Since(start), 300*time.Millisecond)
+	// The page timer starts during load, before this clock, so the wait can
+	// finish in under 300ms. An immediate return is still a failure.
+	g.Gt(time.Since(start), 50*time.Millisecond)
 	g.False(el.MustEval(`() => this.readOnly`).Bool())
 }
 
