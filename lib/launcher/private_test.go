@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -97,8 +98,10 @@ func TestManaged(t *testing.T) {
 
 	// The default browser is fetched on first use. Do it before the timed
 	// section so a slow download cannot look like a hang.
-	_, preloadErr := New().getBin()
-	g.E(preloadErr)
+	for _, headless := range []bool{true, false} {
+		_, err := New().Headless(headless).getBin()
+		g.E(err)
+	}
 
 	ctx := g.Timeout(30 * time.Second)
 
@@ -124,7 +127,9 @@ func TestManaged(t *testing.T) {
 
 	u, h := MustNewManaged(s.URL()).Bin("go").ClientHeader()
 	_, err := cdp.StartWithURL(ctx, u, h)
-	g.Eq(err.(*cdp.BadHandshakeError).Body, "[rod-manager] not allowed rod-bin path: go (use --allow-all to disable the protection)")
+	var bad *cdp.BadHandshakeError
+	g.True(errors.As(err, &bad))
+	g.Eq(bad.Body, "[rod-manager] not allowed rod-bin path: go (use --allow-all to disable the protection)")
 }
 
 func TestLaunchErrs(t *testing.T) {

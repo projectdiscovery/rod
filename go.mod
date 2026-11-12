@@ -1,6 +1,6 @@
 module github.com/go-rod/rod
 
-go 1.21
+go 1.27
 
 require (
 	github.com/ysmood/fetchup v0.2.3

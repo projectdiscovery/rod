@@ -164,7 +164,11 @@ func TestBrowserWaitEvent(t *testing.T) {
 func TestBrowserCrash(t *testing.T) {
 	g := setup(t)
 
-	browser := rod.New().Context(g.Context()).MustConnect()
+	l := launcher.New().Context(g.Context())
+	u := l.MustLaunch()
+	defer l.Cleanup()
+	defer l.Kill()
+	browser := rod.New().Context(g.Context()).ControlURL(u).MustConnect()
 	page := browser.MustPage()
 	js := `() => new Promise(r => setTimeout(r, 10000))`
 
