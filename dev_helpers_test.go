@@ -16,7 +16,9 @@ import (
 func TestMonitor(t *testing.T) {
 	g := setup(t)
 
-	b := rod.New().MustConnect()
+	l := launcher.New()
+	defer l.Kill()
+	b := rod.New().ControlURL(l.MustLaunch()).MustConnect()
 	defer b.MustClose()
 	p := b.MustPage(g.blank()).MustWaitLoad()
 
