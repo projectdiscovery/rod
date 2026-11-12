@@ -482,6 +482,11 @@ func (l *Launcher) Launch() (string, error) {
 
 	defer l.ctxCancel()
 
+	// Do not start a browser nobody can use anymore.
+	if err := l.ctx.Err(); err != nil {
+		return "", err
+	}
+
 	bin, err := l.getBin()
 	if err != nil {
 		return "", err
