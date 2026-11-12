@@ -195,9 +195,15 @@ running goroutines: %s`, g.Name(), *TimeoutEach, t))
 		res, err := proto.TargetGetTargets{}.Call(g.browser)
 		g.E(err)
 		for _, info := range res.TargetInfos {
-			if info.TargetID != g.page.TargetID {
-				g.E(proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser))
+			if info.TargetID == g.page.TargetID {
+				continue
 			}
+			closeErr := proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser)
+			var gone *cdp.Error
+			if errors.As(closeErr, &gone) && gone.Code == -32602 {
+				continue
+			}
+			g.E(closeErr)
 		}
 
 		if g.browser.LoadState(g.page.SessionID, &proto.FetchEnable{}) {
