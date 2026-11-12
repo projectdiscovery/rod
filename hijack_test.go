@@ -142,8 +142,10 @@ func TestHijackMockWholeResponseEmptyBody(t *testing.T) {
 
 	go router.Run()
 
-	// needs to timeout or will hang when "omitempty" does not get removed from body in fulfillRequest
-	timed := g.page.Timeout(time.Second)
+	// needs to timeout or will hang when "omitempty" does not get removed from body in fulfillRequest.
+	// One second is too tight for a cold Windows runner to finish the navigation, so use a budget
+	// that still fails well before the per-test limit.
+	timed := g.page.Timeout(10 * time.Second)
 	timed.MustNavigate(g.Serve().Route("/", ".txt", "OK").URL())
 
 	g.Eq("", g.page.MustElement("body").MustText())
