@@ -25,8 +25,7 @@ jobs:
 
       - run: go run ./lib/utils/ci-test -race -coverprofile=coverage.out -run=^Test . ./lib/utils ./lib/proto ./lib/cdp ./lib/defaults ./lib/devices ./lib/launcher ./lib/input
 
-      # Per-file coverage is temporarily off. Restore check-cov once the new code is covered.
-      # - run: go run github.com/ysmood/got/cmd/check-cov@latest
+      - run: go run github.com/ysmood/got/cmd/check-cov@latest
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
