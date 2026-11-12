@@ -50,6 +50,8 @@ func TestMain(m *testing.M) {
 
 	testerPool.Cleanup(func(g *G) {
 		g.browser.MustClose()
+		g.launcher.Kill()
+		g.launcher.Cleanup()
 	})
 
 	if err := gotrace.Check(0, gotrace.IgnoreFuncs("internal/poll.runtime_pollWait")); err != nil {
@@ -67,6 +69,10 @@ type G struct {
 	// a random browser instance from the pool. If you have changed state of it, you must reset it
 	// or it may affect other test cases.
 	browser *rod.Browser
+
+	// launcher owns the process behind browser. Closed after the suite so
+	// cmd.Wait cannot outlive the leak check.
+	launcher *launcher.Launcher
 
 	// a random page instance from the pool. If you have changed state of it, you must reset it
 	// or it may affect other test cases.
@@ -89,7 +95,8 @@ func newTesterPool() rod.Pool[G] {
 }
 
 func newTester() *G {
-	u := launcher.New().Set("proxy-bypass-list", "<-loopback>").NoSandbox(true).MustLaunch()
+	l := launcher.New().Set("proxy-bypass-list", "<-loopback>").NoSandbox(true)
+	u := l.MustLaunch()
 
 	mc := newMockClient(u)
 
@@ -105,9 +112,10 @@ func newTester() *G {
 	}
 
 	return &G{
-		mc:      mc,
-		browser: browser,
-		page:    page,
+		mc:       mc,
+		browser:  browser,
+		page:     page,
+		launcher: l,
 	}
 }
 
