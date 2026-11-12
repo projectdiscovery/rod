@@ -52,7 +52,10 @@ func TestDownload(t *testing.T) {
 		return s.URL("/a.zip")
 	}}
 
-	g.Cleanup(func() { _ = os.RemoveAll(b.Dir()) })
+	g.Cleanup(func() {
+		_ = os.RemoveAll(b.Dir())
+		_ = os.Remove(b.Dir() + ".sha256")
+	})
 
 	b.MustGet()
 
@@ -214,7 +217,7 @@ func TestBrowserValid(t *testing.T) {
 	g := setup(t)
 
 	b := launcher.NewBrowser()
-	b.Revision = 0
+	b.Revision = 1
 	g.Err(b.Validate())
 
 	g.E(utils.Mkdir(filepath.Dir(b.BinPath())))

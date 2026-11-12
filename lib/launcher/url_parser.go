@@ -3,12 +3,14 @@ package launcher
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-rod/rod/lib/utils"
 	"github.com/ysmood/gson"
@@ -54,7 +56,9 @@ func (r *URLParser) Write(p []byte) (n int, err error) {
 		str := regWS.FindString(r.Buffer)
 		if str != "" {
 			u, err := url.Parse(strings.TrimSpace(str))
-			utils.E(err)
+			if err != nil {
+				return len(p), nil
+			}
 
 			select {
 			case <-r.ctx.Done():
@@ -119,14 +123,20 @@ func ResolveURL(u string) (string, error) {
 	parsed = toHTTP(*parsed)
 	parsed.Path = "/json/version"
 
-	res, err := http.Get(parsed.String()) //nolint: noctx
+	client := &http.Client{Timeout: 15 * time.Second}
+	res, err := client.Get(parsed.String()) //nolint: noctx
 	if err != nil {
 		return "", err
 	}
 	defer func() { _ = res.Body.Close() }()
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("cdp version endpoint returned %s", res.Status)
+	}
 
-	data, err := io.ReadAll(res.Body)
-	utils.E(err)
+	data, err := io.ReadAll(io.LimitReader(res.Body, 1<<20))
+	if err != nil {
+		return "", err
+	}
 
 	wsURL := gson.New(data).Get("webSocketDebuggerUrl").Str()
 

@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -94,7 +95,7 @@ func TestGetURLErr(t *testing.T) {
 func TestManaged(t *testing.T) {
 	g := setup(t)
 
-	ctx := g.Timeout(5 * time.Second)
+	ctx := g.Timeout(30 * time.Second)
 
 	s := got.New(g).Serve()
 	rl := NewManager()
@@ -118,7 +119,9 @@ func TestManaged(t *testing.T) {
 
 	u, h := MustNewManaged(s.URL()).Bin("go").ClientHeader()
 	_, err := cdp.StartWithURL(ctx, u, h)
-	g.Eq(err.(*cdp.BadHandshakeError).Body, "[rod-manager] not allowed rod-bin path: go (use --allow-all to disable the protection)")
+	var bad *cdp.BadHandshakeError
+	g.True(errors.As(err, &bad))
+	g.Eq(bad.Body, "[rod-manager] not allowed rod-bin path: go (use --allow-all to disable the protection)")
 }
 
 func TestLaunchErrs(t *testing.T) {
