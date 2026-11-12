@@ -200,8 +200,13 @@ func (p *Page) WithReferrer(referrer string) *Page {
 
 // NavigateBack history.
 func (p *Page) NavigateBack() error {
-	// Not using cdp API because it doesn't work for iframe
+	// Not using cdp API because it doesn't work for iframe.
+	// history.back() destroys the execution context. Chrome 157 reports
+	// that as the target navigating, which means the back navigation started.
 	_, err := p.Evaluate(Eval(`() => history.back()`).ByUser())
+	if errors.Is(err, cdp.ErrCtxDestroyed) {
+		return nil
+	}
 	return err
 }
 
@@ -218,8 +223,12 @@ func (p *Page) GetNavigationHistory() (*proto.PageGetNavigationHistoryResult, er
 
 // NavigateForward history.
 func (p *Page) NavigateForward() error {
-	// Not using cdp API because it doesn't work for iframe
+	// Not using cdp API because it doesn't work for iframe.
+	// Same context-destroyed result as NavigateBack.
 	_, err := p.Evaluate(Eval(`() => history.forward()`).ByUser())
+	if errors.Is(err, cdp.ErrCtxDestroyed) {
+		return nil
+	}
 	return err
 }
 
