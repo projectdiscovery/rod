@@ -8,17 +8,17 @@ Animation
 
 */
 
-// AnimationAnimationType enum.
+// AnimationAnimationType enum
 type AnimationAnimationType string
 
 const (
-	// AnimationAnimationTypeCSSTransition enum const.
+	// AnimationAnimationTypeCSSTransition enum const
 	AnimationAnimationTypeCSSTransition AnimationAnimationType = "CSSTransition"
 
-	// AnimationAnimationTypeCSSAnimation enum const.
+	// AnimationAnimationTypeCSSAnimation enum const
 	AnimationAnimationTypeCSSAnimation AnimationAnimationType = "CSSAnimation"
 
-	// AnimationAnimationTypeWebAnimation enum const.
+	// AnimationAnimationTypeWebAnimation enum const
 	AnimationAnimationTypeWebAnimation AnimationAnimationType = "WebAnimation"
 )
 
@@ -62,7 +62,7 @@ type AnimationAnimation struct {
 	ViewOrScrollTimeline *AnimationViewOrScrollTimeline `json:"viewOrScrollTimeline,omitempty"`
 }
 
-// AnimationViewOrScrollTimeline Timeline instance.
+// AnimationViewOrScrollTimeline Timeline instance
 type AnimationViewOrScrollTimeline struct {
 	// SourceNodeID (optional) Scroll container node
 	SourceNodeID DOMBackendNodeID `json:"sourceNodeId,omitempty"`
@@ -84,7 +84,7 @@ type AnimationViewOrScrollTimeline struct {
 	Axis DOMScrollOrientation `json:"axis"`
 }
 
-// AnimationAnimationEffect AnimationEffect instance.
+// AnimationAnimationEffect AnimationEffect instance
 type AnimationAnimationEffect struct {
 	// Delay `AnimationEffect`'s delay.
 	Delay float64 `json:"delay"`
@@ -95,8 +95,8 @@ type AnimationAnimationEffect struct {
 	// IterationStart `AnimationEffect`'s iteration start.
 	IterationStart float64 `json:"iterationStart"`
 
-	// Iterations `AnimationEffect`'s iterations.
-	Iterations float64 `json:"iterations"`
+	// Iterations (optional) `AnimationEffect`'s iterations. Omitted if the value is infinite.
+	Iterations *float64 `json:"iterations,omitempty"`
 
 	// Duration `AnimationEffect`'s iteration duration.
 	// Milliseconds for time based animations and
@@ -120,7 +120,7 @@ type AnimationAnimationEffect struct {
 	Easing string `json:"easing"`
 }
 
-// AnimationKeyframesRule Keyframes Rule.
+// AnimationKeyframesRule Keyframes Rule
 type AnimationKeyframesRule struct {
 	// Name (optional) CSS keyframed animation's name.
 	Name string `json:"name,omitempty"`
@@ -129,7 +129,7 @@ type AnimationKeyframesRule struct {
 	Keyframes []*AnimationKeyframeStyle `json:"keyframes"`
 }
 
-// AnimationKeyframeStyle Keyframe Style.
+// AnimationKeyframeStyle Keyframe Style
 type AnimationKeyframeStyle struct {
 	// Offset Keyframe's time offset.
 	Offset string `json:"offset"`
@@ -141,10 +141,10 @@ type AnimationKeyframeStyle struct {
 // AnimationDisable Disables animation domain notifications.
 type AnimationDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationDisable) ProtoReq() string { return "Animation.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -152,10 +152,10 @@ func (m AnimationDisable) Call(c Client) error {
 // AnimationEnable Enables animation domain notifications.
 type AnimationEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationEnable) ProtoReq() string { return "Animation.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -166,10 +166,10 @@ type AnimationGetCurrentTime struct {
 	ID string `json:"id"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationGetCurrentTime) ProtoReq() string { return "Animation.getCurrentTime" }
 
-// Call the request.
+// Call the request
 func (m AnimationGetCurrentTime) Call(c Client) (*AnimationGetCurrentTimeResult, error) {
 	var res AnimationGetCurrentTimeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -184,10 +184,10 @@ type AnimationGetCurrentTimeResult struct {
 // AnimationGetPlaybackRate Gets the playback rate of the document timeline.
 type AnimationGetPlaybackRate struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationGetPlaybackRate) ProtoReq() string { return "Animation.getPlaybackRate" }
 
-// Call the request.
+// Call the request
 func (m AnimationGetPlaybackRate) Call(c Client) (*AnimationGetPlaybackRateResult, error) {
 	var res AnimationGetPlaybackRateResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -205,10 +205,10 @@ type AnimationReleaseAnimations struct {
 	Animations []string `json:"animations"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationReleaseAnimations) ProtoReq() string { return "Animation.releaseAnimations" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationReleaseAnimations) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -219,10 +219,10 @@ type AnimationResolveAnimation struct {
 	AnimationID string `json:"animationId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationResolveAnimation) ProtoReq() string { return "Animation.resolveAnimation" }
 
-// Call the request.
+// Call the request
 func (m AnimationResolveAnimation) Call(c Client) (*AnimationResolveAnimationResult, error) {
 	var res AnimationResolveAnimationResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -239,14 +239,19 @@ type AnimationSeekAnimations struct {
 	// Animations List of animation ids to seek.
 	Animations []string `json:"animations"`
 
-	// CurrentTime Set the current time of each animation.
-	CurrentTime float64 `json:"currentTime"`
+	// CurrentTime (optional) Set each animation to the same time.
+	CurrentTime *float64 `json:"currentTime,omitempty"`
+
+	// CurrentTimes (optional) Set each animation to a different time. If set, should have the same
+	// length as animations. Exactly one of currentTime or currentTimes should
+	// be set.
+	CurrentTimes []float64 `json:"currentTimes,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationSeekAnimations) ProtoReq() string { return "Animation.seekAnimations" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationSeekAnimations) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -260,10 +265,10 @@ type AnimationSetPaused struct {
 	Paused bool `json:"paused"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationSetPaused) ProtoReq() string { return "Animation.setPaused" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationSetPaused) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -274,10 +279,10 @@ type AnimationSetPlaybackRate struct {
 	PlaybackRate float64 `json:"playbackRate"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationSetPlaybackRate) ProtoReq() string { return "Animation.setPlaybackRate" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationSetPlaybackRate) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -294,10 +299,10 @@ type AnimationSetTiming struct {
 	Delay float64 `json:"delay"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AnimationSetTiming) ProtoReq() string { return "Animation.setTiming" }
 
-// Call sends the request.
+// Call sends the request
 func (m AnimationSetTiming) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -308,7 +313,7 @@ type AnimationAnimationCanceled struct {
 	ID string `json:"id"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AnimationAnimationCanceled) ProtoEvent() string {
 	return "Animation.animationCanceled"
 }
@@ -319,7 +324,7 @@ type AnimationAnimationCreated struct {
 	ID string `json:"id"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AnimationAnimationCreated) ProtoEvent() string {
 	return "Animation.animationCreated"
 }
@@ -330,7 +335,7 @@ type AnimationAnimationStarted struct {
 	Animation *AnimationAnimation `json:"animation"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AnimationAnimationStarted) ProtoEvent() string {
 	return "Animation.animationStarted"
 }
@@ -341,7 +346,7 @@ type AnimationAnimationUpdated struct {
 	Animation *AnimationAnimation `json:"animation"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AnimationAnimationUpdated) ProtoEvent() string {
 	return "Animation.animationUpdated"
 }

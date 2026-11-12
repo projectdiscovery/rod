@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-rod/rod/lib/utils"
 )
@@ -17,8 +18,9 @@ type Dialer interface {
 // TODO: replace it with tls.Dialer once golang v1.15 is widely used.
 type tlsDialer struct{}
 
-func (d *tlsDialer) DialContext(_ context.Context, network, address string) (net.Conn, error) {
-	return tls.Dial(network, address, nil)
+func (d *tlsDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
+	nd := &net.Dialer{Timeout: 30 * time.Second}
+	return (&tls.Dialer{NetDialer: nd}).DialContext(ctx, network, address)
 }
 
 // MustConnectWS helper to make a websocket connection.

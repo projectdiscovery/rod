@@ -125,14 +125,14 @@ type OverlayFlexItemHighlightConfig struct {
 	FlexibilityArrow *OverlayLineStyle `json:"flexibilityArrow,omitempty"`
 }
 
-// OverlayLineStylePattern enum.
+// OverlayLineStylePattern enum
 type OverlayLineStylePattern string
 
 const (
-	// OverlayLineStylePatternDashed enum const.
+	// OverlayLineStylePatternDashed enum const
 	OverlayLineStylePatternDashed OverlayLineStylePattern = "dashed"
 
-	// OverlayLineStylePatternDotted enum const.
+	// OverlayLineStylePatternDotted enum const
 	OverlayLineStylePatternDotted OverlayLineStylePattern = "dotted"
 )
 
@@ -158,15 +158,45 @@ type OverlayBoxStyle struct {
 type OverlayContrastAlgorithm string
 
 const (
-	// OverlayContrastAlgorithmAa enum const.
+	// OverlayContrastAlgorithmAa enum const
 	OverlayContrastAlgorithmAa OverlayContrastAlgorithm = "aa"
 
-	// OverlayContrastAlgorithmAaa enum const.
+	// OverlayContrastAlgorithmAaa enum const
 	OverlayContrastAlgorithmAaa OverlayContrastAlgorithm = "aaa"
 
-	// OverlayContrastAlgorithmApca enum const.
+	// OverlayContrastAlgorithmApca enum const
 	OverlayContrastAlgorithmApca OverlayContrastAlgorithm = "apca"
 )
+
+// OverlayImcbHighlightConfig Configuration for Inset-Modified Containing Block (IMCB) and CSS Anchor Positioning highlight.
+type OverlayImcbHighlightConfig struct {
+	// ImcbBorderColor (optional) Border color for the Inset-Modified Containing Block (default: transparent).
+	ImcbBorderColor *DOMRGBA `json:"imcbBorderColor,omitempty"`
+
+	// ImcbBackgroundColor (optional) Background fill color for the Inset-Modified Containing Block (default: transparent).
+	ImcbBackgroundColor *DOMRGBA `json:"imcbBackgroundColor,omitempty"`
+
+	// InsetsBackgroundColor (optional) Fill color for the inset modifiers area (difference between CB and IMCB).
+	InsetsBackgroundColor *DOMRGBA `json:"insetsBackgroundColor,omitempty"`
+
+	// InsetsHatchColor (optional) Hatch color for the inset modifiers area.
+	InsetsHatchColor *DOMRGBA `json:"insetsHatchColor,omitempty"`
+
+	// AnchorBorderColor (optional) Border color for the referenced target anchor element(s) (when element is anchor-positioned).
+	AnchorBorderColor *DOMRGBA `json:"anchorBorderColor,omitempty"`
+
+	// AnchorBackgroundColor (optional) Background fill color for the referenced target anchor element(s) (when element is anchor-positioned).
+	AnchorBackgroundColor *DOMRGBA `json:"anchorBackgroundColor,omitempty"`
+
+	// ShowPositionAreaGrid (optional) Whether to render the 3x3 position-area grid lines when position-area is used.
+	ShowPositionAreaGrid bool `json:"showPositionAreaGrid,omitempty"`
+
+	// PositionAreaGridLineColor (optional) Line color for the 3x3 position-area grid lines.
+	PositionAreaGridLineColor *DOMRGBA `json:"positionAreaGridLineColor,omitempty"`
+
+	// PositionAreaActiveRegionColor (optional) Fill color for the active region within the position-area grid.
+	PositionAreaActiveRegionColor *DOMRGBA `json:"positionAreaActiveRegionColor,omitempty"`
+}
 
 // OverlayHighlightConfig Configuration data for the highlighting of page elements.
 type OverlayHighlightConfig struct {
@@ -226,26 +256,29 @@ type OverlayHighlightConfig struct {
 
 	// ContainerQueryContainerHighlightConfig (optional) The container query container highlight configuration (default: all transparent).
 	ContainerQueryContainerHighlightConfig *OverlayContainerQueryContainerHighlightConfig `json:"containerQueryContainerHighlightConfig,omitempty"`
+
+	// ImcbHighlightConfig (optional) The IMCB highlight configuration (default: all transparent).
+	ImcbHighlightConfig *OverlayImcbHighlightConfig `json:"imcbHighlightConfig,omitempty"`
 }
 
 // OverlayColorFormat ...
 type OverlayColorFormat string
 
 const (
-	// OverlayColorFormatRgb enum const.
+	// OverlayColorFormatRgb enum const
 	OverlayColorFormatRgb OverlayColorFormat = "rgb"
 
-	// OverlayColorFormatHsl enum const.
+	// OverlayColorFormatHsl enum const
 	OverlayColorFormatHsl OverlayColorFormat = "hsl"
 
-	// OverlayColorFormatHwb enum const.
+	// OverlayColorFormatHwb enum const
 	OverlayColorFormatHwb OverlayColorFormat = "hwb"
 
-	// OverlayColorFormatHex enum const.
+	// OverlayColorFormatHex enum const
 	OverlayColorFormatHex OverlayColorFormat = "hex"
 )
 
-// OverlayGridNodeHighlightConfig Configurations for Persistent Grid Highlight.
+// OverlayGridNodeHighlightConfig Configurations for Persistent Grid Highlight
 type OverlayGridNodeHighlightConfig struct {
 	// GridHighlightConfig A descriptor for the highlight appearance.
 	GridHighlightConfig *OverlayGridHighlightConfig `json:"gridHighlightConfig"`
@@ -287,7 +320,7 @@ type OverlayScrollSnapHighlightConfig struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// OverlayHingeConfig Configuration for dual screen hinge.
+// OverlayHingeConfig Configuration for dual screen hinge
 type OverlayHingeConfig struct {
 	// Rect A rectangle represent hinge
 	Rect *DOMRect `json:"rect"`
@@ -299,7 +332,54 @@ type OverlayHingeConfig struct {
 	OutlineColor *DOMRGBA `json:"outlineColor,omitempty"`
 }
 
-// OverlayWindowControlsOverlayConfig Configuration for Window Controls Overlay.
+// OverlayDisplayCutoutShape Supported display cutout shapes.
+type OverlayDisplayCutoutShape string
+
+const (
+	// OverlayDisplayCutoutShapePill enum const
+	OverlayDisplayCutoutShapePill OverlayDisplayCutoutShape = "pill"
+
+	// OverlayDisplayCutoutShapeNotch enum const
+	OverlayDisplayCutoutShapeNotch OverlayDisplayCutoutShape = "notch"
+
+	// OverlayDisplayCutoutShapeCircle enum const
+	OverlayDisplayCutoutShapeCircle OverlayDisplayCutoutShape = "circle"
+
+	// OverlayDisplayCutoutShapeRectangle enum const
+	OverlayDisplayCutoutShapeRectangle OverlayDisplayCutoutShape = "rectangle"
+)
+
+// OverlayDisplayCutoutConfig Configuration for a display cutout.
+type OverlayDisplayCutoutConfig struct {
+	// Rect A rectangle representing the cutout bounds.
+	Rect *DOMRect `json:"rect"`
+
+	// Shape used to draw the cutout.
+	Shape OverlayDisplayCutoutShape `json:"shape"`
+
+	// BorderRadius (optional) Border radius for rounded cutout shapes.
+	BorderRadius *int `json:"borderRadius,omitempty"`
+
+	// UpperRadius (optional) Upper shoulder radius for notch cutout shapes.
+	UpperRadius *int `json:"upperRadius,omitempty"`
+
+	// LowerRadius (optional) Lower transition radius for notch cutout shapes.
+	LowerRadius *int `json:"lowerRadius,omitempty"`
+
+	// Cx (optional) Center x coordinate for circle cutout shapes.
+	Cx *int `json:"cx,omitempty"`
+
+	// Cy (optional) Center y coordinate for circle cutout shapes.
+	Cy *int `json:"cy,omitempty"`
+
+	// Radius (optional) Radius for circle cutout shapes.
+	Radius *int `json:"radius,omitempty"`
+
+	// ContentColor (optional) The cutout fill color (default: black).
+	ContentColor *DOMRGBA `json:"contentColor,omitempty"`
+}
+
+// OverlayWindowControlsOverlayConfig Configuration for Window Controls Overlay
 type OverlayWindowControlsOverlayConfig struct {
 	// ShowCSS Whether the title bar CSS should be shown when emulating the Window Controls Overlay.
 	ShowCSS bool `json:"showCSS"`
@@ -354,29 +434,35 @@ type OverlayIsolationModeHighlightConfig struct {
 type OverlayInspectMode string
 
 const (
-	// OverlayInspectModeSearchForNode enum const.
+	// OverlayInspectModeSearchForNode enum const
 	OverlayInspectModeSearchForNode OverlayInspectMode = "searchForNode"
 
-	// OverlayInspectModeSearchForUAShadowDOM enum const.
+	// OverlayInspectModeSearchForUAShadowDOM enum const
 	OverlayInspectModeSearchForUAShadowDOM OverlayInspectMode = "searchForUAShadowDOM"
 
-	// OverlayInspectModeCaptureAreaScreenshot enum const.
+	// OverlayInspectModeCaptureAreaScreenshot enum const
 	OverlayInspectModeCaptureAreaScreenshot OverlayInspectMode = "captureAreaScreenshot"
 
-	// OverlayInspectModeShowDistances enum const.
-	OverlayInspectModeShowDistances OverlayInspectMode = "showDistances"
-
-	// OverlayInspectModeNone enum const.
+	// OverlayInspectModeNone enum const
 	OverlayInspectModeNone OverlayInspectMode = "none"
 )
+
+// OverlayInspectedElementAnchorConfig ...
+type OverlayInspectedElementAnchorConfig struct {
+	// NodeID (optional) Identifier of the node to highlight.
+	NodeID DOMNodeID `json:"nodeId,omitempty"`
+
+	// BackendNodeID (optional) Identifier of the backend node to highlight.
+	BackendNodeID DOMBackendNodeID `json:"backendNodeId,omitempty"`
+}
 
 // OverlayDisable Disables domain notifications.
 type OverlayDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayDisable) ProtoReq() string { return "Overlay.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -384,10 +470,10 @@ func (m OverlayDisable) Call(c Client) error {
 // OverlayEnable Enables domain notifications.
 type OverlayEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayEnable) ProtoReq() string { return "Overlay.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -410,12 +496,12 @@ type OverlayGetHighlightObjectForTest struct {
 	ShowAccessibilityInfo bool `json:"showAccessibilityInfo,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayGetHighlightObjectForTest) ProtoReq() string {
 	return "Overlay.getHighlightObjectForTest"
 }
 
-// Call the request.
+// Call the request
 func (m OverlayGetHighlightObjectForTest) Call(c Client) (*OverlayGetHighlightObjectForTestResult, error) {
 	var res OverlayGetHighlightObjectForTestResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -433,12 +519,12 @@ type OverlayGetGridHighlightObjectsForTest struct {
 	NodeIDs []DOMNodeID `json:"nodeIds"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayGetGridHighlightObjectsForTest) ProtoReq() string {
 	return "Overlay.getGridHighlightObjectsForTest"
 }
 
-// Call the request.
+// Call the request
 func (m OverlayGetGridHighlightObjectsForTest) Call(c Client) (*OverlayGetGridHighlightObjectsForTestResult, error) {
 	var res OverlayGetGridHighlightObjectsForTestResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -456,12 +542,12 @@ type OverlayGetSourceOrderHighlightObjectForTest struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayGetSourceOrderHighlightObjectForTest) ProtoReq() string {
 	return "Overlay.getSourceOrderHighlightObjectForTest"
 }
 
-// Call the request.
+// Call the request
 func (m OverlayGetSourceOrderHighlightObjectForTest) Call(c Client) (*OverlayGetSourceOrderHighlightObjectForTestResult, error) {
 	var res OverlayGetSourceOrderHighlightObjectForTestResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -476,10 +562,10 @@ type OverlayGetSourceOrderHighlightObjectForTestResult struct {
 // OverlayHideHighlight Hides any highlight.
 type OverlayHideHighlight struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHideHighlight) ProtoReq() string { return "Overlay.hideHighlight" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHideHighlight) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -499,10 +585,10 @@ type OverlayHighlightFrame struct {
 	ContentOutlineColor *DOMRGBA `json:"contentOutlineColor,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHighlightFrame) ProtoReq() string { return "Overlay.highlightFrame" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHighlightFrame) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -526,10 +612,10 @@ type OverlayHighlightNode struct {
 	Selector string `json:"selector,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHighlightNode) ProtoReq() string { return "Overlay.highlightNode" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHighlightNode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -546,15 +632,18 @@ type OverlayHighlightQuad struct {
 	OutlineColor *DOMRGBA `json:"outlineColor,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHighlightQuad) ProtoReq() string { return "Overlay.highlightQuad" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHighlightQuad) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
 // OverlayHighlightRect Highlights given rectangle. Coordinates are absolute with respect to the main frame viewport.
+// Issue: the method does not handle device pixel ratio (DPR) correctly.
+// The coordinates currently have to be adjusted by the client
+// if DPR is not 1 (see crbug.com/437807128).
 type OverlayHighlightRect struct {
 	// X coordinate
 	X int `json:"x"`
@@ -575,10 +664,10 @@ type OverlayHighlightRect struct {
 	OutlineColor *DOMRGBA `json:"outlineColor,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHighlightRect) ProtoReq() string { return "Overlay.highlightRect" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHighlightRect) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -599,10 +688,10 @@ type OverlayHighlightSourceOrder struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlayHighlightSourceOrder) ProtoReq() string { return "Overlay.highlightSourceOrder" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlayHighlightSourceOrder) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -618,10 +707,10 @@ type OverlaySetInspectMode struct {
 	HighlightConfig *OverlayHighlightConfig `json:"highlightConfig,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetInspectMode) ProtoReq() string { return "Overlay.setInspectMode" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetInspectMode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -632,10 +721,10 @@ type OverlaySetShowAdHighlights struct {
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowAdHighlights) ProtoReq() string { return "Overlay.setShowAdHighlights" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowAdHighlights) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -646,40 +735,40 @@ type OverlaySetPausedInDebuggerMessage struct {
 	Message string `json:"message,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetPausedInDebuggerMessage) ProtoReq() string {
 	return "Overlay.setPausedInDebuggerMessage"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetPausedInDebuggerMessage) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowDebugBorders Requests that backend shows debug borders on layers.
+// OverlaySetShowDebugBorders Requests that backend shows debug borders on layers
 type OverlaySetShowDebugBorders struct {
 	// Show True for showing debug borders
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowDebugBorders) ProtoReq() string { return "Overlay.setShowDebugBorders" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowDebugBorders) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowFPSCounter Requests that backend shows the FPS counter.
+// OverlaySetShowFPSCounter Requests that backend shows the FPS counter
 type OverlaySetShowFPSCounter struct {
 	// Show True for showing the FPS counter
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowFPSCounter) ProtoReq() string { return "Overlay.setShowFPSCounter" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowFPSCounter) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -690,10 +779,10 @@ type OverlaySetShowGridOverlays struct {
 	GridNodeHighlightConfigs []*OverlayGridNodeHighlightConfig `json:"gridNodeHighlightConfigs"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowGridOverlays) ProtoReq() string { return "Overlay.setShowGridOverlays" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowGridOverlays) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -704,10 +793,10 @@ type OverlaySetShowFlexOverlays struct {
 	FlexNodeHighlightConfigs []*OverlayFlexNodeHighlightConfig `json:"flexNodeHighlightConfigs"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowFlexOverlays) ProtoReq() string { return "Overlay.setShowFlexOverlays" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowFlexOverlays) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -718,12 +807,12 @@ type OverlaySetShowScrollSnapOverlays struct {
 	ScrollSnapHighlightConfigs []*OverlayScrollSnapHighlightConfig `json:"scrollSnapHighlightConfigs"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowScrollSnapOverlays) ProtoReq() string {
 	return "Overlay.setShowScrollSnapOverlays"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowScrollSnapOverlays) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -734,58 +823,74 @@ type OverlaySetShowContainerQueryOverlays struct {
 	ContainerQueryHighlightConfigs []*OverlayContainerQueryHighlightConfig `json:"containerQueryHighlightConfigs"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowContainerQueryOverlays) ProtoReq() string {
 	return "Overlay.setShowContainerQueryOverlays"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowContainerQueryOverlays) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowPaintRects Requests that backend shows paint rectangles.
+// OverlaySetShowInspectedElementAnchor ...
+type OverlaySetShowInspectedElementAnchor struct {
+	// InspectedElementAnchorConfig Node identifier for which to show an anchor for.
+	InspectedElementAnchorConfig *OverlayInspectedElementAnchorConfig `json:"inspectedElementAnchorConfig"`
+}
+
+// ProtoReq name
+func (m OverlaySetShowInspectedElementAnchor) ProtoReq() string {
+	return "Overlay.setShowInspectedElementAnchor"
+}
+
+// Call sends the request
+func (m OverlaySetShowInspectedElementAnchor) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// OverlaySetShowPaintRects Requests that backend shows paint rectangles
 type OverlaySetShowPaintRects struct {
 	// Result True for showing paint rectangles
 	Result bool `json:"result"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowPaintRects) ProtoReq() string { return "Overlay.setShowPaintRects" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowPaintRects) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowLayoutShiftRegions Requests that backend shows layout shift regions.
+// OverlaySetShowLayoutShiftRegions Requests that backend shows layout shift regions
 type OverlaySetShowLayoutShiftRegions struct {
 	// Result True for showing layout shift regions
 	Result bool `json:"result"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowLayoutShiftRegions) ProtoReq() string {
 	return "Overlay.setShowLayoutShiftRegions"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowLayoutShiftRegions) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowScrollBottleneckRects Requests that backend shows scroll bottleneck rects.
+// OverlaySetShowScrollBottleneckRects Requests that backend shows scroll bottleneck rects
 type OverlaySetShowScrollBottleneckRects struct {
 	// Show True for showing scroll bottleneck rects
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowScrollBottleneckRects) ProtoReq() string {
 	return "Overlay.setShowScrollBottleneckRects"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowScrollBottleneckRects) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -796,24 +901,24 @@ type OverlaySetShowHitTestBorders struct {
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowHitTestBorders) ProtoReq() string { return "Overlay.setShowHitTestBorders" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowHitTestBorders) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowWebVitals Request that backend shows an overlay with web vital metrics.
+// OverlaySetShowWebVitals (deprecated) Deprecated, no longer has any effect.
 type OverlaySetShowWebVitals struct {
 	// Show ...
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowWebVitals) ProtoReq() string { return "Overlay.setShowWebVitals" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowWebVitals) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -824,27 +929,41 @@ type OverlaySetShowViewportSizeOnResize struct {
 	Show bool `json:"show"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowViewportSizeOnResize) ProtoReq() string {
 	return "Overlay.setShowViewportSizeOnResize"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowViewportSizeOnResize) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowHinge Add a dual screen device hinge.
+// OverlaySetShowHinge Add a dual screen device hinge
 type OverlaySetShowHinge struct {
 	// HingeConfig (optional) hinge data, null means hideHinge
 	HingeConfig *OverlayHingeConfig `json:"hingeConfig,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowHinge) ProtoReq() string { return "Overlay.setShowHinge" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowHinge) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// OverlaySetShowDisplayCutout Add a display cutout overlay.
+type OverlaySetShowDisplayCutout struct {
+	// DisplayCutoutConfig (optional) display cutout data, null means hide display cutout
+	DisplayCutoutConfig *OverlayDisplayCutoutConfig `json:"displayCutoutConfig,omitempty"`
+}
+
+// ProtoReq name
+func (m OverlaySetShowDisplayCutout) ProtoReq() string { return "Overlay.setShowDisplayCutout" }
+
+// Call sends the request
+func (m OverlaySetShowDisplayCutout) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -854,26 +973,26 @@ type OverlaySetShowIsolatedElements struct {
 	IsolatedElementHighlightConfigs []*OverlayIsolatedElementHighlightConfig `json:"isolatedElementHighlightConfigs"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowIsolatedElements) ProtoReq() string { return "Overlay.setShowIsolatedElements" }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowIsolatedElements) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// OverlaySetShowWindowControlsOverlay Show Window Controls Overlay for PWA.
+// OverlaySetShowWindowControlsOverlay Show Window Controls Overlay for PWA
 type OverlaySetShowWindowControlsOverlay struct {
 	// WindowControlsOverlayConfig (optional) Window Controls Overlay data, null means hide Window Controls Overlay
 	WindowControlsOverlayConfig *OverlayWindowControlsOverlayConfig `json:"windowControlsOverlayConfig,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m OverlaySetShowWindowControlsOverlay) ProtoReq() string {
 	return "Overlay.setShowWindowControlsOverlay"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m OverlaySetShowWindowControlsOverlay) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -885,7 +1004,7 @@ type OverlayInspectNodeRequested struct {
 	BackendNodeID DOMBackendNodeID `json:"backendNodeId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt OverlayInspectNodeRequested) ProtoEvent() string {
 	return "Overlay.inspectNodeRequested"
 }
@@ -896,7 +1015,7 @@ type OverlayNodeHighlightRequested struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt OverlayNodeHighlightRequested) ProtoEvent() string {
 	return "Overlay.nodeHighlightRequested"
 }
@@ -907,15 +1026,37 @@ type OverlayScreenshotRequested struct {
 	Viewport *PageViewport `json:"viewport"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt OverlayScreenshotRequested) ProtoEvent() string {
 	return "Overlay.screenshotRequested"
+}
+
+// OverlayInspectPanelShowRequested Fired when user asks to show the Inspect panel.
+type OverlayInspectPanelShowRequested struct {
+	// BackendNodeID Id of the node to show in the panel.
+	BackendNodeID DOMBackendNodeID `json:"backendNodeId"`
+}
+
+// ProtoEvent name
+func (evt OverlayInspectPanelShowRequested) ProtoEvent() string {
+	return "Overlay.inspectPanelShowRequested"
+}
+
+// OverlayInspectedElementWindowRestored Fired when user asks to restore the Inspected Element floating window.
+type OverlayInspectedElementWindowRestored struct {
+	// BackendNodeID Id of the node to restore the floating window for.
+	BackendNodeID DOMBackendNodeID `json:"backendNodeId"`
+}
+
+// ProtoEvent name
+func (evt OverlayInspectedElementWindowRestored) ProtoEvent() string {
+	return "Overlay.inspectedElementWindowRestored"
 }
 
 // OverlayInspectModeCanceled Fired when user cancels the inspect mode.
 type OverlayInspectModeCanceled struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt OverlayInspectModeCanceled) ProtoEvent() string {
 	return "Overlay.inspectModeCanceled"
 }

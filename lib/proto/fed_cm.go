@@ -15,10 +15,10 @@ This domain allows interacting with the FedCM dialog.
 type FedCmLoginState string
 
 const (
-	// FedCmLoginStateSignIn enum const.
+	// FedCmLoginStateSignIn enum const
 	FedCmLoginStateSignIn FedCmLoginState = "SignIn"
 
-	// FedCmLoginStateSignUp enum const.
+	// FedCmLoginStateSignUp enum const
 	FedCmLoginStateSignUp FedCmLoginState = "SignUp"
 )
 
@@ -26,16 +26,16 @@ const (
 type FedCmDialogType string
 
 const (
-	// FedCmDialogTypeAccountChooser enum const.
+	// FedCmDialogTypeAccountChooser enum const
 	FedCmDialogTypeAccountChooser FedCmDialogType = "AccountChooser"
 
-	// FedCmDialogTypeAutoReauthn enum const.
+	// FedCmDialogTypeAutoReauthn enum const
 	FedCmDialogTypeAutoReauthn FedCmDialogType = "AutoReauthn"
 
-	// FedCmDialogTypeConfirmIdpLogin enum const.
+	// FedCmDialogTypeConfirmIdpLogin enum const
 	FedCmDialogTypeConfirmIdpLogin FedCmDialogType = "ConfirmIdpLogin"
 
-	// FedCmDialogTypeError enum const.
+	// FedCmDialogTypeError enum const
 	FedCmDialogTypeError FedCmDialogType = "Error"
 )
 
@@ -43,28 +43,28 @@ const (
 type FedCmDialogButton string
 
 const (
-	// FedCmDialogButtonConfirmIdpLoginContinue enum const.
+	// FedCmDialogButtonConfirmIdpLoginContinue enum const
 	FedCmDialogButtonConfirmIdpLoginContinue FedCmDialogButton = "ConfirmIdpLoginContinue"
 
-	// FedCmDialogButtonErrorGotIt enum const.
+	// FedCmDialogButtonErrorGotIt enum const
 	FedCmDialogButtonErrorGotIt FedCmDialogButton = "ErrorGotIt"
 
-	// FedCmDialogButtonErrorMoreDetails enum const.
+	// FedCmDialogButtonErrorMoreDetails enum const
 	FedCmDialogButtonErrorMoreDetails FedCmDialogButton = "ErrorMoreDetails"
 )
 
-// FedCmAccountURLType The URLs that each account has.
+// FedCmAccountURLType The URLs that each account has
 type FedCmAccountURLType string
 
 const (
-	// FedCmAccountURLTypeTermsOfService enum const.
+	// FedCmAccountURLTypeTermsOfService enum const
 	FedCmAccountURLTypeTermsOfService FedCmAccountURLType = "TermsOfService"
 
-	// FedCmAccountURLTypePrivacyPolicy enum const.
+	// FedCmAccountURLTypePrivacyPolicy enum const
 	FedCmAccountURLTypePrivacyPolicy FedCmAccountURLType = "PrivacyPolicy"
 )
 
-// FedCmAccount Corresponds to IdentityRequestAccount.
+// FedCmAccount Corresponds to IdentityRequestAccount
 type FedCmAccount struct {
 	// AccountID ...
 	AccountID string `json:"accountId"`
@@ -105,10 +105,10 @@ type FedCmEnable struct {
 	DisableRejectionDelay bool `json:"disableRejectionDelay,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmEnable) ProtoReq() string { return "FedCm.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -116,10 +116,10 @@ func (m FedCmEnable) Call(c Client) error {
 // FedCmDisable ...
 type FedCmDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmDisable) ProtoReq() string { return "FedCm.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -133,10 +133,10 @@ type FedCmSelectAccount struct {
 	AccountIndex int `json:"accountIndex"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmSelectAccount) ProtoReq() string { return "FedCm.selectAccount" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmSelectAccount) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -150,10 +150,10 @@ type FedCmClickDialogButton struct {
 	DialogButton FedCmDialogButton `json:"dialogButton"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmClickDialogButton) ProtoReq() string { return "FedCm.clickDialogButton" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmClickDialogButton) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -170,10 +170,10 @@ type FedCmOpenURL struct {
 	AccountURLType FedCmAccountURLType `json:"accountUrlType"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmOpenURL) ProtoReq() string { return "FedCm.openUrl" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmOpenURL) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -187,10 +187,10 @@ type FedCmDismissDialog struct {
 	TriggerCooldown bool `json:"triggerCooldown,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmDismissDialog) ProtoReq() string { return "FedCm.dismissDialog" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmDismissDialog) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -199,10 +199,10 @@ func (m FedCmDismissDialog) Call(c Client) error {
 // a dialog even if one was recently dismissed by the user.
 type FedCmResetCooldown struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m FedCmResetCooldown) ProtoReq() string { return "FedCm.resetCooldown" }
 
-// Call sends the request.
+// Call sends the request
 func (m FedCmResetCooldown) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -226,7 +226,7 @@ type FedCmDialogShown struct {
 	Subtitle string `json:"subtitle,omitempty"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt FedCmDialogShown) ProtoEvent() string {
 	return "FedCm.dialogShown"
 }
@@ -238,7 +238,7 @@ type FedCmDialogClosed struct {
 	DialogID string `json:"dialogId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt FedCmDialogClosed) ProtoEvent() string {
 	return "FedCm.dialogClosed"
 }

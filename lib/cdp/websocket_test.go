@@ -123,7 +123,5 @@ func TestDuplicatedConnectErr(t *testing.T) {
 	ws := &cdp.WebSocket{}
 	g.E(ws.Connect(g.Context(), u, nil))
 
-	g.Panic(func() {
-		_ = ws.Connect(g.Context(), u, nil)
-	})
+	g.Err(ws.Connect(g.Context(), u, nil))
 }

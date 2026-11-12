@@ -1,0 +1,274 @@
+package launcher
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+
+	"github.com/go-rod/rod/lib/launcher/flags"
+	"github.com/go-rod/rod/lib/utils"
+)
+
+const fakeDumpDOSScript = "#!/bin/sh\necho '<html><head></head><body></body></html>'\n"
+
+// fakeCFT serves a Stable versions file and fake Chrome for Testing archives
+// for the current platform, both headless-shell and full Chrome. It points the
+// package at the server for the duration of the test.
+func fakeCFT(t *testing.T, version string) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		t.Skip("the fake browser is a shell script")
+	}
+	platform, err := cftPlatform()
+	if err != nil {
+		t.Skip(err)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/versions.json", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"channels":{"Stable":{"version":%q}}}`, version)
+	})
+	for _, headless := range []bool{true, false} {
+		c := &chromeForTesting{version: version, headlessShell: headless}
+		body := buildZip(t, zipEntry{
+			name: c.product() + "-" + platform + "/" + c.binName(),
+			body: fakeDumpDOSScript,
+			mode: 0o755,
+		})
+		path := fmt.Sprintf("/cft/%s/%s/%s-%s.zip", version, platform, c.product(), platform)
+		mux.HandleFunc(path, func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write(body)
+		})
+	}
+	s := httptest.NewServer(mux)
+	t.Cleanup(s.Close)
+
+	oldVersions, oldStorage := ChromeForTestingVersionsURL, chromeForTestingStorage
+	ChromeForTestingVersionsURL = s.URL + "/versions.json"
+	chromeForTestingStorage = s.URL + "/cft"
+	t.Cleanup(func() {
+		ChromeForTestingVersionsURL = oldVersions
+		chromeForTestingStorage = oldStorage
+	})
+}
+
+// installFake places an executable fake browser under root, as a previous
+// download would have.
+func installFake(t *testing.T, root string, c *chromeForTesting) string {
+	t.Helper()
+	bin := filepath.Join(root, c.dirName(), filepath.FromSlash(c.binName()))
+	if err := os.MkdirAll(filepath.Dir(bin), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(bin, []byte(fakeDumpDOSScript), 0o755); err != nil { //nolint: gosec
+		t.Fatal(err)
+	}
+	return bin
+}
+
+func TestCFTPlatformFor(t *testing.T) {
+	cases := map[[2]string]string{
+		{"linux", "amd64"}:   "linux64",
+		{"linux", "arm64"}:   "linux-arm64",
+		{"darwin", "arm64"}:  "mac-arm64",
+		{"darwin", "amd64"}:  "mac-x64",
+		{"windows", "amd64"}: "win64",
+		{"windows", "386"}:   "win32",
+	}
+	for k, want := range cases {
+		got, err := cftPlatformFor(k[0], k[1])
+		if err != nil || got != want {
+			t.Fatalf("%v: got %q %v, want %q", k, got, err, want)
+		}
+	}
+	if _, err := cftPlatformFor("linux", "386"); err == nil {
+		t.Fatal("linux/386 has no build")
+	}
+}
+
+func TestDefaultDownloadsLatestChrome(t *testing.T) {
+	fakeCFT(t, "157.0.1.0")
+
+	b := NewBrowser()
+	b.RootDir = t.TempDir()
+	b.Logger = utils.LoggerQuiet
+
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(b.RootDir, "chrome-157.0.1.0",
+		filepath.FromSlash((&chromeForTesting{}).binName()))
+	if bin != want {
+		t.Fatalf("bin %s, want %s", bin, want)
+	}
+	if err := b.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(b.Dir() + ".sha256"); err != nil {
+		t.Fatal("pin not recorded", err)
+	}
+}
+
+func TestHeadfulDownloadsFullChrome(t *testing.T) {
+	fakeCFT(t, "157.0.1.0")
+
+	b := NewBrowser()
+	b.RootDir = t.TempDir()
+	b.Logger = utils.LoggerQuiet
+	b.Headful = true
+
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bin, "chrome-157.0.1.0") || strings.Contains(bin, "headless-shell") {
+		t.Fatalf("headful should get the full build, got %s", bin)
+	}
+}
+
+func TestLaunchPicksBuildByHeadless(t *testing.T) {
+	fakeCFT(t, "157.0.1.0")
+
+	headless := New()
+	headless.browser.RootDir = t.TempDir()
+	headless.browser.Logger = utils.LoggerQuiet
+	bin, err := headless.getBin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bin, "chrome-157.0.1.0") || strings.Contains(bin, "headless-shell") {
+		t.Fatalf("headless launch should get full Chrome, got %s", bin)
+	}
+
+	shell := New().HeadlessShell(true)
+	shell.browser.RootDir = t.TempDir()
+	shell.browser.Logger = utils.LoggerQuiet
+	bin, err = shell.getBin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bin, "chrome-headless-shell-157.0.1.0") {
+		t.Fatalf("HeadlessShell should get the shell, got %s", bin)
+	}
+
+	// The shell cannot show a window, so the flag is ignored.
+	window := New().Headless(false).HeadlessShell(true)
+	window.browser.RootDir = t.TempDir()
+	window.browser.Logger = utils.LoggerQuiet
+	bin, err = window.getBin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bin, "chrome-157.0.1.0") || strings.Contains(bin, "headless-shell") {
+		t.Fatalf("headful HeadlessShell should get full Chrome, got %s", bin)
+	}
+
+	headful := New().Headless(false)
+	headful.browser.RootDir = t.TempDir()
+	headful.browser.Logger = utils.LoggerQuiet
+	if headful.Has(flags.Headless) {
+		t.Fatal("headless flag should be removed")
+	}
+	bin, err = headful.getBin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bin, "chrome-157.0.1.0") || strings.Contains(bin, "headless-shell") {
+		t.Fatalf("headful launch should get the full build, got %s", bin)
+	}
+}
+
+func TestLatestPrunesOlderVersion(t *testing.T) {
+	fakeCFT(t, "157.0.1.0")
+
+	root := t.TempDir()
+	old := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
+	shell := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: true})
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	if _, err := b.Get(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Dir(old)); !os.IsNotExist(err) {
+		t.Fatal("older full chrome still cached", err)
+	}
+	if _, err := os.Stat(filepath.Dir(shell)); err != nil {
+		t.Fatal("older headless-shell of another product must stay", err)
+	}
+}
+
+func TestLatestFallsBackToInstalledWhenOffline(t *testing.T) {
+	// Nothing listens on port 1, so the versions file cannot be fetched.
+	oldVersions := ChromeForTestingVersionsURL
+	ChromeForTestingVersionsURL = "http://127.0.0.1:1/versions.json"
+	t.Cleanup(func() { ChromeForTestingVersionsURL = oldVersions })
+
+	root := t.TempDir()
+	older := installFake(t, root, &chromeForTesting{version: "155.0.1.0", headlessShell: false})
+	newest := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin != newest {
+		t.Fatalf("bin %s, want the newest installed %s (not %s)", bin, newest, older)
+	}
+}
+
+func TestOfflineWithNothingInstalledFails(t *testing.T) {
+	oldVersions := ChromeForTestingVersionsURL
+	ChromeForTestingVersionsURL = "http://127.0.0.1:1/versions.json"
+	t.Cleanup(func() { ChromeForTestingVersionsURL = oldVersions })
+
+	b := NewBrowser()
+	b.RootDir = t.TempDir()
+	b.Logger = utils.LoggerQuiet
+	if _, err := b.Get(); err == nil {
+		t.Fatal("expected an error without network or cache")
+	}
+}
+
+func TestRevisionSelectsChromium(t *testing.T) {
+	b := NewBrowser()
+	b.RootDir = "/cache"
+	b.Revision = 7
+	if got, want := b.Dir(), filepath.Join("/cache", "chromium-7"); got != want {
+		t.Fatalf("dir %s, want %s", got, want)
+	}
+	if len(defaultHosts(nil)) != 3 {
+		t.Fatal("chromium snapshots keep the google, npm and playwright hosts")
+	}
+}
+
+func TestCompliantLaunchFlags(t *testing.T) {
+	l := New().HeadlessShell(true).Compliant(true)
+	l.applyCompliant()
+	if l.browser.HeadlessShell {
+		t.Fatal("compliant launch uses full Chrome")
+	}
+	if l.Has("enable-automation") {
+		t.Fatal("automation switch still set")
+	}
+	if !strings.Contains(l.Get("disable-blink-features"), "AutomationControlled") {
+		t.Fatalf("blink features %q", l.Get("disable-blink-features"))
+	}
+
+	again := New().Set("disable-blink-features", "AutomationControlled")
+	again.compliant = true
+	again.applyCompliant()
+	if again.Get("disable-blink-features") != "AutomationControlled" {
+		t.Fatalf("feature duplicated: %s", again.Get("disable-blink-features"))
+	}
+}

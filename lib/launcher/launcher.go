@@ -10,14 +10,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/go-rod/rod/lib/defaults"
 	"github.com/go-rod/rod/lib/launcher/flags"
 	"github.com/go-rod/rod/lib/utils"
-	"github.com/ysmood/leakless"
 )
 
 // DefaultUserDataDirPrefix ...
@@ -37,8 +38,18 @@ type Launcher struct {
 	pid     int
 	exit    chan struct{}
 
-	managed    bool
-	serviceURL string
+	managed       bool
+	serviceURL    string
+	noInheritEnv  bool
+	launchTimeout time.Duration
+	output        *limitBuf
+
+	dropPriv bool
+	uid      int
+	gid      int
+
+	// compliant selects full Chrome and drops the automation switch.
+	compliant bool
 
 	isLaunched int32 // zero means not launched
 }
@@ -47,8 +58,9 @@ type Launcher struct {
 // Headless will be enabled by default.
 // Leakless will be enabled by default.
 // UserDataDir will use OS tmp dir by default, this folder will usually be cleaned up by the OS after reboot.
-// It will auto download the browser binary according to the current platform,
-// check [Launcher.Bin] and [Launcher.Revision] for more info.
+// It will auto download the latest stable full Chrome for the current platform.
+// [Launcher.HeadlessShell] selects the smaller chrome-headless-shell build.
+// Check [Launcher.Bin] and [Launcher.Revision] for more info.
 func New() *Launcher {
 	dir := defaults.Dir
 	if dir == "" {
@@ -118,6 +130,7 @@ func New() *Launcher {
 		browser:   NewBrowser(),
 		parser:    NewURLParser(),
 		logger:    io.Discard,
+		output:    &limitBuf{max: LaunchOutputLimit},
 	}
 }
 
@@ -140,6 +153,7 @@ func NewUserMode() *Launcher {
 		exit:    make(chan struct{}),
 		parser:  NewURLParser(),
 		logger:  io.Discard,
+		output:  &limitBuf{max: LaunchOutputLimit},
 	}
 }
 
@@ -215,10 +229,51 @@ func (l *Launcher) Bin(path string) *Launcher {
 	return l.Set(flags.Bin, path)
 }
 
-// Revision of the browser to auto download.
+// Revision of a Chromium snapshot to auto download, such as [RevisionDefault].
+// Without it the launcher downloads the latest stable full Chrome.
+// [Launcher.HeadlessShell] selects chrome-headless-shell instead.
 func (l *Launcher) Revision(rev int) *Launcher {
 	l.browser.Revision = rev
 	return l
+}
+
+// HeadlessShell downloads chrome-headless-shell instead of full Chrome.
+// The shell is smaller. It cannot show a window, so a headful launch ignores
+// this and downloads full Chrome. It also has no window.chrome, no plugins
+// and no PDF viewer, and its client hints say HeadlessChrome.
+func (l *Launcher) HeadlessShell(enable bool) *Launcher {
+	l.browser.HeadlessShell = enable
+	return l
+}
+
+// Compliant launches full Chrome without the automation switch, so
+// navigator.webdriver is false. [Browser.Compliant] then aligns the user
+// agent and client hints with that browser. A headless shell is not used.
+// Calling it with false leaves the launcher unchanged.
+func (l *Launcher) Compliant(enable bool) *Launcher {
+	if enable {
+		l.compliant = true
+		l.browser.HeadlessShell = false
+	}
+	return l
+}
+
+// applyCompliant drops the automation flag. Launch calls it.
+func (l *Launcher) applyCompliant() {
+	if !l.compliant {
+		return
+	}
+	l.browser.HeadlessShell = false
+	l.Delete("enable-automation")
+	const feature = "AutomationControlled"
+	cur := l.Get("disable-blink-features")
+	if cur == "" {
+		l.Set("disable-blink-features", feature)
+		return
+	}
+	if !strings.Contains(cur, feature) {
+		l.Set("disable-blink-features", cur+","+feature)
+	}
 }
 
 // Headless switch. Whether to run browser in headless mode. A mode without visible UI.
@@ -267,8 +322,10 @@ func (l *Launcher) AlwaysOpenPDFExternally() *Launcher {
 	return l.Set(flags.Preferences, `{"plugins":{"always_open_pdf_externally": true}}`)
 }
 
-// Leakless switch. If enabled, the browser will be force killed after the Go process exits.
-// The doc of leakless: https://github.com/ysmood/leakless.
+// Leakless is kept so existing callers compile. The helper binary is not
+// used. The browser is started in its own process group and is killed when
+// this process dies: by Pdeathsig on Linux, a job object on Windows, and a
+// /bin/sh watchdog elsewhere.
 func (l *Launcher) Leakless(enable bool) *Launcher {
 	if enable {
 		return l.Set(flags.Leakless)
@@ -421,8 +478,14 @@ func (l *Launcher) Launch() (string, error) {
 	if l.hasLaunched() {
 		return "", ErrAlreadyLaunched
 	}
+	l.applyCompliant()
 
 	defer l.ctxCancel()
+
+	// Do not start a browser nobody can use anymore.
+	if err := l.ctx.Err(); err != nil {
+		return "", err
+	}
 
 	bin, err := l.getBin()
 	if err != nil {
@@ -430,52 +493,61 @@ func (l *Launcher) Launch() (string, error) {
 	}
 
 	l.setupUserPreferences()
+	if err := l.preparePrivileges(); err != nil {
+		return "", err
+	}
 
-	var ll *leakless.Launcher
 	var cmd *exec.Cmd
 
 	args := l.FormatArgs()
 
-	if l.Has(flags.Leakless) && leakless.Support() {
-		ll = leakless.New()
-		cmd = ll.Command(bin, args...)
-	} else {
-		port := l.Get(flags.RemoteDebuggingPort)
+	port := l.Get(flags.RemoteDebuggingPort)
+	if port != "" && port != "0" {
 		u, err := ResolveURL(port)
 		if err == nil {
 			return u, nil
 		}
-		cmd = exec.Command(bin, args...)
 	}
+	cmd = exec.Command(bin, args...)
 
 	l.setupCmd(cmd)
 
-	err = cmd.Start()
-	if err != nil {
-		return "", err
+	if err = startLocked(l, cmd); err != nil {
+		return "", l.annotate(err)
 	}
-
-	if ll == nil {
-		l.pid = cmd.Process.Pid
-	} else {
-		l.pid = <-ll.Pid()
-		if ll.Err() != "" {
-			return "", errors.New(ll.Err())
-		}
-	}
-
-	go func() {
-		_ = cmd.Wait()
-		close(l.exit)
-	}()
 
 	u, err := l.getURL()
 	if err != nil {
 		l.Kill()
-		return "", err
+		return "", l.annotate(err)
 	}
 
 	return ResolveURL(u)
+}
+
+// startLocked starts cmd on a thread that stays alive until the process
+// exits. On Linux, Pdeathsig is tied to that thread, so Chrome is signalled
+// when this process dies and not merely when an unrelated thread exits.
+func startLocked(l *Launcher, cmd *exec.Cmd) error {
+	started := make(chan error, 1)
+	go func() {
+		if runtime.GOOS == "linux" {
+			runtime.LockOSThread()
+		}
+		err := cmd.Start()
+		if err != nil {
+			started <- err
+			return
+		}
+		l.pid = cmd.Process.Pid
+		stop := afterStart(cmd)
+		writeOwner(l.Get(flags.UserDataDir), l.pid)
+		started <- nil
+		_ = cmd.Wait()
+		stop()
+		close(l.exit)
+	}()
+	return <-started
 }
 
 func (l *Launcher) hasLaunched() bool {
@@ -503,36 +575,90 @@ func (l *Launcher) setupUserPreferences() {
 	utils.E(utils.OutputFile(path, pref))
 }
 
+// DropPrivileges runs the browser as uid and gid. On Unix the profile
+// directory is created and given to that user before start. The call does
+// nothing until it is used. It is not supported on Windows.
+func (l *Launcher) DropPrivileges(uid, gid int) *Launcher {
+	l.dropPriv = true
+	l.uid = uid
+	l.gid = gid
+	return l
+}
+
+// NoInheritEnv starts the browser with a minimal environment (PATH, HOME,
+// TMPDIR) instead of the parent process environment.
+func (l *Launcher) NoInheritEnv(enable bool) *Launcher {
+	l.noInheritEnv = enable
+	return l
+}
+
 func (l *Launcher) setupCmd(cmd *exec.Cmd) {
 	l.osSetupCmd(cmd)
 
 	dir := l.Get(flags.WorkingDir)
-	env, _ := l.GetFlags(flags.Env)
+	env, hasEnv := l.GetFlags(flags.Env)
 	cmd.Dir = dir
-	cmd.Env = env
+	if hasEnv {
+		cmd.Env = env
+	} else if l.noInheritEnv {
+		cmd.Env = minimalEnv()
+	}
 
-	cmd.Stdout = io.MultiWriter(l.logger, l.parser)
-	cmd.Stderr = io.MultiWriter(l.logger, l.parser)
+	cmd.Stdout = io.MultiWriter(l.logger, l.parser, l.output)
+	cmd.Stderr = io.MultiWriter(l.logger, l.parser, l.output)
+	// A child that inherited the pipe, which a crashed browser leaves
+	// behind, would otherwise keep Wait and Cleanup blocked forever.
+	cmd.WaitDelay = 3 * time.Second
 }
 
 func (l *Launcher) getBin() (string, error) {
 	bin := l.Get(flags.Bin)
 	if bin == "" {
 		l.browser.Context = l.ctx
+		// chrome-headless-shell cannot show a window, so a headful launch
+		// needs the full Chrome build.
+		l.browser.Headful = !l.Has(flags.Headless)
 		return l.browser.Get()
 	}
 	return bin, nil
 }
 
 func (l *Launcher) getURL() (u string, err error) {
+	timeout := l.launchTimeout
+	if timeout == 0 {
+		timeout = DefaultLaunchTimeout
+	}
+	var expired <-chan time.Time
+	if timeout > 0 {
+		t := time.NewTimer(timeout)
+		defer t.Stop()
+		expired = t.C
+	}
 	select {
 	case <-l.ctx.Done():
 		err = l.ctx.Err()
 	case u = <-l.parser.URL:
 	case <-l.exit:
 		err = l.parser.Err()
+	case <-expired:
+		err = fmt.Errorf("%w after %v", ErrLaunchTimeout, timeout)
 	}
 	return
+}
+
+// DefaultLaunchTimeout bounds how long Launch waits for the browser to print
+// its DevTools address when [Launcher.LaunchTimeout] is not set.
+var DefaultLaunchTimeout = 60 * time.Second
+
+// ErrLaunchTimeout is returned when the browser does not report its DevTools
+// address in time.
+var ErrLaunchTimeout = errors.New("launcher: browser did not start in time")
+
+// LaunchTimeout bounds how long Launch waits for the browser to start.
+// Zero uses DefaultLaunchTimeout, a negative value waits forever.
+func (l *Launcher) LaunchTimeout(d time.Duration) *Launcher {
+	l.launchTimeout = d
+	return l
 }
 
 // PID returns the browser process pid.
@@ -542,10 +668,6 @@ func (l *Launcher) PID() int {
 
 // Kill the browser process.
 func (l *Launcher) Kill() {
-	// TODO: If kill too fast, the browser's children processes may not be ready.
-	// Browser don't have an API to tell if the children processes are ready.
-	utils.Sleep(1)
-
 	if l.PID() == 0 { // avoid killing the current process
 		return
 	}
@@ -557,10 +679,34 @@ func (l *Launcher) Kill() {
 	}
 }
 
+func minimalEnv() []string {
+	env := []string{}
+	for _, key := range []string{"PATH", "HOME", "TMPDIR", "SystemRoot"} {
+		if v, ok := os.LookupEnv(key); ok {
+			env = append(env, key+"="+v)
+		}
+	}
+	return env
+}
+
 // Cleanup wait until the Browser exits and remove [flags.UserDataDir].
 func (l *Launcher) Cleanup() {
 	<-l.exit
 
 	dir := l.Get(flags.UserDataDir)
-	_ = os.RemoveAll(dir)
+	removeAllRetry(dir)
+}
+
+// removeAllRetry retries while the browser's children release their files,
+// which matters on Windows where open files cannot be deleted.
+func removeAllRetry(dir string) {
+	if dir == "" {
+		return
+	}
+	for i := 0; i < 20; i++ {
+		if err := os.RemoveAll(dir); err == nil {
+			return
+		}
+		time.Sleep(time.Duration(i+1) * 50 * time.Millisecond)
+	}
 }

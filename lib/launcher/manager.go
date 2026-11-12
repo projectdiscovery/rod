@@ -141,6 +141,16 @@ func NewManager() *Manager {
 		Logger:   utils.LoggerQuiet,
 		Defaults: func(_ http.ResponseWriter, _ *http.Request) *Launcher { return New() },
 		BeforeLaunch: func(l *Launcher, w http.ResponseWriter, _ *http.Request) {
+			for name := range l.Flags {
+				if deniedLauncherFlag(string(name)) {
+					b := []byte("[rod-manager] flag not allowed: " + string(name))
+					w.Header().Add("Content-Length", fmt.Sprintf("%d", len(b)))
+					w.WriteHeader(http.StatusBadRequest)
+					_, _ = w.Write(b)
+					w.(http.Flusher).Flush() //nolint: forcetypeassert
+					panic(http.ErrAbortHandler)
+				}
+			}
 			for f, allowed := range allowedPath {
 				p := l.Get(f)
 				if p != "" && !strings.HasPrefix(p, allowed) {
@@ -207,5 +217,14 @@ func (m *Manager) cleanup(l *Launcher, kill bool) {
 		l.Cleanup()
 		dir := l.Get(flags.UserDataDir)
 		m.Logger.Println("Removed", dir)
+	}
+}
+
+func deniedLauncherFlag(name string) bool {
+	switch strings.TrimLeft(name, "-") {
+	case "renderer-cmd-prefix", "utility-cmd-prefix", "gpu-launcher", "plugin-launcher", "ppapi-plugin-launcher":
+		return true
+	default:
+		return false
 	}
 }

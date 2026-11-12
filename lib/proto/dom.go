@@ -27,6 +27,9 @@ type DOMNodeID int
 // front-end.
 type DOMBackendNodeID int
 
+// DOMStyleSheetID Unique identifier for a CSS stylesheet.
+type DOMStyleSheetID string
+
 // DOMBackendNode Backend node with a friendly name.
 type DOMBackendNode struct {
 	// NodeType `Node`'s nodeType.
@@ -43,102 +46,150 @@ type DOMBackendNode struct {
 type DOMPseudoType string
 
 const (
-	// DOMPseudoTypeFirstLine enum const.
+	// DOMPseudoTypeFirstLine enum const
 	DOMPseudoTypeFirstLine DOMPseudoType = "first-line"
 
-	// DOMPseudoTypeFirstLetter enum const.
+	// DOMPseudoTypeFirstLetter enum const
 	DOMPseudoTypeFirstLetter DOMPseudoType = "first-letter"
 
-	// DOMPseudoTypeBefore enum const.
+	// DOMPseudoTypeCheckmark enum const
+	DOMPseudoTypeCheckmark DOMPseudoType = "checkmark"
+
+	// DOMPseudoTypeBefore enum const
 	DOMPseudoTypeBefore DOMPseudoType = "before"
 
-	// DOMPseudoTypeAfter enum const.
+	// DOMPseudoTypeAfter enum const
 	DOMPseudoTypeAfter DOMPseudoType = "after"
 
-	// DOMPseudoTypeMarker enum const.
+	// DOMPseudoTypeExpandIcon enum const
+	DOMPseudoTypeExpandIcon DOMPseudoType = "expand-icon"
+
+	// DOMPseudoTypePickerIcon enum const
+	DOMPseudoTypePickerIcon DOMPseudoType = "picker-icon"
+
+	// DOMPseudoTypeInterestButton enum const
+	DOMPseudoTypeInterestButton DOMPseudoType = "interest-button"
+
+	// DOMPseudoTypeMarker enum const
 	DOMPseudoTypeMarker DOMPseudoType = "marker"
 
-	// DOMPseudoTypeBackdrop enum const.
+	// DOMPseudoTypeBackdrop enum const
 	DOMPseudoTypeBackdrop DOMPseudoType = "backdrop"
 
-	// DOMPseudoTypeSelection enum const.
+	// DOMPseudoTypeColumn enum const
+	DOMPseudoTypeColumn DOMPseudoType = "column"
+
+	// DOMPseudoTypeSelection enum const
 	DOMPseudoTypeSelection DOMPseudoType = "selection"
 
-	// DOMPseudoTypeSearchText enum const.
+	// DOMPseudoTypeSearchText enum const
 	DOMPseudoTypeSearchText DOMPseudoType = "search-text"
 
-	// DOMPseudoTypeTargetText enum const.
+	// DOMPseudoTypeTargetText enum const
 	DOMPseudoTypeTargetText DOMPseudoType = "target-text"
 
-	// DOMPseudoTypeSpellingError enum const.
+	// DOMPseudoTypeSpellingError enum const
 	DOMPseudoTypeSpellingError DOMPseudoType = "spelling-error"
 
-	// DOMPseudoTypeGrammarError enum const.
+	// DOMPseudoTypeGrammarError enum const
 	DOMPseudoTypeGrammarError DOMPseudoType = "grammar-error"
 
-	// DOMPseudoTypeHighlight enum const.
+	// DOMPseudoTypeHighlight enum const
 	DOMPseudoTypeHighlight DOMPseudoType = "highlight"
 
-	// DOMPseudoTypeFirstLineInherited enum const.
+	// DOMPseudoTypeFirstLineInherited enum const
 	DOMPseudoTypeFirstLineInherited DOMPseudoType = "first-line-inherited"
 
-	// DOMPseudoTypeScrollMarker enum const.
+	// DOMPseudoTypeScrollMarker enum const
 	DOMPseudoTypeScrollMarker DOMPseudoType = "scroll-marker"
 
-	// DOMPseudoTypeScrollMarkerGroup enum const.
+	// DOMPseudoTypeScrollMarkerGroup enum const
 	DOMPseudoTypeScrollMarkerGroup DOMPseudoType = "scroll-marker-group"
 
-	// DOMPseudoTypeScrollbar enum const.
+	// DOMPseudoTypeScrollButton enum const
+	DOMPseudoTypeScrollButton DOMPseudoType = "scroll-button"
+
+	// DOMPseudoTypeScrollbar enum const
 	DOMPseudoTypeScrollbar DOMPseudoType = "scrollbar"
 
-	// DOMPseudoTypeScrollbarThumb enum const.
+	// DOMPseudoTypeScrollbarThumb enum const
 	DOMPseudoTypeScrollbarThumb DOMPseudoType = "scrollbar-thumb"
 
-	// DOMPseudoTypeScrollbarButton enum const.
+	// DOMPseudoTypeScrollbarButton enum const
 	DOMPseudoTypeScrollbarButton DOMPseudoType = "scrollbar-button"
 
-	// DOMPseudoTypeScrollbarTrack enum const.
+	// DOMPseudoTypeScrollbarTrack enum const
 	DOMPseudoTypeScrollbarTrack DOMPseudoType = "scrollbar-track"
 
-	// DOMPseudoTypeScrollbarTrackPiece enum const.
+	// DOMPseudoTypeScrollbarTrackPiece enum const
 	DOMPseudoTypeScrollbarTrackPiece DOMPseudoType = "scrollbar-track-piece"
 
-	// DOMPseudoTypeScrollbarCorner enum const.
+	// DOMPseudoTypeScrollbarCorner enum const
 	DOMPseudoTypeScrollbarCorner DOMPseudoType = "scrollbar-corner"
 
-	// DOMPseudoTypeResizer enum const.
+	// DOMPseudoTypeResizer enum const
 	DOMPseudoTypeResizer DOMPseudoType = "resizer"
 
-	// DOMPseudoTypeInputListButton enum const.
+	// DOMPseudoTypeInputListButton enum const
 	DOMPseudoTypeInputListButton DOMPseudoType = "input-list-button"
 
-	// DOMPseudoTypeViewTransition enum const.
+	// DOMPseudoTypeViewTransition enum const
 	DOMPseudoTypeViewTransition DOMPseudoType = "view-transition"
 
-	// DOMPseudoTypeViewTransitionGroup enum const.
+	// DOMPseudoTypeViewTransitionGroup enum const
 	DOMPseudoTypeViewTransitionGroup DOMPseudoType = "view-transition-group"
 
-	// DOMPseudoTypeViewTransitionImagePair enum const.
+	// DOMPseudoTypeViewTransitionImagePair enum const
 	DOMPseudoTypeViewTransitionImagePair DOMPseudoType = "view-transition-image-pair"
 
-	// DOMPseudoTypeViewTransitionOld enum const.
+	// DOMPseudoTypeViewTransitionGroupChildren enum const
+	DOMPseudoTypeViewTransitionGroupChildren DOMPseudoType = "view-transition-group-children"
+
+	// DOMPseudoTypeViewTransitionOld enum const
 	DOMPseudoTypeViewTransitionOld DOMPseudoType = "view-transition-old"
 
-	// DOMPseudoTypeViewTransitionNew enum const.
+	// DOMPseudoTypeViewTransitionNew enum const
 	DOMPseudoTypeViewTransitionNew DOMPseudoType = "view-transition-new"
+
+	// DOMPseudoTypePlaceholder enum const
+	DOMPseudoTypePlaceholder DOMPseudoType = "placeholder"
+
+	// DOMPseudoTypeFileSelectorButton enum const
+	DOMPseudoTypeFileSelectorButton DOMPseudoType = "file-selector-button"
+
+	// DOMPseudoTypeDetailsContent enum const
+	DOMPseudoTypeDetailsContent DOMPseudoType = "details-content"
+
+	// DOMPseudoTypePicker enum const
+	DOMPseudoTypePicker DOMPseudoType = "picker"
+
+	// DOMPseudoTypeSelectListbox enum const
+	DOMPseudoTypeSelectListbox DOMPseudoType = "select-listbox"
+
+	// DOMPseudoTypePermissionIcon enum const
+	DOMPseudoTypePermissionIcon DOMPseudoType = "permission-icon"
+
+	// DOMPseudoTypeOverscrollAreaParent enum const
+	DOMPseudoTypeOverscrollAreaParent DOMPseudoType = "overscroll-area-parent"
+
+	// DOMPseudoTypeOverscrollBackdrop enum const
+	DOMPseudoTypeOverscrollBackdrop DOMPseudoType = "overscroll-backdrop"
+
+	// DOMPseudoTypeSkeleton enum const
+	DOMPseudoTypeSkeleton DOMPseudoType = "skeleton"
 )
 
 // DOMShadowRootType Shadow root type.
 type DOMShadowRootType string
 
 const (
-	// DOMShadowRootTypeUserAgent enum const.
+	// DOMShadowRootTypeUserAgent enum const
 	DOMShadowRootTypeUserAgent DOMShadowRootType = "user-agent"
 
-	// DOMShadowRootTypeOpen enum const.
+	// DOMShadowRootTypeOpen enum const
 	DOMShadowRootTypeOpen DOMShadowRootType = "open"
 
-	// DOMShadowRootTypeClosed enum const.
+	// DOMShadowRootTypeClosed enum const
 	DOMShadowRootTypeClosed DOMShadowRootType = "closed"
 )
 
@@ -146,52 +197,52 @@ const (
 type DOMCompatibilityMode string
 
 const (
-	// DOMCompatibilityModeQuirksMode enum const.
+	// DOMCompatibilityModeQuirksMode enum const
 	DOMCompatibilityModeQuirksMode DOMCompatibilityMode = "QuirksMode"
 
-	// DOMCompatibilityModeLimitedQuirksMode enum const.
+	// DOMCompatibilityModeLimitedQuirksMode enum const
 	DOMCompatibilityModeLimitedQuirksMode DOMCompatibilityMode = "LimitedQuirksMode"
 
-	// DOMCompatibilityModeNoQuirksMode enum const.
+	// DOMCompatibilityModeNoQuirksMode enum const
 	DOMCompatibilityModeNoQuirksMode DOMCompatibilityMode = "NoQuirksMode"
 )
 
-// DOMPhysicalAxes ContainerSelector physical axes.
+// DOMPhysicalAxes ContainerSelector physical axes
 type DOMPhysicalAxes string
 
 const (
-	// DOMPhysicalAxesHorizontal enum const.
+	// DOMPhysicalAxesHorizontal enum const
 	DOMPhysicalAxesHorizontal DOMPhysicalAxes = "Horizontal"
 
-	// DOMPhysicalAxesVertical enum const.
+	// DOMPhysicalAxesVertical enum const
 	DOMPhysicalAxesVertical DOMPhysicalAxes = "Vertical"
 
-	// DOMPhysicalAxesBoth enum const.
+	// DOMPhysicalAxesBoth enum const
 	DOMPhysicalAxesBoth DOMPhysicalAxes = "Both"
 )
 
-// DOMLogicalAxes ContainerSelector logical axes.
+// DOMLogicalAxes ContainerSelector logical axes
 type DOMLogicalAxes string
 
 const (
-	// DOMLogicalAxesInline enum const.
+	// DOMLogicalAxesInline enum const
 	DOMLogicalAxesInline DOMLogicalAxes = "Inline"
 
-	// DOMLogicalAxesBlock enum const.
+	// DOMLogicalAxesBlock enum const
 	DOMLogicalAxesBlock DOMLogicalAxes = "Block"
 
-	// DOMLogicalAxesBoth enum const.
+	// DOMLogicalAxesBoth enum const
 	DOMLogicalAxesBoth DOMLogicalAxes = "Both"
 )
 
-// DOMScrollOrientation Physical scroll orientation.
+// DOMScrollOrientation Physical scroll orientation
 type DOMScrollOrientation string
 
 const (
-	// DOMScrollOrientationHorizontal enum const.
+	// DOMScrollOrientationHorizontal enum const
 	DOMScrollOrientationHorizontal DOMScrollOrientation = "horizontal"
 
-	// DOMScrollOrientationVertical enum const.
+	// DOMScrollOrientationVertical enum const
 	DOMScrollOrientationVertical DOMScrollOrientation = "vertical"
 )
 
@@ -295,6 +346,27 @@ type DOMNode struct {
 
 	// AssignedSlot (optional) ...
 	AssignedSlot *DOMBackendNode `json:"assignedSlot,omitempty"`
+
+	// IsScrollable (experimental) (optional) ...
+	IsScrollable bool `json:"isScrollable,omitempty"`
+
+	// AffectedByStartingStyles (experimental) (optional) ...
+	AffectedByStartingStyles bool `json:"affectedByStartingStyles,omitempty"`
+
+	// AdoptedStyleSheets (experimental) (optional) ...
+	AdoptedStyleSheets []DOMStyleSheetID `json:"adoptedStyleSheets,omitempty"`
+
+	// AdProvenance (experimental) (optional) ...
+	AdProvenance *NetworkAdProvenance `json:"adProvenance,omitempty"`
+}
+
+// DOMDetachedElementInfo A structure to hold the top-level node of a detached tree and an array of its retained descendants.
+type DOMDetachedElementInfo struct {
+	// TreeNode ...
+	TreeNode *DOMNode `json:"treeNode"`
+
+	// RetainedNodeIDs ...
+	RetainedNodeIDs []DOMNodeID `json:"retainedNodeIds"`
 }
 
 // DOMRGBA A structure holding an RGBA color.
@@ -381,10 +453,10 @@ type DOMCollectClassNamesFromSubtree struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMCollectClassNamesFromSubtree) ProtoReq() string { return "DOM.collectClassNamesFromSubtree" }
 
-// Call the request.
+// Call the request
 func (m DOMCollectClassNamesFromSubtree) Call(c Client) (*DOMCollectClassNamesFromSubtreeResult, error) {
 	var res DOMCollectClassNamesFromSubtreeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -410,10 +482,10 @@ type DOMCopyTo struct {
 	InsertBeforeNodeID DOMNodeID `json:"insertBeforeNodeId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMCopyTo) ProtoReq() string { return "DOM.copyTo" }
 
-// Call the request.
+// Call the request
 func (m DOMCopyTo) Call(c Client) (*DOMCopyToResult, error) {
 	var res DOMCopyToResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -446,10 +518,10 @@ type DOMDescribeNode struct {
 	Pierce bool `json:"pierce,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMDescribeNode) ProtoReq() string { return "DOM.describeNode" }
 
-// Call the request.
+// Call the request
 func (m DOMDescribeNode) Call(c Client) (*DOMDescribeNodeResult, error) {
 	var res DOMDescribeNodeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -479,10 +551,10 @@ type DOMScrollIntoViewIfNeeded struct {
 	Rect *DOMRect `json:"rect,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMScrollIntoViewIfNeeded) ProtoReq() string { return "DOM.scrollIntoViewIfNeeded" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMScrollIntoViewIfNeeded) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -490,10 +562,10 @@ func (m DOMScrollIntoViewIfNeeded) Call(c Client) error {
 // DOMDisable Disables DOM agent for the given page.
 type DOMDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMDisable) ProtoReq() string { return "DOM.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -505,22 +577,22 @@ type DOMDiscardSearchResults struct {
 	SearchID string `json:"searchId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMDiscardSearchResults) ProtoReq() string { return "DOM.discardSearchResults" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMDiscardSearchResults) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// DOMEnableIncludeWhitespace enum.
+// DOMEnableIncludeWhitespace enum
 type DOMEnableIncludeWhitespace string
 
 const (
-	// DOMEnableIncludeWhitespaceNone enum const.
+	// DOMEnableIncludeWhitespaceNone enum const
 	DOMEnableIncludeWhitespaceNone DOMEnableIncludeWhitespace = "none"
 
-	// DOMEnableIncludeWhitespaceAll enum const.
+	// DOMEnableIncludeWhitespaceAll enum const
 	DOMEnableIncludeWhitespaceAll DOMEnableIncludeWhitespace = "all"
 )
 
@@ -530,10 +602,10 @@ type DOMEnable struct {
 	IncludeWhitespace DOMEnableIncludeWhitespace `json:"includeWhitespace,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMEnable) ProtoReq() string { return "DOM.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMEnable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -550,10 +622,10 @@ type DOMFocus struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMFocus) ProtoReq() string { return "DOM.focus" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMFocus) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -564,10 +636,10 @@ type DOMGetAttributes struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetAttributes) ProtoReq() string { return "DOM.getAttributes" }
 
-// Call the request.
+// Call the request
 func (m DOMGetAttributes) Call(c Client) (*DOMGetAttributesResult, error) {
 	var res DOMGetAttributesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -591,10 +663,10 @@ type DOMGetBoxModel struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetBoxModel) ProtoReq() string { return "DOM.getBoxModel" }
 
-// Call the request.
+// Call the request
 func (m DOMGetBoxModel) Call(c Client) (*DOMGetBoxModelResult, error) {
 	var res DOMGetBoxModelResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -619,10 +691,10 @@ type DOMGetContentQuads struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetContentQuads) ProtoReq() string { return "DOM.getContentQuads" }
 
-// Call the request.
+// Call the request
 func (m DOMGetContentQuads) Call(c Client) (*DOMGetContentQuadsResult, error) {
 	var res DOMGetContentQuadsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -646,10 +718,10 @@ type DOMGetDocument struct {
 	Pierce bool `json:"pierce,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetDocument) ProtoReq() string { return "DOM.getDocument" }
 
-// Call the request.
+// Call the request
 func (m DOMGetDocument) Call(c Client) (*DOMGetDocumentResult, error) {
 	var res DOMGetDocumentResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -674,10 +746,10 @@ type DOMGetFlattenedDocument struct {
 	Pierce bool `json:"pierce,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetFlattenedDocument) ProtoReq() string { return "DOM.getFlattenedDocument" }
 
-// Call the request.
+// Call the request
 func (m DOMGetFlattenedDocument) Call(c Client) (*DOMGetFlattenedDocumentResult, error) {
 	var res DOMGetFlattenedDocumentResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -702,10 +774,10 @@ type DOMGetNodesForSubtreeByStyle struct {
 	Pierce bool `json:"pierce,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetNodesForSubtreeByStyle) ProtoReq() string { return "DOM.getNodesForSubtreeByStyle" }
 
-// Call the request.
+// Call the request
 func (m DOMGetNodesForSubtreeByStyle) Call(c Client) (*DOMGetNodesForSubtreeByStyleResult, error) {
 	var res DOMGetNodesForSubtreeByStyleResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -733,10 +805,10 @@ type DOMGetNodeForLocation struct {
 	IgnorePointerEventsNone bool `json:"ignorePointerEventsNone,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetNodeForLocation) ProtoReq() string { return "DOM.getNodeForLocation" }
 
-// Call the request.
+// Call the request
 func (m DOMGetNodeForLocation) Call(c Client) (*DOMGetNodeForLocationResult, error) {
 	var res DOMGetNodeForLocationResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -764,12 +836,15 @@ type DOMGetOuterHTML struct {
 
 	// ObjectID (optional) JavaScript object id of the node wrapper.
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
+
+	// IncludeShadowDOM (experimental) (optional) Include all shadow roots. Equals to false if not specified.
+	IncludeShadowDOM bool `json:"includeShadowDOM,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetOuterHTML) ProtoReq() string { return "DOM.getOuterHTML" }
 
-// Call the request.
+// Call the request
 func (m DOMGetOuterHTML) Call(c Client) (*DOMGetOuterHTMLResult, error) {
 	var res DOMGetOuterHTMLResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -787,10 +862,10 @@ type DOMGetRelayoutBoundary struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetRelayoutBoundary) ProtoReq() string { return "DOM.getRelayoutBoundary" }
 
-// Call the request.
+// Call the request
 func (m DOMGetRelayoutBoundary) Call(c Client) (*DOMGetRelayoutBoundaryResult, error) {
 	var res DOMGetRelayoutBoundaryResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -815,10 +890,10 @@ type DOMGetSearchResults struct {
 	ToIndex int `json:"toIndex"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetSearchResults) ProtoReq() string { return "DOM.getSearchResults" }
 
-// Call the request.
+// Call the request
 func (m DOMGetSearchResults) Call(c Client) (*DOMGetSearchResultsResult, error) {
 	var res DOMGetSearchResultsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -833,10 +908,10 @@ type DOMGetSearchResultsResult struct {
 // DOMHideHighlight Hides any highlight.
 type DOMHideHighlight struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMHideHighlight) ProtoReq() string { return "DOM.hideHighlight" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMHideHighlight) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -844,10 +919,10 @@ func (m DOMHideHighlight) Call(c Client) error {
 // DOMHighlightNode Highlights DOM node.
 type DOMHighlightNode struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMHighlightNode) ProtoReq() string { return "DOM.highlightNode" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMHighlightNode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -855,10 +930,10 @@ func (m DOMHighlightNode) Call(c Client) error {
 // DOMHighlightRect Highlights given rectangle.
 type DOMHighlightRect struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMHighlightRect) ProtoReq() string { return "DOM.highlightRect" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMHighlightRect) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -866,10 +941,10 @@ func (m DOMHighlightRect) Call(c Client) error {
 // DOMMarkUndoableState (experimental) Marks last undoable state.
 type DOMMarkUndoableState struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMMarkUndoableState) ProtoReq() string { return "DOM.markUndoableState" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMMarkUndoableState) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -887,10 +962,10 @@ type DOMMoveTo struct {
 	InsertBeforeNodeID DOMNodeID `json:"insertBeforeNodeId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMMoveTo) ProtoReq() string { return "DOM.moveTo" }
 
-// Call the request.
+// Call the request
 func (m DOMMoveTo) Call(c Client) (*DOMMoveToResult, error) {
 	var res DOMMoveToResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -912,10 +987,10 @@ type DOMPerformSearch struct {
 	IncludeUserAgentShadowDOM bool `json:"includeUserAgentShadowDOM,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMPerformSearch) ProtoReq() string { return "DOM.performSearch" }
 
-// Call the request.
+// Call the request
 func (m DOMPerformSearch) Call(c Client) (*DOMPerformSearchResult, error) {
 	var res DOMPerformSearchResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -930,16 +1005,16 @@ type DOMPerformSearchResult struct {
 	ResultCount int `json:"resultCount"`
 }
 
-// DOMPushNodeByPathToFrontend (experimental) Requests that the node is sent to the caller given its path. // FIXME, use XPath.
+// DOMPushNodeByPathToFrontend (experimental) Requests that the node is sent to the caller given its path. // FIXME, use XPath
 type DOMPushNodeByPathToFrontend struct {
 	// Path to node in the proprietary format.
 	Path string `json:"path"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMPushNodeByPathToFrontend) ProtoReq() string { return "DOM.pushNodeByPathToFrontend" }
 
-// Call the request.
+// Call the request
 func (m DOMPushNodeByPathToFrontend) Call(c Client) (*DOMPushNodeByPathToFrontendResult, error) {
 	var res DOMPushNodeByPathToFrontendResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -957,12 +1032,12 @@ type DOMPushNodesByBackendIDsToFrontend struct {
 	BackendNodeIDs []DOMBackendNodeID `json:"backendNodeIds"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMPushNodesByBackendIDsToFrontend) ProtoReq() string {
 	return "DOM.pushNodesByBackendIdsToFrontend"
 }
 
-// Call the request.
+// Call the request
 func (m DOMPushNodesByBackendIDsToFrontend) Call(c Client) (*DOMPushNodesByBackendIDsToFrontendResult, error) {
 	var res DOMPushNodesByBackendIDsToFrontendResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -984,10 +1059,10 @@ type DOMQuerySelector struct {
 	Selector string `json:"selector"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMQuerySelector) ProtoReq() string { return "DOM.querySelector" }
 
-// Call the request.
+// Call the request
 func (m DOMQuerySelector) Call(c Client) (*DOMQuerySelectorResult, error) {
 	var res DOMQuerySelectorResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1008,10 +1083,10 @@ type DOMQuerySelectorAll struct {
 	Selector string `json:"selector"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMQuerySelectorAll) ProtoReq() string { return "DOM.querySelectorAll" }
 
-// Call the request.
+// Call the request
 func (m DOMQuerySelectorAll) Call(c Client) (*DOMQuerySelectorAllResult, error) {
 	var res DOMQuerySelectorAllResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1028,10 +1103,10 @@ type DOMQuerySelectorAllResult struct {
 // appear on top of all other content.
 type DOMGetTopLayerElements struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetTopLayerElements) ProtoReq() string { return "DOM.getTopLayerElements" }
 
-// Call the request.
+// Call the request
 func (m DOMGetTopLayerElements) Call(c Client) (*DOMGetTopLayerElementsResult, error) {
 	var res DOMGetTopLayerElementsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1043,12 +1118,18 @@ type DOMGetTopLayerElementsResult struct {
 	NodeIDs []DOMNodeID `json:"nodeIds"`
 }
 
-// DOMGetElementByRelationRelation enum.
+// DOMGetElementByRelationRelation enum
 type DOMGetElementByRelationRelation string
 
 const (
-	// DOMGetElementByRelationRelationPopoverTarget enum const.
+	// DOMGetElementByRelationRelationPopoverTarget enum const
 	DOMGetElementByRelationRelationPopoverTarget DOMGetElementByRelationRelation = "PopoverTarget"
+
+	// DOMGetElementByRelationRelationInterestTarget enum const
+	DOMGetElementByRelationRelationInterestTarget DOMGetElementByRelationRelation = "InterestTarget"
+
+	// DOMGetElementByRelationRelationCommandFor enum const
+	DOMGetElementByRelationRelationCommandFor DOMGetElementByRelationRelation = "CommandFor"
 )
 
 // DOMGetElementByRelation (experimental) Returns the NodeId of the matched element according to certain relations.
@@ -1060,10 +1141,10 @@ type DOMGetElementByRelation struct {
 	Relation DOMGetElementByRelationRelation `json:"relation"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetElementByRelation) ProtoReq() string { return "DOM.getElementByRelation" }
 
-// Call the request.
+// Call the request
 func (m DOMGetElementByRelation) Call(c Client) (*DOMGetElementByRelationResult, error) {
 	var res DOMGetElementByRelationResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1078,10 +1159,10 @@ type DOMGetElementByRelationResult struct {
 // DOMRedo (experimental) Re-does the last undone action.
 type DOMRedo struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMRedo) ProtoReq() string { return "DOM.redo" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMRedo) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1095,10 +1176,10 @@ type DOMRemoveAttribute struct {
 	Name string `json:"name"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMRemoveAttribute) ProtoReq() string { return "DOM.removeAttribute" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMRemoveAttribute) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1109,10 +1190,10 @@ type DOMRemoveNode struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMRemoveNode) ProtoReq() string { return "DOM.removeNode" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMRemoveNode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1133,10 +1214,10 @@ type DOMRequestChildNodes struct {
 	Pierce bool `json:"pierce,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMRequestChildNodes) ProtoReq() string { return "DOM.requestChildNodes" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMRequestChildNodes) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1149,10 +1230,10 @@ type DOMRequestNode struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMRequestNode) ProtoReq() string { return "DOM.requestNode" }
 
-// Call the request.
+// Call the request
 func (m DOMRequestNode) Call(c Client) (*DOMRequestNodeResult, error) {
 	var res DOMRequestNodeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1179,10 +1260,10 @@ type DOMResolveNode struct {
 	ExecutionContextID RuntimeExecutionContextID `json:"executionContextId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMResolveNode) ProtoReq() string { return "DOM.resolveNode" }
 
-// Call the request.
+// Call the request
 func (m DOMResolveNode) Call(c Client) (*DOMResolveNodeResult, error) {
 	var res DOMResolveNodeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1206,10 +1287,10 @@ type DOMSetAttributeValue struct {
 	Value string `json:"value"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetAttributeValue) ProtoReq() string { return "DOM.setAttributeValue" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetAttributeValue) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1228,10 +1309,10 @@ type DOMSetAttributesAsText struct {
 	Name string `json:"name,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetAttributesAsText) ProtoReq() string { return "DOM.setAttributesAsText" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetAttributesAsText) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1251,10 +1332,10 @@ type DOMSetFileInputFiles struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetFileInputFiles) ProtoReq() string { return "DOM.setFileInputFiles" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetFileInputFiles) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1265,10 +1346,10 @@ type DOMSetNodeStackTracesEnabled struct {
 	Enable bool `json:"enable"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetNodeStackTracesEnabled) ProtoReq() string { return "DOM.setNodeStackTracesEnabled" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetNodeStackTracesEnabled) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1279,10 +1360,10 @@ type DOMGetNodeStackTraces struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetNodeStackTraces) ProtoReq() string { return "DOM.getNodeStackTraces" }
 
-// Call the request.
+// Call the request
 func (m DOMGetNodeStackTraces) Call(c Client) (*DOMGetNodeStackTracesResult, error) {
 	var res DOMGetNodeStackTracesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1301,10 +1382,10 @@ type DOMGetFileInfo struct {
 	ObjectID RuntimeRemoteObjectID `json:"objectId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetFileInfo) ProtoReq() string { return "DOM.getFileInfo" }
 
-// Call the request.
+// Call the request
 func (m DOMGetFileInfo) Call(c Client) (*DOMGetFileInfoResult, error) {
 	var res DOMGetFileInfoResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1316,6 +1397,24 @@ type DOMGetFileInfoResult struct {
 	Path string `json:"path"`
 }
 
+// DOMGetDetachedDomNodes (experimental) Returns list of detached nodes
+type DOMGetDetachedDomNodes struct{}
+
+// ProtoReq name
+func (m DOMGetDetachedDomNodes) ProtoReq() string { return "DOM.getDetachedDomNodes" }
+
+// Call the request
+func (m DOMGetDetachedDomNodes) Call(c Client) (*DOMGetDetachedDomNodesResult, error) {
+	var res DOMGetDetachedDomNodesResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// DOMGetDetachedDomNodesResult (experimental) ...
+type DOMGetDetachedDomNodesResult struct {
+	// DetachedNodes The list of detached nodes
+	DetachedNodes []*DOMDetachedElementInfo `json:"detachedNodes"`
+}
+
 // DOMSetInspectedNode (experimental) Enables console to refer to the node with given id via $x (see Command Line API for more details
 // $x functions).
 type DOMSetInspectedNode struct {
@@ -1323,10 +1422,10 @@ type DOMSetInspectedNode struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetInspectedNode) ProtoReq() string { return "DOM.setInspectedNode" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetInspectedNode) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1340,10 +1439,10 @@ type DOMSetNodeName struct {
 	Name string `json:"name"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetNodeName) ProtoReq() string { return "DOM.setNodeName" }
 
-// Call the request.
+// Call the request
 func (m DOMSetNodeName) Call(c Client) (*DOMSetNodeNameResult, error) {
 	var res DOMSetNodeNameResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1364,10 +1463,10 @@ type DOMSetNodeValue struct {
 	Value string `json:"value"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetNodeValue) ProtoReq() string { return "DOM.setNodeValue" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetNodeValue) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1381,10 +1480,10 @@ type DOMSetOuterHTML struct {
 	OuterHTML string `json:"outerHTML"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMSetOuterHTML) ProtoReq() string { return "DOM.setOuterHTML" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMSetOuterHTML) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1392,10 +1491,10 @@ func (m DOMSetOuterHTML) Call(c Client) error {
 // DOMUndo (experimental) Undoes the last performed action.
 type DOMUndo struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMUndo) ProtoReq() string { return "DOM.undo" }
 
-// Call sends the request.
+// Call sends the request
 func (m DOMUndo) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1406,10 +1505,10 @@ type DOMGetFrameOwner struct {
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetFrameOwner) ProtoReq() string { return "DOM.getFrameOwner" }
 
-// Call the request.
+// Call the request
 func (m DOMGetFrameOwner) Call(c Client) (*DOMGetFrameOwnerResult, error) {
 	var res DOMGetFrameOwnerResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1425,9 +1524,10 @@ type DOMGetFrameOwnerResult struct {
 }
 
 // DOMGetContainerForNode (experimental) Returns the query container of the given node based on container query
-// conditions: containerName, physical, and logical axes. If no axes are
-// provided, the style container is returned, which is the direct parent or the
-// closest element with a matching container-name.
+// conditions: containerName, physical and logical axes, and whether it queries
+// scroll-state or anchored elements. If no axes are provided and
+// queriesScrollState is false, the style container is returned, which is the
+// direct parent or the closest element with a matching container-name.
 type DOMGetContainerForNode struct {
 	// NodeID ...
 	NodeID DOMNodeID `json:"nodeId"`
@@ -1440,12 +1540,18 @@ type DOMGetContainerForNode struct {
 
 	// LogicalAxes (optional) ...
 	LogicalAxes DOMLogicalAxes `json:"logicalAxes,omitempty"`
+
+	// QueriesScrollState (optional) ...
+	QueriesScrollState bool `json:"queriesScrollState,omitempty"`
+
+	// QueriesAnchored (optional) ...
+	QueriesAnchored bool `json:"queriesAnchored,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetContainerForNode) ProtoReq() string { return "DOM.getContainerForNode" }
 
-// Call the request.
+// Call the request
 func (m DOMGetContainerForNode) Call(c Client) (*DOMGetContainerForNodeResult, error) {
 	var res DOMGetContainerForNodeResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1464,12 +1570,12 @@ type DOMGetQueryingDescendantsForContainer struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetQueryingDescendantsForContainer) ProtoReq() string {
 	return "DOM.getQueryingDescendantsForContainer"
 }
 
-// Call the request.
+// Call the request
 func (m DOMGetQueryingDescendantsForContainer) Call(c Client) (*DOMGetQueryingDescendantsForContainerResult, error) {
 	var res DOMGetQueryingDescendantsForContainerResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1494,10 +1600,10 @@ type DOMGetAnchorElement struct {
 	AnchorSpecifier string `json:"anchorSpecifier,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m DOMGetAnchorElement) ProtoReq() string { return "DOM.getAnchorElement" }
 
-// Call the request.
+// Call the request
 func (m DOMGetAnchorElement) Call(c Client) (*DOMGetAnchorElementResult, error) {
 	var res DOMGetAnchorElementResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1507,6 +1613,136 @@ func (m DOMGetAnchorElement) Call(c Client) (*DOMGetAnchorElementResult, error) 
 type DOMGetAnchorElementResult struct {
 	// NodeID The anchor element of the given anchor query.
 	NodeID DOMNodeID `json:"nodeId"`
+}
+
+// DOMForceShowPopover (experimental) When enabling, this API force-opens the popover identified by nodeId
+// and keeps it open until disabled.
+type DOMForceShowPopover struct {
+	// NodeID Id of the popover HTMLElement
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// Enable If true, opens the popover and keeps it open. If false, closes the
+	// popover if it was previously force-opened.
+	Enable bool `json:"enable"`
+
+	// InvokerNodeID (optional) Optional ID of the element invoking this popover, used to establish the implicit anchor.
+	// If not provided, it will fall back to the first invoker in the document, preferring
+	// elements with a popovertarget attribute over those with a commandfor attribute. Note that
+	// if there are multiple invokers, this is just an estimate.
+	InvokerNodeID DOMBackendNodeID `json:"invokerNodeId,omitempty"`
+}
+
+// ProtoReq name
+func (m DOMForceShowPopover) ProtoReq() string { return "DOM.forceShowPopover" }
+
+// Call the request
+func (m DOMForceShowPopover) Call(c Client) (*DOMForceShowPopoverResult, error) {
+	var res DOMForceShowPopoverResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// DOMForceShowPopoverResult (experimental) ...
+type DOMForceShowPopoverResult struct {
+	// NodeIDs List of popovers that were closed in order to respect popover stacking order.
+	NodeIDs []DOMNodeID `json:"nodeIds"`
+}
+
+// DOMGetImplicitAnchorCandidates (experimental) Returns candidate nodes that are configured as triggers for the given popover.
+type DOMGetImplicitAnchorCandidates struct {
+	// NodeID Id of the popover HTMLElement.
+	NodeID DOMNodeID `json:"nodeId"`
+}
+
+// ProtoReq name
+func (m DOMGetImplicitAnchorCandidates) ProtoReq() string { return "DOM.getImplicitAnchorCandidates" }
+
+// Call the request
+func (m DOMGetImplicitAnchorCandidates) Call(c Client) (*DOMGetImplicitAnchorCandidatesResult, error) {
+	var res DOMGetImplicitAnchorCandidatesResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// DOMGetImplicitAnchorCandidatesResult (experimental) ...
+type DOMGetImplicitAnchorCandidatesResult struct {
+	// BackendNodeIDs Candidate elements that can invoke this popover.
+	BackendNodeIDs []DOMBackendNodeID `json:"backendNodeIds"`
+}
+
+// DOMForceShowInterest (experimental) When enabling, this API forces an element to gain interest in its target,
+// keeping interest active until disabled.
+type DOMForceShowInterest struct {
+	// NodeID Id of the interest invoker HTMLElement.
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// Enable If true, opens and holds interest. If false, releases forced interest.
+	Enable bool `json:"enable"`
+}
+
+// ProtoReq name
+func (m DOMForceShowInterest) ProtoReq() string { return "DOM.forceShowInterest" }
+
+// Call sends the request
+func (m DOMForceShowInterest) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// DOMSetTextMarkerType enum
+type DOMSetTextMarkerType string
+
+const (
+	// DOMSetTextMarkerTypeSpelling enum const
+	DOMSetTextMarkerTypeSpelling DOMSetTextMarkerType = "spelling"
+
+	// DOMSetTextMarkerTypeGrammar enum const
+	DOMSetTextMarkerTypeGrammar DOMSetTextMarkerType = "grammar"
+)
+
+// DOMSetTextMarker (experimental) Sets a spelling or grammar error marker on the given range of text.
+// See https://github.com/Igalia/explainers/blob/main/force-spelling-grammar-markers/README.md
+// Note: exactly one between nodeId, backendNodeId and objectId should be passed
+// to identify the node.
+type DOMSetTextMarker struct {
+	// NodeID (optional) Identifier of the node.
+	NodeID DOMNodeID `json:"nodeId,omitempty"`
+
+	// BackendNodeID (optional) Identifier of the backend node.
+	BackendNodeID DOMBackendNodeID `json:"backendNodeId,omitempty"`
+
+	// ObjectID (optional) JavaScript object id of the node wrapper.
+	ObjectID RuntimeRemoteObjectID `json:"objectId,omitempty"`
+
+	// Type The type of marker to set on the given range of text.
+	Type DOMSetTextMarkerType `json:"type"`
+
+	// Start offset into the element's rendered text in UTF-16 code units.
+	// For a text control, an offset into the control's value.
+	// Offsets count text in DOM order and do not enter shadow trees.
+	// To mark text inside a shadow tree, pass the element inside the shadow tree.
+	Start int `json:"start"`
+
+	// End offset (exclusive) in the same units and space as start.
+	End int `json:"end"`
+}
+
+// ProtoReq name
+func (m DOMSetTextMarker) ProtoReq() string { return "DOM.setTextMarker" }
+
+// Call sends the request
+func (m DOMSetTextMarker) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// DOMClearTextMarkers (experimental) Clears the spelling and grammar error text markers overlapping the ranges
+// set by setTextMarker in this session. These markers are also removed when
+// the DOM domain is disabled or the session ends.
+type DOMClearTextMarkers struct{}
+
+// ProtoReq name
+func (m DOMClearTextMarkers) ProtoReq() string { return "DOM.clearTextMarkers" }
+
+// Call sends the request
+func (m DOMClearTextMarkers) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
 }
 
 // DOMAttributeModified Fired when `Element`'s attribute is modified.
@@ -1521,9 +1757,23 @@ type DOMAttributeModified struct {
 	Value string `json:"value"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMAttributeModified) ProtoEvent() string {
 	return "DOM.attributeModified"
+}
+
+// DOMAdoptedStyleSheetsModified (experimental) Fired when `Element`'s adoptedStyleSheets are modified.
+type DOMAdoptedStyleSheetsModified struct {
+	// NodeID Id of the node that has changed.
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// AdoptedStyleSheets (experimental) New adoptedStyleSheets array.
+	AdoptedStyleSheets []DOMStyleSheetID `json:"adoptedStyleSheets"`
+}
+
+// ProtoEvent name
+func (evt DOMAdoptedStyleSheetsModified) ProtoEvent() string {
+	return "DOM.adoptedStyleSheetsModified"
 }
 
 // DOMAttributeRemoved Fired when `Element`'s attribute is removed.
@@ -1535,7 +1785,7 @@ type DOMAttributeRemoved struct {
 	Name string `json:"name"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMAttributeRemoved) ProtoEvent() string {
 	return "DOM.attributeRemoved"
 }
@@ -1549,7 +1799,7 @@ type DOMCharacterDataModified struct {
 	CharacterData string `json:"characterData"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMCharacterDataModified) ProtoEvent() string {
 	return "DOM.characterDataModified"
 }
@@ -1563,7 +1813,7 @@ type DOMChildNodeCountUpdated struct {
 	ChildNodeCount int `json:"childNodeCount"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMChildNodeCountUpdated) ProtoEvent() string {
 	return "DOM.childNodeCountUpdated"
 }
@@ -1580,7 +1830,7 @@ type DOMChildNodeInserted struct {
 	Node *DOMNode `json:"node"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMChildNodeInserted) ProtoEvent() string {
 	return "DOM.childNodeInserted"
 }
@@ -1594,7 +1844,7 @@ type DOMChildNodeRemoved struct {
 	NodeID DOMNodeID `json:"nodeId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMChildNodeRemoved) ProtoEvent() string {
 	return "DOM.childNodeRemoved"
 }
@@ -1608,7 +1858,7 @@ type DOMDistributedNodesUpdated struct {
 	DistributedNodes []*DOMBackendNode `json:"distributedNodes"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMDistributedNodesUpdated) ProtoEvent() string {
 	return "DOM.distributedNodesUpdated"
 }
@@ -1616,7 +1866,7 @@ func (evt DOMDistributedNodesUpdated) ProtoEvent() string {
 // DOMDocumentUpdated Fired when `Document` has been totally updated. Node ids are no longer valid.
 type DOMDocumentUpdated struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMDocumentUpdated) ProtoEvent() string {
 	return "DOM.documentUpdated"
 }
@@ -1627,7 +1877,7 @@ type DOMInlineStyleInvalidated struct {
 	NodeIDs []DOMNodeID `json:"nodeIds"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMInlineStyleInvalidated) ProtoEvent() string {
 	return "DOM.inlineStyleInvalidated"
 }
@@ -1641,7 +1891,7 @@ type DOMPseudoElementAdded struct {
 	PseudoElement *DOMNode `json:"pseudoElement"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMPseudoElementAdded) ProtoEvent() string {
 	return "DOM.pseudoElementAdded"
 }
@@ -1649,9 +1899,51 @@ func (evt DOMPseudoElementAdded) ProtoEvent() string {
 // DOMTopLayerElementsUpdated (experimental) Called when top layer elements are changed.
 type DOMTopLayerElementsUpdated struct{}
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMTopLayerElementsUpdated) ProtoEvent() string {
 	return "DOM.topLayerElementsUpdated"
+}
+
+// DOMScrollableFlagUpdated (experimental) Fired when a node's scrollability state changes.
+type DOMScrollableFlagUpdated struct {
+	// NodeID The id of the node.
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// IsScrollable If the node is scrollable.
+	IsScrollable bool `json:"isScrollable"`
+}
+
+// ProtoEvent name
+func (evt DOMScrollableFlagUpdated) ProtoEvent() string {
+	return "DOM.scrollableFlagUpdated"
+}
+
+// DOMAdRelatedStateUpdated (experimental) Fired when a node's ad related state changes.
+type DOMAdRelatedStateUpdated struct {
+	// NodeID The id of the node.
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// AdProvenance (optional) The provenance of the ad related node, if it is ad related.
+	AdProvenance *NetworkAdProvenance `json:"adProvenance,omitempty"`
+}
+
+// ProtoEvent name
+func (evt DOMAdRelatedStateUpdated) ProtoEvent() string {
+	return "DOM.adRelatedStateUpdated"
+}
+
+// DOMAffectedByStartingStylesFlagUpdated (experimental) Fired when a node's starting styles changes.
+type DOMAffectedByStartingStylesFlagUpdated struct {
+	// NodeID The id of the node.
+	NodeID DOMNodeID `json:"nodeId"`
+
+	// AffectedByStartingStyles If the node has starting styles.
+	AffectedByStartingStyles bool `json:"affectedByStartingStyles"`
+}
+
+// ProtoEvent name
+func (evt DOMAffectedByStartingStylesFlagUpdated) ProtoEvent() string {
+	return "DOM.affectedByStartingStylesFlagUpdated"
 }
 
 // DOMPseudoElementRemoved (experimental) Called when a pseudo element is removed from an element.
@@ -1663,7 +1955,7 @@ type DOMPseudoElementRemoved struct {
 	PseudoElementID DOMNodeID `json:"pseudoElementId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMPseudoElementRemoved) ProtoEvent() string {
 	return "DOM.pseudoElementRemoved"
 }
@@ -1678,7 +1970,7 @@ type DOMSetChildNodes struct {
 	Nodes []*DOMNode `json:"nodes"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMSetChildNodes) ProtoEvent() string {
 	return "DOM.setChildNodes"
 }
@@ -1692,7 +1984,7 @@ type DOMShadowRootPopped struct {
 	RootID DOMNodeID `json:"rootId"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMShadowRootPopped) ProtoEvent() string {
 	return "DOM.shadowRootPopped"
 }
@@ -1706,7 +1998,7 @@ type DOMShadowRootPushed struct {
 	Root *DOMNode `json:"root"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt DOMShadowRootPushed) ProtoEvent() string {
 	return "DOM.shadowRootPushed"
 }

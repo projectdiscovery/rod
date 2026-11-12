@@ -24,11 +24,11 @@ type AuditsAffectedCookie struct {
 
 // AuditsAffectedRequest Information about a request that is affected by an inspector issue.
 type AuditsAffectedRequest struct {
-	// RequestID The unique request id.
-	RequestID NetworkRequestID `json:"requestId"`
+	// RequestID (optional) The unique request id.
+	RequestID NetworkRequestID `json:"requestId,omitempty"`
 
-	// URL (optional) ...
-	URL string `json:"url,omitempty"`
+	// URL ...
+	URL string `json:"url"`
 }
 
 // AuditsAffectedFrame Information about the frame affected by an inspector issue.
@@ -41,85 +41,111 @@ type AuditsAffectedFrame struct {
 type AuditsCookieExclusionReason string
 
 const (
-	// AuditsCookieExclusionReasonExcludeSameSiteUnspecifiedTreatedAsLax enum const.
+	// AuditsCookieExclusionReasonExcludeSameSiteUnspecifiedTreatedAsLax enum const
 	AuditsCookieExclusionReasonExcludeSameSiteUnspecifiedTreatedAsLax AuditsCookieExclusionReason = "ExcludeSameSiteUnspecifiedTreatedAsLax"
 
-	// AuditsCookieExclusionReasonExcludeSameSiteNoneInsecure enum const.
+	// AuditsCookieExclusionReasonExcludeSameSiteNoneInsecure enum const
 	AuditsCookieExclusionReasonExcludeSameSiteNoneInsecure AuditsCookieExclusionReason = "ExcludeSameSiteNoneInsecure"
 
-	// AuditsCookieExclusionReasonExcludeSameSiteLax enum const.
+	// AuditsCookieExclusionReasonExcludeSameSiteLax enum const
 	AuditsCookieExclusionReasonExcludeSameSiteLax AuditsCookieExclusionReason = "ExcludeSameSiteLax"
 
-	// AuditsCookieExclusionReasonExcludeSameSiteStrict enum const.
+	// AuditsCookieExclusionReasonExcludeSameSiteStrict enum const
 	AuditsCookieExclusionReasonExcludeSameSiteStrict AuditsCookieExclusionReason = "ExcludeSameSiteStrict"
 
-	// AuditsCookieExclusionReasonExcludeInvalidSameParty enum const.
-	AuditsCookieExclusionReasonExcludeInvalidSameParty AuditsCookieExclusionReason = "ExcludeInvalidSameParty"
-
-	// AuditsCookieExclusionReasonExcludeSamePartyCrossPartyContext enum const.
-	AuditsCookieExclusionReasonExcludeSamePartyCrossPartyContext AuditsCookieExclusionReason = "ExcludeSamePartyCrossPartyContext"
-
-	// AuditsCookieExclusionReasonExcludeDomainNonASCII enum const.
+	// AuditsCookieExclusionReasonExcludeDomainNonASCII enum const
 	AuditsCookieExclusionReasonExcludeDomainNonASCII AuditsCookieExclusionReason = "ExcludeDomainNonASCII"
 
-	// AuditsCookieExclusionReasonExcludeThirdPartyCookieBlockedInFirstPartySet enum const.
-	AuditsCookieExclusionReasonExcludeThirdPartyCookieBlockedInFirstPartySet AuditsCookieExclusionReason = "ExcludeThirdPartyCookieBlockedInFirstPartySet"
-
-	// AuditsCookieExclusionReasonExcludeThirdPartyPhaseout enum const.
+	// AuditsCookieExclusionReasonExcludeThirdPartyPhaseout enum const
 	AuditsCookieExclusionReasonExcludeThirdPartyPhaseout AuditsCookieExclusionReason = "ExcludeThirdPartyPhaseout"
+
+	// AuditsCookieExclusionReasonExcludePortMismatch enum const
+	AuditsCookieExclusionReasonExcludePortMismatch AuditsCookieExclusionReason = "ExcludePortMismatch"
+
+	// AuditsCookieExclusionReasonExcludeSchemeMismatch enum const
+	AuditsCookieExclusionReasonExcludeSchemeMismatch AuditsCookieExclusionReason = "ExcludeSchemeMismatch"
 )
 
 // AuditsCookieWarningReason ...
 type AuditsCookieWarningReason string
 
 const (
-	// AuditsCookieWarningReasonWarnSameSiteUnspecifiedCrossSiteContext enum const.
+	// AuditsCookieWarningReasonWarnSameSiteUnspecifiedCrossSiteContext enum const
 	AuditsCookieWarningReasonWarnSameSiteUnspecifiedCrossSiteContext AuditsCookieWarningReason = "WarnSameSiteUnspecifiedCrossSiteContext"
 
-	// AuditsCookieWarningReasonWarnSameSiteNoneInsecure enum const.
+	// AuditsCookieWarningReasonWarnSameSiteNoneInsecure enum const
 	AuditsCookieWarningReasonWarnSameSiteNoneInsecure AuditsCookieWarningReason = "WarnSameSiteNoneInsecure"
 
-	// AuditsCookieWarningReasonWarnSameSiteUnspecifiedLaxAllowUnsafe enum const.
+	// AuditsCookieWarningReasonWarnSameSiteUnspecifiedLaxAllowUnsafe enum const
 	AuditsCookieWarningReasonWarnSameSiteUnspecifiedLaxAllowUnsafe AuditsCookieWarningReason = "WarnSameSiteUnspecifiedLaxAllowUnsafe"
 
-	// AuditsCookieWarningReasonWarnSameSiteStrictLaxDowngradeStrict enum const.
+	// AuditsCookieWarningReasonWarnSameSiteStrictLaxDowngradeStrict enum const
 	AuditsCookieWarningReasonWarnSameSiteStrictLaxDowngradeStrict AuditsCookieWarningReason = "WarnSameSiteStrictLaxDowngradeStrict"
 
-	// AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeStrict enum const.
+	// AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeStrict enum const
 	AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeStrict AuditsCookieWarningReason = "WarnSameSiteStrictCrossDowngradeStrict"
 
-	// AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeLax enum const.
+	// AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeLax enum const
 	AuditsCookieWarningReasonWarnSameSiteStrictCrossDowngradeLax AuditsCookieWarningReason = "WarnSameSiteStrictCrossDowngradeLax"
 
-	// AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeStrict enum const.
+	// AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeStrict enum const
 	AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeStrict AuditsCookieWarningReason = "WarnSameSiteLaxCrossDowngradeStrict"
 
-	// AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeLax enum const.
+	// AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeLax enum const
 	AuditsCookieWarningReasonWarnSameSiteLaxCrossDowngradeLax AuditsCookieWarningReason = "WarnSameSiteLaxCrossDowngradeLax"
 
-	// AuditsCookieWarningReasonWarnAttributeValueExceedsMaxSize enum const.
+	// AuditsCookieWarningReasonWarnAttributeValueExceedsMaxSize enum const
 	AuditsCookieWarningReasonWarnAttributeValueExceedsMaxSize AuditsCookieWarningReason = "WarnAttributeValueExceedsMaxSize"
 
-	// AuditsCookieWarningReasonWarnDomainNonASCII enum const.
+	// AuditsCookieWarningReasonWarnDomainNonASCII enum const
 	AuditsCookieWarningReasonWarnDomainNonASCII AuditsCookieWarningReason = "WarnDomainNonASCII"
 
-	// AuditsCookieWarningReasonWarnThirdPartyPhaseout enum const.
+	// AuditsCookieWarningReasonWarnThirdPartyPhaseout enum const
 	AuditsCookieWarningReasonWarnThirdPartyPhaseout AuditsCookieWarningReason = "WarnThirdPartyPhaseout"
 
-	// AuditsCookieWarningReasonWarnCrossSiteRedirectDowngradeChangesInclusion enum const.
+	// AuditsCookieWarningReasonWarnCrossSiteRedirectDowngradeChangesInclusion enum const
 	AuditsCookieWarningReasonWarnCrossSiteRedirectDowngradeChangesInclusion AuditsCookieWarningReason = "WarnCrossSiteRedirectDowngradeChangesInclusion"
+
+	// AuditsCookieWarningReasonWarnDeprecationTrialMetadata enum const
+	AuditsCookieWarningReasonWarnDeprecationTrialMetadata AuditsCookieWarningReason = "WarnDeprecationTrialMetadata"
+
+	// AuditsCookieWarningReasonWarnThirdPartyCookieHeuristic enum const
+	AuditsCookieWarningReasonWarnThirdPartyCookieHeuristic AuditsCookieWarningReason = "WarnThirdPartyCookieHeuristic"
 )
 
 // AuditsCookieOperation ...
 type AuditsCookieOperation string
 
 const (
-	// AuditsCookieOperationSetCookie enum const.
+	// AuditsCookieOperationSetCookie enum const
 	AuditsCookieOperationSetCookie AuditsCookieOperation = "SetCookie"
 
-	// AuditsCookieOperationReadCookie enum const.
+	// AuditsCookieOperationReadCookie enum const
 	AuditsCookieOperationReadCookie AuditsCookieOperation = "ReadCookie"
 )
+
+// AuditsInsightType Represents the category of insight that a cookie issue falls under.
+type AuditsInsightType string
+
+const (
+	// AuditsInsightTypeGitHubResource enum const
+	AuditsInsightTypeGitHubResource AuditsInsightType = "GitHubResource"
+
+	// AuditsInsightTypeGracePeriod enum const
+	AuditsInsightTypeGracePeriod AuditsInsightType = "GracePeriod"
+
+	// AuditsInsightTypeHeuristics enum const
+	AuditsInsightTypeHeuristics AuditsInsightType = "Heuristics"
+)
+
+// AuditsCookieIssueInsight Information about the suggested solution to a cookie issue.
+type AuditsCookieIssueInsight struct {
+	// Type ...
+	Type AuditsInsightType `json:"type"`
+
+	// TableEntryURL (optional) Link to table entry in third-party cookie migration readiness list.
+	TableEntryURL string `json:"tableEntryUrl,omitempty"`
+}
 
 // AuditsCookieIssueDetails This information is currently necessary, as the front-end has a difficult
 // time finding a specific cookie. With this, we can convey specific error
@@ -152,19 +178,39 @@ type AuditsCookieIssueDetails struct {
 
 	// Request (optional) ...
 	Request *AuditsAffectedRequest `json:"request,omitempty"`
+
+	// Insight (optional) The recommended solution to the issue.
+	Insight *AuditsCookieIssueInsight `json:"insight,omitempty"`
+}
+
+// AuditsPerformanceIssueType ...
+type AuditsPerformanceIssueType string
+
+const (
+	// AuditsPerformanceIssueTypeDocumentCookie enum const
+	AuditsPerformanceIssueTypeDocumentCookie AuditsPerformanceIssueType = "DocumentCookie"
+)
+
+// AuditsPerformanceIssueDetails Details for a performance issue.
+type AuditsPerformanceIssueDetails struct {
+	// PerformanceIssueType ...
+	PerformanceIssueType AuditsPerformanceIssueType `json:"performanceIssueType"`
+
+	// SourceCodeLocation (optional) ...
+	SourceCodeLocation *AuditsSourceCodeLocation `json:"sourceCodeLocation,omitempty"`
 }
 
 // AuditsMixedContentResolutionStatus ...
 type AuditsMixedContentResolutionStatus string
 
 const (
-	// AuditsMixedContentResolutionStatusMixedContentBlocked enum const.
+	// AuditsMixedContentResolutionStatusMixedContentBlocked enum const
 	AuditsMixedContentResolutionStatusMixedContentBlocked AuditsMixedContentResolutionStatus = "MixedContentBlocked"
 
-	// AuditsMixedContentResolutionStatusMixedContentAutomaticallyUpgraded enum const.
+	// AuditsMixedContentResolutionStatusMixedContentAutomaticallyUpgraded enum const
 	AuditsMixedContentResolutionStatusMixedContentAutomaticallyUpgraded AuditsMixedContentResolutionStatus = "MixedContentAutomaticallyUpgraded"
 
-	// AuditsMixedContentResolutionStatusMixedContentWarning enum const.
+	// AuditsMixedContentResolutionStatusMixedContentWarning enum const
 	AuditsMixedContentResolutionStatusMixedContentWarning AuditsMixedContentResolutionStatus = "MixedContentWarning"
 )
 
@@ -172,91 +218,88 @@ const (
 type AuditsMixedContentResourceType string
 
 const (
-	// AuditsMixedContentResourceTypeAttributionSrc enum const.
-	AuditsMixedContentResourceTypeAttributionSrc AuditsMixedContentResourceType = "AttributionSrc"
-
-	// AuditsMixedContentResourceTypeAudio enum const.
+	// AuditsMixedContentResourceTypeAudio enum const
 	AuditsMixedContentResourceTypeAudio AuditsMixedContentResourceType = "Audio"
 
-	// AuditsMixedContentResourceTypeBeacon enum const.
+	// AuditsMixedContentResourceTypeBeacon enum const
 	AuditsMixedContentResourceTypeBeacon AuditsMixedContentResourceType = "Beacon"
 
-	// AuditsMixedContentResourceTypeCSPReport enum const.
+	// AuditsMixedContentResourceTypeCSPReport enum const
 	AuditsMixedContentResourceTypeCSPReport AuditsMixedContentResourceType = "CSPReport"
 
-	// AuditsMixedContentResourceTypeDownload enum const.
+	// AuditsMixedContentResourceTypeDownload enum const
 	AuditsMixedContentResourceTypeDownload AuditsMixedContentResourceType = "Download"
 
-	// AuditsMixedContentResourceTypeEventSource enum const.
+	// AuditsMixedContentResourceTypeEventSource enum const
 	AuditsMixedContentResourceTypeEventSource AuditsMixedContentResourceType = "EventSource"
 
-	// AuditsMixedContentResourceTypeFavicon enum const.
+	// AuditsMixedContentResourceTypeFavicon enum const
 	AuditsMixedContentResourceTypeFavicon AuditsMixedContentResourceType = "Favicon"
 
-	// AuditsMixedContentResourceTypeFont enum const.
+	// AuditsMixedContentResourceTypeFont enum const
 	AuditsMixedContentResourceTypeFont AuditsMixedContentResourceType = "Font"
 
-	// AuditsMixedContentResourceTypeForm enum const.
+	// AuditsMixedContentResourceTypeForm enum const
 	AuditsMixedContentResourceTypeForm AuditsMixedContentResourceType = "Form"
 
-	// AuditsMixedContentResourceTypeFrame enum const.
+	// AuditsMixedContentResourceTypeFrame enum const
 	AuditsMixedContentResourceTypeFrame AuditsMixedContentResourceType = "Frame"
 
-	// AuditsMixedContentResourceTypeImage enum const.
+	// AuditsMixedContentResourceTypeImage enum const
 	AuditsMixedContentResourceTypeImage AuditsMixedContentResourceType = "Image"
 
-	// AuditsMixedContentResourceTypeImport enum const.
+	// AuditsMixedContentResourceTypeImport enum const
 	AuditsMixedContentResourceTypeImport AuditsMixedContentResourceType = "Import"
 
-	// AuditsMixedContentResourceTypeJSON enum const.
+	// AuditsMixedContentResourceTypeJSON enum const
 	AuditsMixedContentResourceTypeJSON AuditsMixedContentResourceType = "JSON"
 
-	// AuditsMixedContentResourceTypeManifest enum const.
+	// AuditsMixedContentResourceTypeManifest enum const
 	AuditsMixedContentResourceTypeManifest AuditsMixedContentResourceType = "Manifest"
 
-	// AuditsMixedContentResourceTypePing enum const.
+	// AuditsMixedContentResourceTypePing enum const
 	AuditsMixedContentResourceTypePing AuditsMixedContentResourceType = "Ping"
 
-	// AuditsMixedContentResourceTypePluginData enum const.
+	// AuditsMixedContentResourceTypePluginData enum const
 	AuditsMixedContentResourceTypePluginData AuditsMixedContentResourceType = "PluginData"
 
-	// AuditsMixedContentResourceTypePluginResource enum const.
+	// AuditsMixedContentResourceTypePluginResource enum const
 	AuditsMixedContentResourceTypePluginResource AuditsMixedContentResourceType = "PluginResource"
 
-	// AuditsMixedContentResourceTypePrefetch enum const.
+	// AuditsMixedContentResourceTypePrefetch enum const
 	AuditsMixedContentResourceTypePrefetch AuditsMixedContentResourceType = "Prefetch"
 
-	// AuditsMixedContentResourceTypeResource enum const.
+	// AuditsMixedContentResourceTypeResource enum const
 	AuditsMixedContentResourceTypeResource AuditsMixedContentResourceType = "Resource"
 
-	// AuditsMixedContentResourceTypeScript enum const.
+	// AuditsMixedContentResourceTypeScript enum const
 	AuditsMixedContentResourceTypeScript AuditsMixedContentResourceType = "Script"
 
-	// AuditsMixedContentResourceTypeServiceWorker enum const.
+	// AuditsMixedContentResourceTypeServiceWorker enum const
 	AuditsMixedContentResourceTypeServiceWorker AuditsMixedContentResourceType = "ServiceWorker"
 
-	// AuditsMixedContentResourceTypeSharedWorker enum const.
+	// AuditsMixedContentResourceTypeSharedWorker enum const
 	AuditsMixedContentResourceTypeSharedWorker AuditsMixedContentResourceType = "SharedWorker"
 
-	// AuditsMixedContentResourceTypeSpeculationRules enum const.
+	// AuditsMixedContentResourceTypeSpeculationRules enum const
 	AuditsMixedContentResourceTypeSpeculationRules AuditsMixedContentResourceType = "SpeculationRules"
 
-	// AuditsMixedContentResourceTypeStylesheet enum const.
+	// AuditsMixedContentResourceTypeStylesheet enum const
 	AuditsMixedContentResourceTypeStylesheet AuditsMixedContentResourceType = "Stylesheet"
 
-	// AuditsMixedContentResourceTypeTrack enum const.
+	// AuditsMixedContentResourceTypeTrack enum const
 	AuditsMixedContentResourceTypeTrack AuditsMixedContentResourceType = "Track"
 
-	// AuditsMixedContentResourceTypeVideo enum const.
+	// AuditsMixedContentResourceTypeVideo enum const
 	AuditsMixedContentResourceTypeVideo AuditsMixedContentResourceType = "Video"
 
-	// AuditsMixedContentResourceTypeWorker enum const.
+	// AuditsMixedContentResourceTypeWorker enum const
 	AuditsMixedContentResourceTypeWorker AuditsMixedContentResourceType = "Worker"
 
-	// AuditsMixedContentResourceTypeXMLHTTPRequest enum const.
+	// AuditsMixedContentResourceTypeXMLHTTPRequest enum const
 	AuditsMixedContentResourceTypeXMLHTTPRequest AuditsMixedContentResourceType = "XMLHttpRequest"
 
-	// AuditsMixedContentResourceTypeXSLT enum const.
+	// AuditsMixedContentResourceTypeXSLT enum const
 	AuditsMixedContentResourceTypeXSLT AuditsMixedContentResourceType = "XSLT"
 )
 
@@ -290,26 +333,29 @@ type AuditsMixedContentIssueDetails struct {
 type AuditsBlockedByResponseReason string
 
 const (
-	// AuditsBlockedByResponseReasonCoepFrameResourceNeedsCoepHeader enum const.
+	// AuditsBlockedByResponseReasonCoepFrameResourceNeedsCoepHeader enum const
 	AuditsBlockedByResponseReasonCoepFrameResourceNeedsCoepHeader AuditsBlockedByResponseReason = "CoepFrameResourceNeedsCoepHeader"
 
-	// AuditsBlockedByResponseReasonCoopSandboxedIFrameCannotNavigateToCoopPage enum const.
+	// AuditsBlockedByResponseReasonCoopSandboxedIFrameCannotNavigateToCoopPage enum const
 	AuditsBlockedByResponseReasonCoopSandboxedIFrameCannotNavigateToCoopPage AuditsBlockedByResponseReason = "CoopSandboxedIFrameCannotNavigateToCoopPage"
 
-	// AuditsBlockedByResponseReasonCorpNotSameOrigin enum const.
+	// AuditsBlockedByResponseReasonCorpNotSameOrigin enum const
 	AuditsBlockedByResponseReasonCorpNotSameOrigin AuditsBlockedByResponseReason = "CorpNotSameOrigin"
 
-	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoep enum const.
+	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoep enum const
 	AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoep AuditsBlockedByResponseReason = "CorpNotSameOriginAfterDefaultedToSameOriginByCoep"
 
-	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByDip enum const.
+	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByDip enum const
 	AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByDip AuditsBlockedByResponseReason = "CorpNotSameOriginAfterDefaultedToSameOriginByDip"
 
-	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoepAndDip enum const.
+	// AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoepAndDip enum const
 	AuditsBlockedByResponseReasonCorpNotSameOriginAfterDefaultedToSameOriginByCoepAndDip AuditsBlockedByResponseReason = "CorpNotSameOriginAfterDefaultedToSameOriginByCoepAndDip"
 
-	// AuditsBlockedByResponseReasonCorpNotSameSite enum const.
+	// AuditsBlockedByResponseReasonCorpNotSameSite enum const
 	AuditsBlockedByResponseReasonCorpNotSameSite AuditsBlockedByResponseReason = "CorpNotSameSite"
+
+	// AuditsBlockedByResponseReasonSRIMessageSignatureMismatch enum const
+	AuditsBlockedByResponseReasonSRIMessageSignatureMismatch AuditsBlockedByResponseReason = "SRIMessageSignatureMismatch"
 )
 
 // AuditsBlockedByResponseIssueDetails Details for a request that has been blocked with the BLOCKED_BY_RESPONSE
@@ -333,10 +379,10 @@ type AuditsBlockedByResponseIssueDetails struct {
 type AuditsHeavyAdResolutionStatus string
 
 const (
-	// AuditsHeavyAdResolutionStatusHeavyAdBlocked enum const.
+	// AuditsHeavyAdResolutionStatusHeavyAdBlocked enum const
 	AuditsHeavyAdResolutionStatusHeavyAdBlocked AuditsHeavyAdResolutionStatus = "HeavyAdBlocked"
 
-	// AuditsHeavyAdResolutionStatusHeavyAdWarning enum const.
+	// AuditsHeavyAdResolutionStatusHeavyAdWarning enum const
 	AuditsHeavyAdResolutionStatusHeavyAdWarning AuditsHeavyAdResolutionStatus = "HeavyAdWarning"
 )
 
@@ -344,13 +390,13 @@ const (
 type AuditsHeavyAdReason string
 
 const (
-	// AuditsHeavyAdReasonNetworkTotalLimit enum const.
+	// AuditsHeavyAdReasonNetworkTotalLimit enum const
 	AuditsHeavyAdReasonNetworkTotalLimit AuditsHeavyAdReason = "NetworkTotalLimit"
 
-	// AuditsHeavyAdReasonCPUTotalLimit enum const.
+	// AuditsHeavyAdReasonCPUTotalLimit enum const
 	AuditsHeavyAdReasonCPUTotalLimit AuditsHeavyAdReason = "CpuTotalLimit"
 
-	// AuditsHeavyAdReasonCPUPeakLimit enum const.
+	// AuditsHeavyAdReasonCPUPeakLimit enum const
 	AuditsHeavyAdReasonCPUPeakLimit AuditsHeavyAdReason = "CpuPeakLimit"
 )
 
@@ -370,22 +416,25 @@ type AuditsHeavyAdIssueDetails struct {
 type AuditsContentSecurityPolicyViolationType string
 
 const (
-	// AuditsContentSecurityPolicyViolationTypeKInlineViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKInlineViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKInlineViolation AuditsContentSecurityPolicyViolationType = "kInlineViolation"
 
-	// AuditsContentSecurityPolicyViolationTypeKEvalViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKEvalViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKEvalViolation AuditsContentSecurityPolicyViolationType = "kEvalViolation"
 
-	// AuditsContentSecurityPolicyViolationTypeKURLViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKURLViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKURLViolation AuditsContentSecurityPolicyViolationType = "kURLViolation"
 
-	// AuditsContentSecurityPolicyViolationTypeKTrustedTypesSinkViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKSRIViolation enum const
+	AuditsContentSecurityPolicyViolationTypeKSRIViolation AuditsContentSecurityPolicyViolationType = "kSRIViolation"
+
+	// AuditsContentSecurityPolicyViolationTypeKTrustedTypesSinkViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKTrustedTypesSinkViolation AuditsContentSecurityPolicyViolationType = "kTrustedTypesSinkViolation"
 
-	// AuditsContentSecurityPolicyViolationTypeKTrustedTypesPolicyViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKTrustedTypesPolicyViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKTrustedTypesPolicyViolation AuditsContentSecurityPolicyViolationType = "kTrustedTypesPolicyViolation"
 
-	// AuditsContentSecurityPolicyViolationTypeKWasmEvalViolation enum const.
+	// AuditsContentSecurityPolicyViolationTypeKWasmEvalViolation enum const
 	AuditsContentSecurityPolicyViolationTypeKWasmEvalViolation AuditsContentSecurityPolicyViolationType = "kWasmEvalViolation"
 )
 
@@ -432,10 +481,10 @@ type AuditsContentSecurityPolicyIssueDetails struct {
 type AuditsSharedArrayBufferIssueType string
 
 const (
-	// AuditsSharedArrayBufferIssueTypeTransferIssue enum const.
+	// AuditsSharedArrayBufferIssueTypeTransferIssue enum const
 	AuditsSharedArrayBufferIssueTypeTransferIssue AuditsSharedArrayBufferIssueType = "TransferIssue"
 
-	// AuditsSharedArrayBufferIssueTypeCreationIssue enum const.
+	// AuditsSharedArrayBufferIssueTypeCreationIssue enum const
 	AuditsSharedArrayBufferIssueTypeCreationIssue AuditsSharedArrayBufferIssueType = "CreationIssue"
 )
 
@@ -450,30 +499,6 @@ type AuditsSharedArrayBufferIssueDetails struct {
 
 	// Type ...
 	Type AuditsSharedArrayBufferIssueType `json:"type"`
-}
-
-// AuditsLowTextContrastIssueDetails ...
-type AuditsLowTextContrastIssueDetails struct {
-	// ViolatingNodeID ...
-	ViolatingNodeID DOMBackendNodeID `json:"violatingNodeId"`
-
-	// ViolatingNodeSelector ...
-	ViolatingNodeSelector string `json:"violatingNodeSelector"`
-
-	// ContrastRatio ...
-	ContrastRatio float64 `json:"contrastRatio"`
-
-	// ThresholdAA ...
-	ThresholdAA float64 `json:"thresholdAA"`
-
-	// ThresholdAAA ...
-	ThresholdAAA float64 `json:"thresholdAAA"`
-
-	// FontSize ...
-	FontSize string `json:"fontSize"`
-
-	// FontWeight ...
-	FontWeight string `json:"fontWeight"`
 }
 
 // AuditsCorsIssueDetails Details for a CORS related issue, e.g. a warning or error related to
@@ -501,160 +526,217 @@ type AuditsCorsIssueDetails struct {
 	ClientSecurityState *NetworkClientSecurityState `json:"clientSecurityState,omitempty"`
 }
 
-// AuditsAttributionReportingIssueType ...
-type AuditsAttributionReportingIssueType string
-
-const (
-	// AuditsAttributionReportingIssueTypePermissionPolicyDisabled enum const.
-	AuditsAttributionReportingIssueTypePermissionPolicyDisabled AuditsAttributionReportingIssueType = "PermissionPolicyDisabled"
-
-	// AuditsAttributionReportingIssueTypeUntrustworthyReportingOrigin enum const.
-	AuditsAttributionReportingIssueTypeUntrustworthyReportingOrigin AuditsAttributionReportingIssueType = "UntrustworthyReportingOrigin"
-
-	// AuditsAttributionReportingIssueTypeInsecureContext enum const.
-	AuditsAttributionReportingIssueTypeInsecureContext AuditsAttributionReportingIssueType = "InsecureContext"
-
-	// AuditsAttributionReportingIssueTypeInvalidHeader enum const.
-	AuditsAttributionReportingIssueTypeInvalidHeader AuditsAttributionReportingIssueType = "InvalidHeader"
-
-	// AuditsAttributionReportingIssueTypeInvalidRegisterTriggerHeader enum const.
-	AuditsAttributionReportingIssueTypeInvalidRegisterTriggerHeader AuditsAttributionReportingIssueType = "InvalidRegisterTriggerHeader"
-
-	// AuditsAttributionReportingIssueTypeSourceAndTriggerHeaders enum const.
-	AuditsAttributionReportingIssueTypeSourceAndTriggerHeaders AuditsAttributionReportingIssueType = "SourceAndTriggerHeaders"
-
-	// AuditsAttributionReportingIssueTypeSourceIgnored enum const.
-	AuditsAttributionReportingIssueTypeSourceIgnored AuditsAttributionReportingIssueType = "SourceIgnored"
-
-	// AuditsAttributionReportingIssueTypeTriggerIgnored enum const.
-	AuditsAttributionReportingIssueTypeTriggerIgnored AuditsAttributionReportingIssueType = "TriggerIgnored"
-
-	// AuditsAttributionReportingIssueTypeOsSourceIgnored enum const.
-	AuditsAttributionReportingIssueTypeOsSourceIgnored AuditsAttributionReportingIssueType = "OsSourceIgnored"
-
-	// AuditsAttributionReportingIssueTypeOsTriggerIgnored enum const.
-	AuditsAttributionReportingIssueTypeOsTriggerIgnored AuditsAttributionReportingIssueType = "OsTriggerIgnored"
-
-	// AuditsAttributionReportingIssueTypeInvalidRegisterOsSourceHeader enum const.
-	AuditsAttributionReportingIssueTypeInvalidRegisterOsSourceHeader AuditsAttributionReportingIssueType = "InvalidRegisterOsSourceHeader"
-
-	// AuditsAttributionReportingIssueTypeInvalidRegisterOsTriggerHeader enum const.
-	AuditsAttributionReportingIssueTypeInvalidRegisterOsTriggerHeader AuditsAttributionReportingIssueType = "InvalidRegisterOsTriggerHeader"
-
-	// AuditsAttributionReportingIssueTypeWebAndOsHeaders enum const.
-	AuditsAttributionReportingIssueTypeWebAndOsHeaders AuditsAttributionReportingIssueType = "WebAndOsHeaders"
-
-	// AuditsAttributionReportingIssueTypeNoWebOrOsSupport enum const.
-	AuditsAttributionReportingIssueTypeNoWebOrOsSupport AuditsAttributionReportingIssueType = "NoWebOrOsSupport"
-
-	// AuditsAttributionReportingIssueTypeNavigationRegistrationWithoutTransientUserActivation enum const.
-	AuditsAttributionReportingIssueTypeNavigationRegistrationWithoutTransientUserActivation AuditsAttributionReportingIssueType = "NavigationRegistrationWithoutTransientUserActivation"
-
-	// AuditsAttributionReportingIssueTypeInvalidInfoHeader enum const.
-	AuditsAttributionReportingIssueTypeInvalidInfoHeader AuditsAttributionReportingIssueType = "InvalidInfoHeader"
-
-	// AuditsAttributionReportingIssueTypeNoRegisterSourceHeader enum const.
-	AuditsAttributionReportingIssueTypeNoRegisterSourceHeader AuditsAttributionReportingIssueType = "NoRegisterSourceHeader"
-
-	// AuditsAttributionReportingIssueTypeNoRegisterTriggerHeader enum const.
-	AuditsAttributionReportingIssueTypeNoRegisterTriggerHeader AuditsAttributionReportingIssueType = "NoRegisterTriggerHeader"
-
-	// AuditsAttributionReportingIssueTypeNoRegisterOsSourceHeader enum const.
-	AuditsAttributionReportingIssueTypeNoRegisterOsSourceHeader AuditsAttributionReportingIssueType = "NoRegisterOsSourceHeader"
-
-	// AuditsAttributionReportingIssueTypeNoRegisterOsTriggerHeader enum const.
-	AuditsAttributionReportingIssueTypeNoRegisterOsTriggerHeader AuditsAttributionReportingIssueType = "NoRegisterOsTriggerHeader"
-)
-
 // AuditsSharedDictionaryError ...
 type AuditsSharedDictionaryError string
 
 const (
-	// AuditsSharedDictionaryErrorUseErrorCrossOriginNoCorsRequest enum const.
+	// AuditsSharedDictionaryErrorUseErrorCrossOriginNoCorsRequest enum const
 	AuditsSharedDictionaryErrorUseErrorCrossOriginNoCorsRequest AuditsSharedDictionaryError = "UseErrorCrossOriginNoCorsRequest"
 
-	// AuditsSharedDictionaryErrorUseErrorDictionaryLoadFailure enum const.
+	// AuditsSharedDictionaryErrorUseErrorDictionaryLoadFailure enum const
 	AuditsSharedDictionaryErrorUseErrorDictionaryLoadFailure AuditsSharedDictionaryError = "UseErrorDictionaryLoadFailure"
 
-	// AuditsSharedDictionaryErrorUseErrorMatchingDictionaryNotUsed enum const.
+	// AuditsSharedDictionaryErrorUseErrorMatchingDictionaryNotUsed enum const
 	AuditsSharedDictionaryErrorUseErrorMatchingDictionaryNotUsed AuditsSharedDictionaryError = "UseErrorMatchingDictionaryNotUsed"
 
-	// AuditsSharedDictionaryErrorUseErrorUnexpectedContentDictionaryHeader enum const.
+	// AuditsSharedDictionaryErrorUseErrorUnexpectedContentDictionaryHeader enum const
 	AuditsSharedDictionaryErrorUseErrorUnexpectedContentDictionaryHeader AuditsSharedDictionaryError = "UseErrorUnexpectedContentDictionaryHeader"
 
-	// AuditsSharedDictionaryErrorWriteErrorCossOriginNoCorsRequest enum const.
+	// AuditsSharedDictionaryErrorWriteErrorCossOriginNoCorsRequest enum const
 	AuditsSharedDictionaryErrorWriteErrorCossOriginNoCorsRequest AuditsSharedDictionaryError = "WriteErrorCossOriginNoCorsRequest"
 
-	// AuditsSharedDictionaryErrorWriteErrorDisallowedBySettings enum const.
+	// AuditsSharedDictionaryErrorWriteErrorDisallowedBySettings enum const
 	AuditsSharedDictionaryErrorWriteErrorDisallowedBySettings AuditsSharedDictionaryError = "WriteErrorDisallowedBySettings"
 
-	// AuditsSharedDictionaryErrorWriteErrorExpiredResponse enum const.
+	// AuditsSharedDictionaryErrorWriteErrorExpiredResponse enum const
 	AuditsSharedDictionaryErrorWriteErrorExpiredResponse AuditsSharedDictionaryError = "WriteErrorExpiredResponse"
 
-	// AuditsSharedDictionaryErrorWriteErrorFeatureDisabled enum const.
+	// AuditsSharedDictionaryErrorWriteErrorFeatureDisabled enum const
 	AuditsSharedDictionaryErrorWriteErrorFeatureDisabled AuditsSharedDictionaryError = "WriteErrorFeatureDisabled"
 
-	// AuditsSharedDictionaryErrorWriteErrorInsufficientResources enum const.
+	// AuditsSharedDictionaryErrorWriteErrorInsufficientResources enum const
 	AuditsSharedDictionaryErrorWriteErrorInsufficientResources AuditsSharedDictionaryError = "WriteErrorInsufficientResources"
 
-	// AuditsSharedDictionaryErrorWriteErrorInvalidMatchField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorInvalidMatchField enum const
 	AuditsSharedDictionaryErrorWriteErrorInvalidMatchField AuditsSharedDictionaryError = "WriteErrorInvalidMatchField"
 
-	// AuditsSharedDictionaryErrorWriteErrorInvalidStructuredHeader enum const.
+	// AuditsSharedDictionaryErrorWriteErrorInvalidStructuredHeader enum const
 	AuditsSharedDictionaryErrorWriteErrorInvalidStructuredHeader AuditsSharedDictionaryError = "WriteErrorInvalidStructuredHeader"
 
-	// AuditsSharedDictionaryErrorWriteErrorNavigationRequest enum const.
+	// AuditsSharedDictionaryErrorWriteErrorInvalidTTLField enum const
+	AuditsSharedDictionaryErrorWriteErrorInvalidTTLField AuditsSharedDictionaryError = "WriteErrorInvalidTTLField"
+
+	// AuditsSharedDictionaryErrorWriteErrorNavigationRequest enum const
 	AuditsSharedDictionaryErrorWriteErrorNavigationRequest AuditsSharedDictionaryError = "WriteErrorNavigationRequest"
 
-	// AuditsSharedDictionaryErrorWriteErrorNoMatchField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNoMatchField enum const
 	AuditsSharedDictionaryErrorWriteErrorNoMatchField AuditsSharedDictionaryError = "WriteErrorNoMatchField"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonListMatchDestField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNonIntegerTTLField enum const
+	AuditsSharedDictionaryErrorWriteErrorNonIntegerTTLField AuditsSharedDictionaryError = "WriteErrorNonIntegerTTLField"
+
+	// AuditsSharedDictionaryErrorWriteErrorNonListMatchDestField enum const
 	AuditsSharedDictionaryErrorWriteErrorNonListMatchDestField AuditsSharedDictionaryError = "WriteErrorNonListMatchDestField"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonSecureContext enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNonSecureContext enum const
 	AuditsSharedDictionaryErrorWriteErrorNonSecureContext AuditsSharedDictionaryError = "WriteErrorNonSecureContext"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonStringIDField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNonStringIDField enum const
 	AuditsSharedDictionaryErrorWriteErrorNonStringIDField AuditsSharedDictionaryError = "WriteErrorNonStringIdField"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonStringInMatchDestList enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNonStringInMatchDestList enum const
 	AuditsSharedDictionaryErrorWriteErrorNonStringInMatchDestList AuditsSharedDictionaryError = "WriteErrorNonStringInMatchDestList"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonStringMatchField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorInvalidMatchDestList enum const
+	AuditsSharedDictionaryErrorWriteErrorInvalidMatchDestList AuditsSharedDictionaryError = "WriteErrorInvalidMatchDestList"
+
+	// AuditsSharedDictionaryErrorWriteErrorNonStringMatchField enum const
 	AuditsSharedDictionaryErrorWriteErrorNonStringMatchField AuditsSharedDictionaryError = "WriteErrorNonStringMatchField"
 
-	// AuditsSharedDictionaryErrorWriteErrorNonTokenTypeField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorNonTokenTypeField enum const
 	AuditsSharedDictionaryErrorWriteErrorNonTokenTypeField AuditsSharedDictionaryError = "WriteErrorNonTokenTypeField"
 
-	// AuditsSharedDictionaryErrorWriteErrorRequestAborted enum const.
+	// AuditsSharedDictionaryErrorWriteErrorRequestAborted enum const
 	AuditsSharedDictionaryErrorWriteErrorRequestAborted AuditsSharedDictionaryError = "WriteErrorRequestAborted"
 
-	// AuditsSharedDictionaryErrorWriteErrorShuttingDown enum const.
+	// AuditsSharedDictionaryErrorWriteErrorShuttingDown enum const
 	AuditsSharedDictionaryErrorWriteErrorShuttingDown AuditsSharedDictionaryError = "WriteErrorShuttingDown"
 
-	// AuditsSharedDictionaryErrorWriteErrorTooLongIDField enum const.
+	// AuditsSharedDictionaryErrorWriteErrorTooLongIDField enum const
 	AuditsSharedDictionaryErrorWriteErrorTooLongIDField AuditsSharedDictionaryError = "WriteErrorTooLongIdField"
 
-	// AuditsSharedDictionaryErrorWriteErrorUnsupportedType enum const.
+	// AuditsSharedDictionaryErrorWriteErrorUnsupportedType enum const
 	AuditsSharedDictionaryErrorWriteErrorUnsupportedType AuditsSharedDictionaryError = "WriteErrorUnsupportedType"
 )
 
-// AuditsAttributionReportingIssueDetails Details for issues around "Attribution Reporting API" usage.
-// Explainer: https://github.com/WICG/attribution-reporting-api
-type AuditsAttributionReportingIssueDetails struct {
-	// ViolationType ...
-	ViolationType AuditsAttributionReportingIssueType `json:"violationType"`
+// AuditsSRIMessageSignatureError ...
+type AuditsSRIMessageSignatureError string
 
-	// Request (optional) ...
-	Request *AuditsAffectedRequest `json:"request,omitempty"`
+const (
+	// AuditsSRIMessageSignatureErrorMissingSignatureHeader enum const
+	AuditsSRIMessageSignatureErrorMissingSignatureHeader AuditsSRIMessageSignatureError = "MissingSignatureHeader"
 
-	// ViolatingNodeID (optional) ...
-	ViolatingNodeID DOMBackendNodeID `json:"violatingNodeId,omitempty"`
+	// AuditsSRIMessageSignatureErrorMissingSignatureInputHeader enum const
+	AuditsSRIMessageSignatureErrorMissingSignatureInputHeader AuditsSRIMessageSignatureError = "MissingSignatureInputHeader"
 
-	// InvalidParameter (optional) ...
-	InvalidParameter string `json:"invalidParameter,omitempty"`
-}
+	// AuditsSRIMessageSignatureErrorInvalidSignatureHeader enum const
+	AuditsSRIMessageSignatureErrorInvalidSignatureHeader AuditsSRIMessageSignatureError = "InvalidSignatureHeader"
+
+	// AuditsSRIMessageSignatureErrorInvalidSignatureInputHeader enum const
+	AuditsSRIMessageSignatureErrorInvalidSignatureInputHeader AuditsSRIMessageSignatureError = "InvalidSignatureInputHeader"
+
+	// AuditsSRIMessageSignatureErrorSignatureHeaderValueIsNotByteSequence enum const
+	AuditsSRIMessageSignatureErrorSignatureHeaderValueIsNotByteSequence AuditsSRIMessageSignatureError = "SignatureHeaderValueIsNotByteSequence"
+
+	// AuditsSRIMessageSignatureErrorSignatureHeaderValueIsParameterized enum const
+	AuditsSRIMessageSignatureErrorSignatureHeaderValueIsParameterized AuditsSRIMessageSignatureError = "SignatureHeaderValueIsParameterized"
+
+	// AuditsSRIMessageSignatureErrorSignatureHeaderValueIsIncorrectLength enum const
+	AuditsSRIMessageSignatureErrorSignatureHeaderValueIsIncorrectLength AuditsSRIMessageSignatureError = "SignatureHeaderValueIsIncorrectLength"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderMissingLabel enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderMissingLabel AuditsSRIMessageSignatureError = "SignatureInputHeaderMissingLabel"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderValueNotInnerList enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderValueNotInnerList AuditsSRIMessageSignatureError = "SignatureInputHeaderValueNotInnerList"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderValueMissingComponents enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderValueMissingComponents AuditsSRIMessageSignatureError = "SignatureInputHeaderValueMissingComponents"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidComponentType enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidComponentType AuditsSRIMessageSignatureError = "SignatureInputHeaderInvalidComponentType"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidComponentName enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidComponentName AuditsSRIMessageSignatureError = "SignatureInputHeaderInvalidComponentName"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidHeaderComponentParameter enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidHeaderComponentParameter AuditsSRIMessageSignatureError = "SignatureInputHeaderInvalidHeaderComponentParameter"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidDerivedComponentParameter enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidDerivedComponentParameter AuditsSRIMessageSignatureError = "SignatureInputHeaderInvalidDerivedComponentParameter"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderKeyIDLength enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderKeyIDLength AuditsSRIMessageSignatureError = "SignatureInputHeaderKeyIdLength"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidParameter enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderInvalidParameter AuditsSRIMessageSignatureError = "SignatureInputHeaderInvalidParameter"
+
+	// AuditsSRIMessageSignatureErrorSignatureInputHeaderMissingRequiredParameters enum const
+	AuditsSRIMessageSignatureErrorSignatureInputHeaderMissingRequiredParameters AuditsSRIMessageSignatureError = "SignatureInputHeaderMissingRequiredParameters"
+
+	// AuditsSRIMessageSignatureErrorValidationFailedSignatureExpired enum const
+	AuditsSRIMessageSignatureErrorValidationFailedSignatureExpired AuditsSRIMessageSignatureError = "ValidationFailedSignatureExpired"
+
+	// AuditsSRIMessageSignatureErrorValidationFailedInvalidLength enum const
+	AuditsSRIMessageSignatureErrorValidationFailedInvalidLength AuditsSRIMessageSignatureError = "ValidationFailedInvalidLength"
+
+	// AuditsSRIMessageSignatureErrorValidationFailedSignatureMismatch enum const
+	AuditsSRIMessageSignatureErrorValidationFailedSignatureMismatch AuditsSRIMessageSignatureError = "ValidationFailedSignatureMismatch"
+
+	// AuditsSRIMessageSignatureErrorValidationFailedIntegrityMismatch enum const
+	AuditsSRIMessageSignatureErrorValidationFailedIntegrityMismatch AuditsSRIMessageSignatureError = "ValidationFailedIntegrityMismatch"
+
+	// AuditsSRIMessageSignatureErrorSignatureBaseUnknownDerivedComponent enum const
+	AuditsSRIMessageSignatureErrorSignatureBaseUnknownDerivedComponent AuditsSRIMessageSignatureError = "SignatureBaseUnknownDerivedComponent"
+
+	// AuditsSRIMessageSignatureErrorSignatureBaseMissingHeader enum const
+	AuditsSRIMessageSignatureErrorSignatureBaseMissingHeader AuditsSRIMessageSignatureError = "SignatureBaseMissingHeader"
+
+	// AuditsSRIMessageSignatureErrorSignatureBaseInvalidUnencodedDigest enum const
+	AuditsSRIMessageSignatureErrorSignatureBaseInvalidUnencodedDigest AuditsSRIMessageSignatureError = "SignatureBaseInvalidUnencodedDigest"
+
+	// AuditsSRIMessageSignatureErrorSignatureBaseUnsupportedComponent enum const
+	AuditsSRIMessageSignatureErrorSignatureBaseUnsupportedComponent AuditsSRIMessageSignatureError = "SignatureBaseUnsupportedComponent"
+)
+
+// AuditsUnencodedDigestError ...
+type AuditsUnencodedDigestError string
+
+const (
+	// AuditsUnencodedDigestErrorMalformedDictionary enum const
+	AuditsUnencodedDigestErrorMalformedDictionary AuditsUnencodedDigestError = "MalformedDictionary"
+
+	// AuditsUnencodedDigestErrorUnknownAlgorithm enum const
+	AuditsUnencodedDigestErrorUnknownAlgorithm AuditsUnencodedDigestError = "UnknownAlgorithm"
+
+	// AuditsUnencodedDigestErrorIncorrectDigestType enum const
+	AuditsUnencodedDigestErrorIncorrectDigestType AuditsUnencodedDigestError = "IncorrectDigestType"
+
+	// AuditsUnencodedDigestErrorIncorrectDigestLength enum const
+	AuditsUnencodedDigestErrorIncorrectDigestLength AuditsUnencodedDigestError = "IncorrectDigestLength"
+)
+
+// AuditsConnectionAllowlistError ...
+type AuditsConnectionAllowlistError string
+
+const (
+	// AuditsConnectionAllowlistErrorInvalidHeader enum const
+	AuditsConnectionAllowlistErrorInvalidHeader AuditsConnectionAllowlistError = "InvalidHeader"
+
+	// AuditsConnectionAllowlistErrorMoreThanOneList enum const
+	AuditsConnectionAllowlistErrorMoreThanOneList AuditsConnectionAllowlistError = "MoreThanOneList"
+
+	// AuditsConnectionAllowlistErrorItemNotInnerList enum const
+	AuditsConnectionAllowlistErrorItemNotInnerList AuditsConnectionAllowlistError = "ItemNotInnerList"
+
+	// AuditsConnectionAllowlistErrorInvalidAllowlistItemType enum const
+	AuditsConnectionAllowlistErrorInvalidAllowlistItemType AuditsConnectionAllowlistError = "InvalidAllowlistItemType"
+
+	// AuditsConnectionAllowlistErrorReportingEndpointNotToken enum const
+	AuditsConnectionAllowlistErrorReportingEndpointNotToken AuditsConnectionAllowlistError = "ReportingEndpointNotToken"
+
+	// AuditsConnectionAllowlistErrorInvalidURLPattern enum const
+	AuditsConnectionAllowlistErrorInvalidURLPattern AuditsConnectionAllowlistError = "InvalidUrlPattern"
+
+	// AuditsConnectionAllowlistErrorIFrameAttributeLoosensEmbeddingRequirement enum const
+	AuditsConnectionAllowlistErrorIFrameAttributeLoosensEmbeddingRequirement AuditsConnectionAllowlistError = "IFrameAttributeLoosensEmbeddingRequirement"
+
+	// AuditsConnectionAllowlistErrorInvalidAllowConnectionAllowlistFrom enum const
+	AuditsConnectionAllowlistErrorInvalidAllowConnectionAllowlistFrom AuditsConnectionAllowlistError = "InvalidAllowConnectionAllowlistFrom"
+
+	// AuditsConnectionAllowlistErrorEmbeddingRequirementNotSatisfied enum const
+	AuditsConnectionAllowlistErrorEmbeddingRequirementNotSatisfied AuditsConnectionAllowlistError = "EmbeddingRequirementNotSatisfied"
+)
 
 // AuditsQuirksModeIssueDetails Details for issues about documents in Quirks Mode
 // or Limited Quirks Mode that affects page layouting.
@@ -694,45 +776,108 @@ type AuditsSharedDictionaryIssueDetails struct {
 	Request *AuditsAffectedRequest `json:"request"`
 }
 
+// AuditsSRIMessageSignatureIssueDetails ...
+type AuditsSRIMessageSignatureIssueDetails struct {
+	// Error ...
+	Error AuditsSRIMessageSignatureError `json:"error"`
+
+	// SignatureBase ...
+	SignatureBase string `json:"signatureBase"`
+
+	// IntegrityAssertions ...
+	IntegrityAssertions []string `json:"integrityAssertions"`
+
+	// Request ...
+	Request *AuditsAffectedRequest `json:"request"`
+}
+
+// AuditsUnencodedDigestIssueDetails ...
+type AuditsUnencodedDigestIssueDetails struct {
+	// Error ...
+	Error AuditsUnencodedDigestError `json:"error"`
+
+	// Request ...
+	Request *AuditsAffectedRequest `json:"request"`
+}
+
+// AuditsConnectionAllowlistIssueDetails ...
+type AuditsConnectionAllowlistIssueDetails struct {
+	// Error ...
+	Error AuditsConnectionAllowlistError `json:"error"`
+
+	// Request ...
+	Request *AuditsAffectedRequest `json:"request"`
+}
+
 // AuditsGenericIssueErrorType ...
 type AuditsGenericIssueErrorType string
 
 const (
-	// AuditsGenericIssueErrorTypeCrossOriginPortalPostMessageError enum const.
-	AuditsGenericIssueErrorTypeCrossOriginPortalPostMessageError AuditsGenericIssueErrorType = "CrossOriginPortalPostMessageError"
-
-	// AuditsGenericIssueErrorTypeFormLabelForNameError enum const.
+	// AuditsGenericIssueErrorTypeFormLabelForNameError enum const
 	AuditsGenericIssueErrorTypeFormLabelForNameError AuditsGenericIssueErrorType = "FormLabelForNameError"
 
-	// AuditsGenericIssueErrorTypeFormDuplicateIDForInputError enum const.
+	// AuditsGenericIssueErrorTypeFormDuplicateIDForInputError enum const
 	AuditsGenericIssueErrorTypeFormDuplicateIDForInputError AuditsGenericIssueErrorType = "FormDuplicateIdForInputError"
 
-	// AuditsGenericIssueErrorTypeFormInputWithNoLabelError enum const.
+	// AuditsGenericIssueErrorTypeFormInputWithNoLabelError enum const
 	AuditsGenericIssueErrorTypeFormInputWithNoLabelError AuditsGenericIssueErrorType = "FormInputWithNoLabelError"
 
-	// AuditsGenericIssueErrorTypeFormAutocompleteAttributeEmptyError enum const.
+	// AuditsGenericIssueErrorTypeFormAutocompleteAttributeEmptyError enum const
 	AuditsGenericIssueErrorTypeFormAutocompleteAttributeEmptyError AuditsGenericIssueErrorType = "FormAutocompleteAttributeEmptyError"
 
-	// AuditsGenericIssueErrorTypeFormEmptyIDAndNameAttributesForInputError enum const.
+	// AuditsGenericIssueErrorTypeFormEmptyIDAndNameAttributesForInputError enum const
 	AuditsGenericIssueErrorTypeFormEmptyIDAndNameAttributesForInputError AuditsGenericIssueErrorType = "FormEmptyIdAndNameAttributesForInputError"
 
-	// AuditsGenericIssueErrorTypeFormAriaLabelledByToNonExistingID enum const.
-	AuditsGenericIssueErrorTypeFormAriaLabelledByToNonExistingID AuditsGenericIssueErrorType = "FormAriaLabelledByToNonExistingId"
+	// AuditsGenericIssueErrorTypeFormAriaLabelledByToNonExistingIDError enum const
+	AuditsGenericIssueErrorTypeFormAriaLabelledByToNonExistingIDError AuditsGenericIssueErrorType = "FormAriaLabelledByToNonExistingIdError"
 
-	// AuditsGenericIssueErrorTypeFormInputAssignedAutocompleteValueToIDOrNameAttributeError enum const.
+	// AuditsGenericIssueErrorTypeFormInputAssignedAutocompleteValueToIDOrNameAttributeError enum const
 	AuditsGenericIssueErrorTypeFormInputAssignedAutocompleteValueToIDOrNameAttributeError AuditsGenericIssueErrorType = "FormInputAssignedAutocompleteValueToIdOrNameAttributeError"
 
-	// AuditsGenericIssueErrorTypeFormLabelHasNeitherForNorNestedInput enum const.
-	AuditsGenericIssueErrorTypeFormLabelHasNeitherForNorNestedInput AuditsGenericIssueErrorType = "FormLabelHasNeitherForNorNestedInput"
+	// AuditsGenericIssueErrorTypeFormLabelHasNeitherForNorNestedInputError enum const
+	AuditsGenericIssueErrorTypeFormLabelHasNeitherForNorNestedInputError AuditsGenericIssueErrorType = "FormLabelHasNeitherForNorNestedInputError"
 
-	// AuditsGenericIssueErrorTypeFormLabelForMatchesNonExistingIDError enum const.
+	// AuditsGenericIssueErrorTypeFormLabelForMatchesNonExistingIDError enum const
 	AuditsGenericIssueErrorTypeFormLabelForMatchesNonExistingIDError AuditsGenericIssueErrorType = "FormLabelForMatchesNonExistingIdError"
 
-	// AuditsGenericIssueErrorTypeFormInputHasWrongButWellIntendedAutocompleteValueError enum const.
+	// AuditsGenericIssueErrorTypeFormInputHasWrongButWellIntendedAutocompleteValueError enum const
 	AuditsGenericIssueErrorTypeFormInputHasWrongButWellIntendedAutocompleteValueError AuditsGenericIssueErrorType = "FormInputHasWrongButWellIntendedAutocompleteValueError"
 
-	// AuditsGenericIssueErrorTypeResponseWasBlockedByORB enum const.
+	// AuditsGenericIssueErrorTypeResponseWasBlockedByORB enum const
 	AuditsGenericIssueErrorTypeResponseWasBlockedByORB AuditsGenericIssueErrorType = "ResponseWasBlockedByORB"
+
+	// AuditsGenericIssueErrorTypeNavigationEntryMarkedSkippable enum const
+	AuditsGenericIssueErrorTypeNavigationEntryMarkedSkippable AuditsGenericIssueErrorType = "NavigationEntryMarkedSkippable"
+
+	// AuditsGenericIssueErrorTypeBackUINavigationWouldSkipAd enum const
+	AuditsGenericIssueErrorTypeBackUINavigationWouldSkipAd AuditsGenericIssueErrorType = "BackUINavigationWouldSkipAd"
+
+	// AuditsGenericIssueErrorTypeAutofillAndManualTextPolicyControlledFeaturesInfo enum const
+	AuditsGenericIssueErrorTypeAutofillAndManualTextPolicyControlledFeaturesInfo AuditsGenericIssueErrorType = "AutofillAndManualTextPolicyControlledFeaturesInfo"
+
+	// AuditsGenericIssueErrorTypeAutofillPolicyControlledFeatureInfo enum const
+	AuditsGenericIssueErrorTypeAutofillPolicyControlledFeatureInfo AuditsGenericIssueErrorType = "AutofillPolicyControlledFeatureInfo"
+
+	// AuditsGenericIssueErrorTypeManualTextPolicyControlledFeatureInfo enum const
+	AuditsGenericIssueErrorTypeManualTextPolicyControlledFeatureInfo AuditsGenericIssueErrorType = "ManualTextPolicyControlledFeatureInfo"
+
+	// AuditsGenericIssueErrorTypeFormModelContextParameterMissingTitleAndDescription enum const
+	AuditsGenericIssueErrorTypeFormModelContextParameterMissingTitleAndDescription AuditsGenericIssueErrorType = "FormModelContextParameterMissingTitleAndDescription"
+
+	// AuditsGenericIssueErrorTypeFormModelContextMissingToolName enum const
+	AuditsGenericIssueErrorTypeFormModelContextMissingToolName AuditsGenericIssueErrorType = "FormModelContextMissingToolName"
+
+	// AuditsGenericIssueErrorTypeFormModelContextMissingToolDescription enum const
+	AuditsGenericIssueErrorTypeFormModelContextMissingToolDescription AuditsGenericIssueErrorType = "FormModelContextMissingToolDescription"
+
+	// AuditsGenericIssueErrorTypeFormModelContextRequiredParameterMissingName enum const
+	AuditsGenericIssueErrorTypeFormModelContextRequiredParameterMissingName AuditsGenericIssueErrorType = "FormModelContextRequiredParameterMissingName"
+
+	// AuditsGenericIssueErrorTypeFormModelContextParameterMissingName enum const
+	AuditsGenericIssueErrorTypeFormModelContextParameterMissingName AuditsGenericIssueErrorType = "FormModelContextParameterMissingName"
+
+	// AuditsGenericIssueErrorTypeGeolocationPromptWithoutUserGesture enum const
+	AuditsGenericIssueErrorTypeGeolocationPromptWithoutUserGesture AuditsGenericIssueErrorType = "GeolocationPromptWithoutUserGesture"
 )
 
 // AuditsGenericIssueDetails Depending on the concrete errorType, different properties are set.
@@ -799,10 +944,10 @@ type AuditsCookieDeprecationMetadataIssueDetails struct {
 type AuditsClientHintIssueReason string
 
 const (
-	// AuditsClientHintIssueReasonMetaTagAllowListInvalidOrigin enum const.
+	// AuditsClientHintIssueReasonMetaTagAllowListInvalidOrigin enum const
 	AuditsClientHintIssueReasonMetaTagAllowListInvalidOrigin AuditsClientHintIssueReason = "MetaTagAllowListInvalidOrigin"
 
-	// AuditsClientHintIssueReasonMetaTagModifiedHTML enum const.
+	// AuditsClientHintIssueReasonMetaTagModifiedHTML enum const
 	AuditsClientHintIssueReasonMetaTagModifiedHTML AuditsClientHintIssueReason = "MetaTagModifiedHTML"
 )
 
@@ -819,140 +964,146 @@ type AuditsFederatedAuthRequestIssueDetails struct {
 type AuditsFederatedAuthRequestIssueReason string
 
 const (
-	// AuditsFederatedAuthRequestIssueReasonShouldEmbargo enum const.
+	// AuditsFederatedAuthRequestIssueReasonShouldEmbargo enum const
 	AuditsFederatedAuthRequestIssueReasonShouldEmbargo AuditsFederatedAuthRequestIssueReason = "ShouldEmbargo"
 
-	// AuditsFederatedAuthRequestIssueReasonTooManyRequests enum const.
+	// AuditsFederatedAuthRequestIssueReasonTooManyRequests enum const
 	AuditsFederatedAuthRequestIssueReasonTooManyRequests AuditsFederatedAuthRequestIssueReason = "TooManyRequests"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownHTTPNotFound enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownHTTPNotFound enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownHTTPNotFound AuditsFederatedAuthRequestIssueReason = "WellKnownHttpNotFound"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownNoResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownNoResponse enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownNoResponse AuditsFederatedAuthRequestIssueReason = "WellKnownNoResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownInvalidResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownBlockedByConnectionAllowlist enum const
+	AuditsFederatedAuthRequestIssueReasonWellKnownBlockedByConnectionAllowlist AuditsFederatedAuthRequestIssueReason = "WellKnownBlockedByConnectionAllowlist"
+
+	// AuditsFederatedAuthRequestIssueReasonWellKnownInvalidResponse enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownInvalidResponse AuditsFederatedAuthRequestIssueReason = "WellKnownInvalidResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownListEmpty enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownListEmpty enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownListEmpty AuditsFederatedAuthRequestIssueReason = "WellKnownListEmpty"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownInvalidContentType enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownInvalidContentType enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownInvalidContentType AuditsFederatedAuthRequestIssueReason = "WellKnownInvalidContentType"
 
-	// AuditsFederatedAuthRequestIssueReasonConfigNotInWellKnown enum const.
+	// AuditsFederatedAuthRequestIssueReasonConfigNotInWellKnown enum const
 	AuditsFederatedAuthRequestIssueReasonConfigNotInWellKnown AuditsFederatedAuthRequestIssueReason = "ConfigNotInWellKnown"
 
-	// AuditsFederatedAuthRequestIssueReasonWellKnownTooBig enum const.
+	// AuditsFederatedAuthRequestIssueReasonWellKnownTooBig enum const
 	AuditsFederatedAuthRequestIssueReasonWellKnownTooBig AuditsFederatedAuthRequestIssueReason = "WellKnownTooBig"
 
-	// AuditsFederatedAuthRequestIssueReasonConfigHTTPNotFound enum const.
+	// AuditsFederatedAuthRequestIssueReasonConfigHTTPNotFound enum const
 	AuditsFederatedAuthRequestIssueReasonConfigHTTPNotFound AuditsFederatedAuthRequestIssueReason = "ConfigHttpNotFound"
 
-	// AuditsFederatedAuthRequestIssueReasonConfigNoResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonConfigNoResponse enum const
 	AuditsFederatedAuthRequestIssueReasonConfigNoResponse AuditsFederatedAuthRequestIssueReason = "ConfigNoResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonConfigInvalidResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonConfigBlockedByConnectionAllowlist enum const
+	AuditsFederatedAuthRequestIssueReasonConfigBlockedByConnectionAllowlist AuditsFederatedAuthRequestIssueReason = "ConfigBlockedByConnectionAllowlist"
+
+	// AuditsFederatedAuthRequestIssueReasonConfigInvalidResponse enum const
 	AuditsFederatedAuthRequestIssueReasonConfigInvalidResponse AuditsFederatedAuthRequestIssueReason = "ConfigInvalidResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonConfigInvalidContentType enum const.
+	// AuditsFederatedAuthRequestIssueReasonConfigInvalidContentType enum const
 	AuditsFederatedAuthRequestIssueReasonConfigInvalidContentType AuditsFederatedAuthRequestIssueReason = "ConfigInvalidContentType"
 
-	// AuditsFederatedAuthRequestIssueReasonClientMetadataHTTPNotFound enum const.
-	AuditsFederatedAuthRequestIssueReasonClientMetadataHTTPNotFound AuditsFederatedAuthRequestIssueReason = "ClientMetadataHttpNotFound"
-
-	// AuditsFederatedAuthRequestIssueReasonClientMetadataNoResponse enum const.
-	AuditsFederatedAuthRequestIssueReasonClientMetadataNoResponse AuditsFederatedAuthRequestIssueReason = "ClientMetadataNoResponse"
-
-	// AuditsFederatedAuthRequestIssueReasonClientMetadataInvalidResponse enum const.
-	AuditsFederatedAuthRequestIssueReasonClientMetadataInvalidResponse AuditsFederatedAuthRequestIssueReason = "ClientMetadataInvalidResponse"
-
-	// AuditsFederatedAuthRequestIssueReasonClientMetadataInvalidContentType enum const.
-	AuditsFederatedAuthRequestIssueReasonClientMetadataInvalidContentType AuditsFederatedAuthRequestIssueReason = "ClientMetadataInvalidContentType"
-
-	// AuditsFederatedAuthRequestIssueReasonIdpNotPotentiallyTrustworthy enum const.
+	// AuditsFederatedAuthRequestIssueReasonIdpNotPotentiallyTrustworthy enum const
 	AuditsFederatedAuthRequestIssueReasonIdpNotPotentiallyTrustworthy AuditsFederatedAuthRequestIssueReason = "IdpNotPotentiallyTrustworthy"
 
-	// AuditsFederatedAuthRequestIssueReasonDisabledInSettings enum const.
+	// AuditsFederatedAuthRequestIssueReasonDisabledInSettings enum const
 	AuditsFederatedAuthRequestIssueReasonDisabledInSettings AuditsFederatedAuthRequestIssueReason = "DisabledInSettings"
 
-	// AuditsFederatedAuthRequestIssueReasonDisabledInFlags enum const.
+	// AuditsFederatedAuthRequestIssueReasonDisabledInFlags enum const
 	AuditsFederatedAuthRequestIssueReasonDisabledInFlags AuditsFederatedAuthRequestIssueReason = "DisabledInFlags"
 
-	// AuditsFederatedAuthRequestIssueReasonErrorFetchingSignin enum const.
+	// AuditsFederatedAuthRequestIssueReasonErrorFetchingSignin enum const
 	AuditsFederatedAuthRequestIssueReasonErrorFetchingSignin AuditsFederatedAuthRequestIssueReason = "ErrorFetchingSignin"
 
-	// AuditsFederatedAuthRequestIssueReasonInvalidSigninResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonInvalidSigninResponse enum const
 	AuditsFederatedAuthRequestIssueReasonInvalidSigninResponse AuditsFederatedAuthRequestIssueReason = "InvalidSigninResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonAccountsHTTPNotFound enum const.
+	// AuditsFederatedAuthRequestIssueReasonAccountsHTTPNotFound enum const
 	AuditsFederatedAuthRequestIssueReasonAccountsHTTPNotFound AuditsFederatedAuthRequestIssueReason = "AccountsHttpNotFound"
 
-	// AuditsFederatedAuthRequestIssueReasonAccountsNoResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonAccountsNoResponse enum const
 	AuditsFederatedAuthRequestIssueReasonAccountsNoResponse AuditsFederatedAuthRequestIssueReason = "AccountsNoResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonAccountsInvalidResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonAccountsBlockedByConnectionAllowlist enum const
+	AuditsFederatedAuthRequestIssueReasonAccountsBlockedByConnectionAllowlist AuditsFederatedAuthRequestIssueReason = "AccountsBlockedByConnectionAllowlist"
+
+	// AuditsFederatedAuthRequestIssueReasonAccountsInvalidResponse enum const
 	AuditsFederatedAuthRequestIssueReasonAccountsInvalidResponse AuditsFederatedAuthRequestIssueReason = "AccountsInvalidResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonAccountsListEmpty enum const.
+	// AuditsFederatedAuthRequestIssueReasonAccountsListEmpty enum const
 	AuditsFederatedAuthRequestIssueReasonAccountsListEmpty AuditsFederatedAuthRequestIssueReason = "AccountsListEmpty"
 
-	// AuditsFederatedAuthRequestIssueReasonAccountsInvalidContentType enum const.
+	// AuditsFederatedAuthRequestIssueReasonAccountsInvalidContentType enum const
 	AuditsFederatedAuthRequestIssueReasonAccountsInvalidContentType AuditsFederatedAuthRequestIssueReason = "AccountsInvalidContentType"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenHTTPNotFound enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenHTTPNotFound enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenHTTPNotFound AuditsFederatedAuthRequestIssueReason = "IdTokenHttpNotFound"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenNoResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenNoResponse enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenNoResponse AuditsFederatedAuthRequestIssueReason = "IdTokenNoResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenBlockedByConnectionAllowlist enum const
+	AuditsFederatedAuthRequestIssueReasonIDTokenBlockedByConnectionAllowlist AuditsFederatedAuthRequestIssueReason = "IdTokenBlockedByConnectionAllowlist"
+
+	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidResponse enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenInvalidResponse AuditsFederatedAuthRequestIssueReason = "IdTokenInvalidResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenIdpErrorResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenIdpErrorResponse enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenIdpErrorResponse AuditsFederatedAuthRequestIssueReason = "IdTokenIdpErrorResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenCrossSiteIdpErrorResponse enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenCrossSiteIdpErrorResponse enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenCrossSiteIdpErrorResponse AuditsFederatedAuthRequestIssueReason = "IdTokenCrossSiteIdpErrorResponse"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidRequest enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidRequest enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenInvalidRequest AuditsFederatedAuthRequestIssueReason = "IdTokenInvalidRequest"
 
-	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidContentType enum const.
+	// AuditsFederatedAuthRequestIssueReasonIDTokenInvalidContentType enum const
 	AuditsFederatedAuthRequestIssueReasonIDTokenInvalidContentType AuditsFederatedAuthRequestIssueReason = "IdTokenInvalidContentType"
 
-	// AuditsFederatedAuthRequestIssueReasonErrorIDToken enum const.
+	// AuditsFederatedAuthRequestIssueReasonErrorIDToken enum const
 	AuditsFederatedAuthRequestIssueReasonErrorIDToken AuditsFederatedAuthRequestIssueReason = "ErrorIdToken"
 
-	// AuditsFederatedAuthRequestIssueReasonCanceled enum const.
+	// AuditsFederatedAuthRequestIssueReasonCanceled enum const
 	AuditsFederatedAuthRequestIssueReasonCanceled AuditsFederatedAuthRequestIssueReason = "Canceled"
 
-	// AuditsFederatedAuthRequestIssueReasonRpPageNotVisible enum const.
+	// AuditsFederatedAuthRequestIssueReasonRpPageNotVisible enum const
 	AuditsFederatedAuthRequestIssueReasonRpPageNotVisible AuditsFederatedAuthRequestIssueReason = "RpPageNotVisible"
 
-	// AuditsFederatedAuthRequestIssueReasonSilentMediationFailure enum const.
+	// AuditsFederatedAuthRequestIssueReasonSilentMediationFailure enum const
 	AuditsFederatedAuthRequestIssueReasonSilentMediationFailure AuditsFederatedAuthRequestIssueReason = "SilentMediationFailure"
 
-	// AuditsFederatedAuthRequestIssueReasonThirdPartyCookiesBlocked enum const.
-	AuditsFederatedAuthRequestIssueReasonThirdPartyCookiesBlocked AuditsFederatedAuthRequestIssueReason = "ThirdPartyCookiesBlocked"
-
-	// AuditsFederatedAuthRequestIssueReasonNotSignedInWithIdp enum const.
+	// AuditsFederatedAuthRequestIssueReasonNotSignedInWithIdp enum const
 	AuditsFederatedAuthRequestIssueReasonNotSignedInWithIdp AuditsFederatedAuthRequestIssueReason = "NotSignedInWithIdp"
 
-	// AuditsFederatedAuthRequestIssueReasonMissingTransientUserActivation enum const.
+	// AuditsFederatedAuthRequestIssueReasonMissingTransientUserActivation enum const
 	AuditsFederatedAuthRequestIssueReasonMissingTransientUserActivation AuditsFederatedAuthRequestIssueReason = "MissingTransientUserActivation"
 
-	// AuditsFederatedAuthRequestIssueReasonReplacedByButtonMode enum const.
-	AuditsFederatedAuthRequestIssueReasonReplacedByButtonMode AuditsFederatedAuthRequestIssueReason = "ReplacedByButtonMode"
+	// AuditsFederatedAuthRequestIssueReasonReplacedByActiveMode enum const
+	AuditsFederatedAuthRequestIssueReasonReplacedByActiveMode AuditsFederatedAuthRequestIssueReason = "ReplacedByActiveMode"
 
-	// AuditsFederatedAuthRequestIssueReasonInvalidFieldsSpecified enum const.
-	AuditsFederatedAuthRequestIssueReasonInvalidFieldsSpecified AuditsFederatedAuthRequestIssueReason = "InvalidFieldsSpecified"
-
-	// AuditsFederatedAuthRequestIssueReasonRelyingPartyOriginIsOpaque enum const.
+	// AuditsFederatedAuthRequestIssueReasonRelyingPartyOriginIsOpaque enum const
 	AuditsFederatedAuthRequestIssueReasonRelyingPartyOriginIsOpaque AuditsFederatedAuthRequestIssueReason = "RelyingPartyOriginIsOpaque"
 
-	// AuditsFederatedAuthRequestIssueReasonTypeNotMatching enum const.
+	// AuditsFederatedAuthRequestIssueReasonTypeNotMatching enum const
 	AuditsFederatedAuthRequestIssueReasonTypeNotMatching AuditsFederatedAuthRequestIssueReason = "TypeNotMatching"
+
+	// AuditsFederatedAuthRequestIssueReasonUIDismissedNoEmbargo enum const
+	AuditsFederatedAuthRequestIssueReasonUIDismissedNoEmbargo AuditsFederatedAuthRequestIssueReason = "UiDismissedNoEmbargo"
+
+	// AuditsFederatedAuthRequestIssueReasonCorsError enum const
+	AuditsFederatedAuthRequestIssueReasonCorsError AuditsFederatedAuthRequestIssueReason = "CorsError"
+
+	// AuditsFederatedAuthRequestIssueReasonSuppressedBySegmentationPlatform enum const
+	AuditsFederatedAuthRequestIssueReasonSuppressedBySegmentationPlatform AuditsFederatedAuthRequestIssueReason = "SuppressedBySegmentationPlatform"
+
+	// AuditsFederatedAuthRequestIssueReasonPopupBlockedByConnectionAllowlist enum const
+	AuditsFederatedAuthRequestIssueReasonPopupBlockedByConnectionAllowlist AuditsFederatedAuthRequestIssueReason = "PopupBlockedByConnectionAllowlist"
 )
 
 // AuditsFederatedAuthUserInfoRequestIssueDetails ...
@@ -967,32 +1118,219 @@ type AuditsFederatedAuthUserInfoRequestIssueDetails struct {
 type AuditsFederatedAuthUserInfoRequestIssueReason string
 
 const (
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNotSameOrigin enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNotSameOrigin enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNotSameOrigin AuditsFederatedAuthUserInfoRequestIssueReason = "NotSameOrigin"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNotIframe enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNotIframe enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNotIframe AuditsFederatedAuthUserInfoRequestIssueReason = "NotIframe"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNotPotentiallyTrustworthy enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNotPotentiallyTrustworthy enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNotPotentiallyTrustworthy AuditsFederatedAuthUserInfoRequestIssueReason = "NotPotentiallyTrustworthy"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNoAPIPermission enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNoAPIPermission enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNoAPIPermission AuditsFederatedAuthUserInfoRequestIssueReason = "NoApiPermission"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNotSignedInWithIdp enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNotSignedInWithIdp enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNotSignedInWithIdp AuditsFederatedAuthUserInfoRequestIssueReason = "NotSignedInWithIdp"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNoAccountSharingPermission enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNoAccountSharingPermission enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNoAccountSharingPermission AuditsFederatedAuthUserInfoRequestIssueReason = "NoAccountSharingPermission"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonInvalidConfigOrWellKnown enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonInvalidConfigOrWellKnown enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonInvalidConfigOrWellKnown AuditsFederatedAuthUserInfoRequestIssueReason = "InvalidConfigOrWellKnown"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonInvalidAccountsResponse enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonInvalidAccountsResponse enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonInvalidAccountsResponse AuditsFederatedAuthUserInfoRequestIssueReason = "InvalidAccountsResponse"
 
-	// AuditsFederatedAuthUserInfoRequestIssueReasonNoReturningUserFromFetchedAccounts enum const.
+	// AuditsFederatedAuthUserInfoRequestIssueReasonNoReturningUserFromFetchedAccounts enum const
 	AuditsFederatedAuthUserInfoRequestIssueReasonNoReturningUserFromFetchedAccounts AuditsFederatedAuthUserInfoRequestIssueReason = "NoReturningUserFromFetchedAccounts"
+)
+
+// AuditsEmailVerificationRequestIssueDetails ...
+type AuditsEmailVerificationRequestIssueDetails struct {
+	// EmailVerificationRequestIssueReason ...
+	EmailVerificationRequestIssueReason AuditsEmailVerificationRequestIssueReason `json:"emailVerificationRequestIssueReason"`
+}
+
+// AuditsEmailVerificationRequestIssueReason Represents the failure reason when an email verification request fails.
+// Should be updated alongside EmailVerificationRequestResult in
+// third_party/blink/public/mojom/devtools/inspector_issue.mojom.
+type AuditsEmailVerificationRequestIssueReason string
+
+const (
+	// AuditsEmailVerificationRequestIssueReasonInvalidEmail enum const
+	AuditsEmailVerificationRequestIssueReasonInvalidEmail AuditsEmailVerificationRequestIssueReason = "InvalidEmail"
+
+	// AuditsEmailVerificationRequestIssueReasonDNSFetchFailed enum const
+	AuditsEmailVerificationRequestIssueReasonDNSFetchFailed AuditsEmailVerificationRequestIssueReason = "DnsFetchFailed"
+
+	// AuditsEmailVerificationRequestIssueReasonDNSInvalidRecord enum const
+	AuditsEmailVerificationRequestIssueReasonDNSInvalidRecord AuditsEmailVerificationRequestIssueReason = "DnsInvalidRecord"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownHTTPNotFound enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownHTTPNotFound AuditsEmailVerificationRequestIssueReason = "WellKnownHttpNotFound"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownNoResponse enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownNoResponse AuditsEmailVerificationRequestIssueReason = "WellKnownNoResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownInvalidResponse enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownInvalidResponse AuditsEmailVerificationRequestIssueReason = "WellKnownInvalidResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownListEmpty enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownListEmpty AuditsEmailVerificationRequestIssueReason = "WellKnownListEmpty"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownInvalidContentType enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownInvalidContentType AuditsEmailVerificationRequestIssueReason = "WellKnownInvalidContentType"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownMissingIssuanceEndpoint enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownMissingIssuanceEndpoint AuditsEmailVerificationRequestIssueReason = "WellKnownMissingIssuanceEndpoint"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownIssuanceEndpointCrossOrigin enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownIssuanceEndpointCrossOrigin AuditsEmailVerificationRequestIssueReason = "WellKnownIssuanceEndpointCrossOrigin"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownUnsupportedSigningAlgorithm enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownUnsupportedSigningAlgorithm AuditsEmailVerificationRequestIssueReason = "WellKnownUnsupportedSigningAlgorithm"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenHTTPNotFound enum const
+	AuditsEmailVerificationRequestIssueReasonTokenHTTPNotFound AuditsEmailVerificationRequestIssueReason = "TokenHttpNotFound"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenNoResponse enum const
+	AuditsEmailVerificationRequestIssueReasonTokenNoResponse AuditsEmailVerificationRequestIssueReason = "TokenNoResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenInvalidResponse enum const
+	AuditsEmailVerificationRequestIssueReasonTokenInvalidResponse AuditsEmailVerificationRequestIssueReason = "TokenInvalidResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenInvalidContentType enum const
+	AuditsEmailVerificationRequestIssueReasonTokenInvalidContentType AuditsEmailVerificationRequestIssueReason = "TokenInvalidContentType"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenMalformedSdJwt enum const
+	AuditsEmailVerificationRequestIssueReasonTokenMalformedSdJwt AuditsEmailVerificationRequestIssueReason = "TokenMalformedSdJwt"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenInvalidSdJwt enum const
+	AuditsEmailVerificationRequestIssueReasonTokenInvalidSdJwt AuditsEmailVerificationRequestIssueReason = "TokenInvalidSdJwt"
+
+	// AuditsEmailVerificationRequestIssueReasonKeyBindingSigningFailed enum const
+	AuditsEmailVerificationRequestIssueReasonKeyBindingSigningFailed AuditsEmailVerificationRequestIssueReason = "KeyBindingSigningFailed"
+
+	// AuditsEmailVerificationRequestIssueReasonRpOriginIsOpaque enum const
+	AuditsEmailVerificationRequestIssueReasonRpOriginIsOpaque AuditsEmailVerificationRequestIssueReason = "RpOriginIsOpaque"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownMissingAccountsEndpoint enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownMissingAccountsEndpoint AuditsEmailVerificationRequestIssueReason = "WellKnownMissingAccountsEndpoint"
+
+	// AuditsEmailVerificationRequestIssueReasonUserLoggedOut enum const
+	AuditsEmailVerificationRequestIssueReasonUserLoggedOut AuditsEmailVerificationRequestIssueReason = "UserLoggedOut"
+
+	// AuditsEmailVerificationRequestIssueReasonWellKnownAccountsEndpointCrossOrigin enum const
+	AuditsEmailVerificationRequestIssueReasonWellKnownAccountsEndpointCrossOrigin AuditsEmailVerificationRequestIssueReason = "WellKnownAccountsEndpointCrossOrigin"
+
+	// AuditsEmailVerificationRequestIssueReasonAccountsHTTPNotFound enum const
+	AuditsEmailVerificationRequestIssueReasonAccountsHTTPNotFound AuditsEmailVerificationRequestIssueReason = "AccountsHttpNotFound"
+
+	// AuditsEmailVerificationRequestIssueReasonAccountsNoResponse enum const
+	AuditsEmailVerificationRequestIssueReasonAccountsNoResponse AuditsEmailVerificationRequestIssueReason = "AccountsNoResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonAccountsInvalidResponse enum const
+	AuditsEmailVerificationRequestIssueReasonAccountsInvalidResponse AuditsEmailVerificationRequestIssueReason = "AccountsInvalidResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonAccountsInvalidContentType enum const
+	AuditsEmailVerificationRequestIssueReasonAccountsInvalidContentType AuditsEmailVerificationRequestIssueReason = "AccountsInvalidContentType"
+
+	// AuditsEmailVerificationRequestIssueReasonAccountsEmptyList enum const
+	AuditsEmailVerificationRequestIssueReasonAccountsEmptyList AuditsEmailVerificationRequestIssueReason = "AccountsEmptyList"
+
+	// AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownHTTPNotFound enum const
+	AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownHTTPNotFound AuditsEmailVerificationRequestIssueReason = "EmailVerificationWellKnownHttpNotFound"
+
+	// AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownNoResponse enum const
+	AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownNoResponse AuditsEmailVerificationRequestIssueReason = "EmailVerificationWellKnownNoResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownInvalidResponse enum const
+	AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownInvalidResponse AuditsEmailVerificationRequestIssueReason = "EmailVerificationWellKnownInvalidResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownInvalidContentType enum const
+	AuditsEmailVerificationRequestIssueReasonEmailVerificationWellKnownInvalidContentType AuditsEmailVerificationRequestIssueReason = "EmailVerificationWellKnownInvalidContentType"
+
+	// AuditsEmailVerificationRequestIssueReasonJwksHTTPNotFound enum const
+	AuditsEmailVerificationRequestIssueReasonJwksHTTPNotFound AuditsEmailVerificationRequestIssueReason = "JwksHttpNotFound"
+
+	// AuditsEmailVerificationRequestIssueReasonJwksInvalidResponse enum const
+	AuditsEmailVerificationRequestIssueReasonJwksInvalidResponse AuditsEmailVerificationRequestIssueReason = "JwksInvalidResponse"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtUnsupportedHeaderAlg enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtUnsupportedHeaderAlg AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtUnsupportedHeaderAlg"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidTyp enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidTyp AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidTyp"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingIss enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingIss AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtMissingIss"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingIat enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingIat AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtMissingIat"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingCnf enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingCnf AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtMissingCnf"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingEmail enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtMissingEmail AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtMissingEmail"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidIssuedAt enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidIssuedAt AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidIssuedAt"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidIssuer enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidIssuer AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidIssuer"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtJwksMissingKeys enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtJwksMissingKeys AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtJwksMissingKeys"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtSignatureFailed enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtSignatureFailed AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtSignatureFailed"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidEmailVerified enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidEmailVerified AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidEmailVerified"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidEmail enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidEmail AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidEmail"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidHolderKey enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationSdJwtInvalidHolderKey AuditsEmailVerificationRequestIssueReason = "TokenVerificationSdJwtInvalidHolderKey"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidTyp enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidTyp AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbInvalidTyp"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingAud enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingAud AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbMissingAud"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingNonce enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingNonce AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbMissingNonce"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingIat enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingIat AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbMissingIat"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingSdHash enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingSdHash AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbMissingSdHash"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidIssuedAt enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidIssuedAt AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbInvalidIssuedAt"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidAudience enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidAudience AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbInvalidAudience"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidNonce enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidNonce AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbInvalidNonce"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidSdHash enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbInvalidSdHash AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbInvalidSdHash"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingCnf enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbMissingCnf AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbMissingCnf"
+
+	// AuditsEmailVerificationRequestIssueReasonTokenVerificationKbSignatureFailed enum const
+	AuditsEmailVerificationRequestIssueReasonTokenVerificationKbSignatureFailed AuditsEmailVerificationRequestIssueReason = "TokenVerificationKbSignatureFailed"
+
+	// AuditsEmailVerificationRequestIssueReasonCrossOriginIframeNotSupported enum const
+	AuditsEmailVerificationRequestIssueReasonCrossOriginIframeNotSupported AuditsEmailVerificationRequestIssueReason = "CrossOriginIframeNotSupported"
 )
 
 // AuditsClientHintIssueDetails This issue tracks client hints related issues. It's used to deprecate old
@@ -1017,14 +1355,69 @@ type AuditsFailedRequestInfo struct {
 	RequestID NetworkRequestID `json:"requestId,omitempty"`
 }
 
+// AuditsPartitioningBlobURLInfo ...
+type AuditsPartitioningBlobURLInfo string
+
+const (
+	// AuditsPartitioningBlobURLInfoBlockedCrossPartitionFetching enum const
+	AuditsPartitioningBlobURLInfoBlockedCrossPartitionFetching AuditsPartitioningBlobURLInfo = "BlockedCrossPartitionFetching"
+
+	// AuditsPartitioningBlobURLInfoEnforceNoopenerForNavigation enum const
+	AuditsPartitioningBlobURLInfoEnforceNoopenerForNavigation AuditsPartitioningBlobURLInfo = "EnforceNoopenerForNavigation"
+)
+
+// AuditsPartitioningBlobURLIssueDetails ...
+type AuditsPartitioningBlobURLIssueDetails struct {
+	// URL The BlobURL that failed to load.
+	URL string `json:"url"`
+
+	// PartitioningBlobURLInfo Additional information about the Partitioning Blob URL issue.
+	PartitioningBlobURLInfo AuditsPartitioningBlobURLInfo `json:"partitioningBlobURLInfo"`
+}
+
+// AuditsElementAccessibilityIssueReason ...
+type AuditsElementAccessibilityIssueReason string
+
+const (
+	// AuditsElementAccessibilityIssueReasonDisallowedSelectChild enum const
+	AuditsElementAccessibilityIssueReasonDisallowedSelectChild AuditsElementAccessibilityIssueReason = "DisallowedSelectChild"
+
+	// AuditsElementAccessibilityIssueReasonDisallowedOptGroupChild enum const
+	AuditsElementAccessibilityIssueReasonDisallowedOptGroupChild AuditsElementAccessibilityIssueReason = "DisallowedOptGroupChild"
+
+	// AuditsElementAccessibilityIssueReasonNonPhrasingContentOptionChild enum const
+	AuditsElementAccessibilityIssueReasonNonPhrasingContentOptionChild AuditsElementAccessibilityIssueReason = "NonPhrasingContentOptionChild"
+
+	// AuditsElementAccessibilityIssueReasonInteractiveContentOptionChild enum const
+	AuditsElementAccessibilityIssueReasonInteractiveContentOptionChild AuditsElementAccessibilityIssueReason = "InteractiveContentOptionChild"
+
+	// AuditsElementAccessibilityIssueReasonInteractiveContentLegendChild enum const
+	AuditsElementAccessibilityIssueReasonInteractiveContentLegendChild AuditsElementAccessibilityIssueReason = "InteractiveContentLegendChild"
+
+	// AuditsElementAccessibilityIssueReasonInteractiveContentSummaryDescendant enum const
+	AuditsElementAccessibilityIssueReasonInteractiveContentSummaryDescendant AuditsElementAccessibilityIssueReason = "InteractiveContentSummaryDescendant"
+)
+
+// AuditsElementAccessibilityIssueDetails This issue warns about errors in the select or summary element content model.
+type AuditsElementAccessibilityIssueDetails struct {
+	// NodeID ...
+	NodeID DOMBackendNodeID `json:"nodeId"`
+
+	// ElementAccessibilityIssueReason ...
+	ElementAccessibilityIssueReason AuditsElementAccessibilityIssueReason `json:"elementAccessibilityIssueReason"`
+
+	// HasDisallowedAttributes ...
+	HasDisallowedAttributes bool `json:"hasDisallowedAttributes"`
+}
+
 // AuditsStyleSheetLoadingIssueReason ...
 type AuditsStyleSheetLoadingIssueReason string
 
 const (
-	// AuditsStyleSheetLoadingIssueReasonLateImportRule enum const.
+	// AuditsStyleSheetLoadingIssueReasonLateImportRule enum const
 	AuditsStyleSheetLoadingIssueReasonLateImportRule AuditsStyleSheetLoadingIssueReason = "LateImportRule"
 
-	// AuditsStyleSheetLoadingIssueReasonRequestFailed enum const.
+	// AuditsStyleSheetLoadingIssueReasonRequestFailed enum const
 	AuditsStyleSheetLoadingIssueReasonRequestFailed AuditsStyleSheetLoadingIssueReason = "RequestFailed"
 )
 
@@ -1044,16 +1437,16 @@ type AuditsStylesheetLoadingIssueDetails struct {
 type AuditsPropertyRuleIssueReason string
 
 const (
-	// AuditsPropertyRuleIssueReasonInvalidSyntax enum const.
+	// AuditsPropertyRuleIssueReasonInvalidSyntax enum const
 	AuditsPropertyRuleIssueReasonInvalidSyntax AuditsPropertyRuleIssueReason = "InvalidSyntax"
 
-	// AuditsPropertyRuleIssueReasonInvalidInitialValue enum const.
+	// AuditsPropertyRuleIssueReasonInvalidInitialValue enum const
 	AuditsPropertyRuleIssueReasonInvalidInitialValue AuditsPropertyRuleIssueReason = "InvalidInitialValue"
 
-	// AuditsPropertyRuleIssueReasonInvalidInherits enum const.
+	// AuditsPropertyRuleIssueReasonInvalidInherits enum const
 	AuditsPropertyRuleIssueReasonInvalidInherits AuditsPropertyRuleIssueReason = "InvalidInherits"
 
-	// AuditsPropertyRuleIssueReasonInvalidName enum const.
+	// AuditsPropertyRuleIssueReasonInvalidName enum const
 	AuditsPropertyRuleIssueReasonInvalidName AuditsPropertyRuleIssueReason = "InvalidName"
 )
 
@@ -1070,74 +1463,288 @@ type AuditsPropertyRuleIssueDetails struct {
 	PropertyValue string `json:"propertyValue,omitempty"`
 }
 
+// AuditsUserReidentificationIssueType ...
+type AuditsUserReidentificationIssueType string
+
+const (
+	// AuditsUserReidentificationIssueTypeBlockedFrameNavigation enum const
+	AuditsUserReidentificationIssueTypeBlockedFrameNavigation AuditsUserReidentificationIssueType = "BlockedFrameNavigation"
+
+	// AuditsUserReidentificationIssueTypeBlockedSubresource enum const
+	AuditsUserReidentificationIssueTypeBlockedSubresource AuditsUserReidentificationIssueType = "BlockedSubresource"
+
+	// AuditsUserReidentificationIssueTypeNoisedCanvasReadback enum const
+	AuditsUserReidentificationIssueTypeNoisedCanvasReadback AuditsUserReidentificationIssueType = "NoisedCanvasReadback"
+)
+
+// AuditsUserReidentificationIssueDetails This issue warns about uses of APIs that may be considered misuse to
+// re-identify users.
+type AuditsUserReidentificationIssueDetails struct {
+	// Type ...
+	Type AuditsUserReidentificationIssueType `json:"type"`
+
+	// Request (optional) Applies to BlockedFrameNavigation and BlockedSubresource issue types.
+	Request *AuditsAffectedRequest `json:"request,omitempty"`
+
+	// SourceCodeLocation (optional) Applies to NoisedCanvasReadback issue type.
+	SourceCodeLocation *AuditsSourceCodeLocation `json:"sourceCodeLocation,omitempty"`
+}
+
+// AuditsPermissionElementIssueType ...
+type AuditsPermissionElementIssueType string
+
+const (
+	// AuditsPermissionElementIssueTypeInvalidType enum const
+	AuditsPermissionElementIssueTypeInvalidType AuditsPermissionElementIssueType = "InvalidType"
+
+	// AuditsPermissionElementIssueTypeFencedFrameDisallowed enum const
+	AuditsPermissionElementIssueTypeFencedFrameDisallowed AuditsPermissionElementIssueType = "FencedFrameDisallowed"
+
+	// AuditsPermissionElementIssueTypeCspFrameAncestorsMissing enum const
+	AuditsPermissionElementIssueTypeCspFrameAncestorsMissing AuditsPermissionElementIssueType = "CspFrameAncestorsMissing"
+
+	// AuditsPermissionElementIssueTypePermissionsPolicyBlocked enum const
+	AuditsPermissionElementIssueTypePermissionsPolicyBlocked AuditsPermissionElementIssueType = "PermissionsPolicyBlocked"
+
+	// AuditsPermissionElementIssueTypePaddingRightUnsupported enum const
+	AuditsPermissionElementIssueTypePaddingRightUnsupported AuditsPermissionElementIssueType = "PaddingRightUnsupported"
+
+	// AuditsPermissionElementIssueTypePaddingBottomUnsupported enum const
+	AuditsPermissionElementIssueTypePaddingBottomUnsupported AuditsPermissionElementIssueType = "PaddingBottomUnsupported"
+
+	// AuditsPermissionElementIssueTypeInsetBoxShadowUnsupported enum const
+	AuditsPermissionElementIssueTypeInsetBoxShadowUnsupported AuditsPermissionElementIssueType = "InsetBoxShadowUnsupported"
+
+	// AuditsPermissionElementIssueTypeRequestInProgress enum const
+	AuditsPermissionElementIssueTypeRequestInProgress AuditsPermissionElementIssueType = "RequestInProgress"
+
+	// AuditsPermissionElementIssueTypeUntrustedEvent enum const
+	AuditsPermissionElementIssueTypeUntrustedEvent AuditsPermissionElementIssueType = "UntrustedEvent"
+
+	// AuditsPermissionElementIssueTypeRegistrationFailed enum const
+	AuditsPermissionElementIssueTypeRegistrationFailed AuditsPermissionElementIssueType = "RegistrationFailed"
+
+	// AuditsPermissionElementIssueTypeTypeNotSupported enum const
+	AuditsPermissionElementIssueTypeTypeNotSupported AuditsPermissionElementIssueType = "TypeNotSupported"
+
+	// AuditsPermissionElementIssueTypeInvalidTypeActivation enum const
+	AuditsPermissionElementIssueTypeInvalidTypeActivation AuditsPermissionElementIssueType = "InvalidTypeActivation"
+
+	// AuditsPermissionElementIssueTypeSecurityChecksFailed enum const
+	AuditsPermissionElementIssueTypeSecurityChecksFailed AuditsPermissionElementIssueType = "SecurityChecksFailed"
+
+	// AuditsPermissionElementIssueTypeActivationDisabled enum const
+	AuditsPermissionElementIssueTypeActivationDisabled AuditsPermissionElementIssueType = "ActivationDisabled"
+
+	// AuditsPermissionElementIssueTypeGeolocationDeprecated enum const
+	AuditsPermissionElementIssueTypeGeolocationDeprecated AuditsPermissionElementIssueType = "GeolocationDeprecated"
+
+	// AuditsPermissionElementIssueTypeInvalidDisplayStyle enum const
+	AuditsPermissionElementIssueTypeInvalidDisplayStyle AuditsPermissionElementIssueType = "InvalidDisplayStyle"
+
+	// AuditsPermissionElementIssueTypeNonOpaqueColor enum const
+	AuditsPermissionElementIssueTypeNonOpaqueColor AuditsPermissionElementIssueType = "NonOpaqueColor"
+
+	// AuditsPermissionElementIssueTypeLowContrast enum const
+	AuditsPermissionElementIssueTypeLowContrast AuditsPermissionElementIssueType = "LowContrast"
+
+	// AuditsPermissionElementIssueTypeFontSizeTooSmall enum const
+	AuditsPermissionElementIssueTypeFontSizeTooSmall AuditsPermissionElementIssueType = "FontSizeTooSmall"
+
+	// AuditsPermissionElementIssueTypeFontSizeTooLarge enum const
+	AuditsPermissionElementIssueTypeFontSizeTooLarge AuditsPermissionElementIssueType = "FontSizeTooLarge"
+
+	// AuditsPermissionElementIssueTypeInvalidSizeValue enum const
+	AuditsPermissionElementIssueTypeInvalidSizeValue AuditsPermissionElementIssueType = "InvalidSizeValue"
+
+	// AuditsPermissionElementIssueTypeNonSecureContext enum const
+	AuditsPermissionElementIssueTypeNonSecureContext AuditsPermissionElementIssueType = "NonSecureContext"
+
+	// AuditsPermissionElementIssueTypeMissingTransientUserActivation enum const
+	AuditsPermissionElementIssueTypeMissingTransientUserActivation AuditsPermissionElementIssueType = "MissingTransientUserActivation"
+)
+
+// AuditsPermissionElementIssueDetails This issue warns about improper usage of the <permission> element.
+type AuditsPermissionElementIssueDetails struct {
+	// IssueType ...
+	IssueType AuditsPermissionElementIssueType `json:"issueType"`
+
+	// Type (optional) The value of the type attribute.
+	Type string `json:"type,omitempty"`
+
+	// NodeID (optional) The node ID of the <permission> element.
+	NodeID DOMBackendNodeID `json:"nodeId,omitempty"`
+
+	// IsWarning (optional) True if the issue is a warning, false if it is an error.
+	IsWarning bool `json:"isWarning,omitempty"`
+
+	// PermissionName (optional) Fields for message construction:
+	// Used for messages that reference a specific permission name
+	PermissionName string `json:"permissionName,omitempty"`
+
+	// OccluderNodeInfo (optional) Used for messages about occlusion
+	OccluderNodeInfo string `json:"occluderNodeInfo,omitempty"`
+
+	// OccluderParentNodeInfo (optional) Used for messages about occluder's parent
+	OccluderParentNodeInfo string `json:"occluderParentNodeInfo,omitempty"`
+
+	// DisableReason (optional) Used for messages about activation disabled reason
+	DisableReason string `json:"disableReason,omitempty"`
+}
+
+// AuditsWebInstallIssueReason ...
+type AuditsWebInstallIssueReason string
+
+const (
+	// AuditsWebInstallIssueReasonManifestParsingOrNetworkError enum const
+	AuditsWebInstallIssueReasonManifestParsingOrNetworkError AuditsWebInstallIssueReason = "ManifestParsingOrNetworkError"
+
+	// AuditsWebInstallIssueReasonStartURLInvalid enum const
+	AuditsWebInstallIssueReasonStartURLInvalid AuditsWebInstallIssueReason = "StartUrlInvalid"
+
+	// AuditsWebInstallIssueReasonManifestMissingNameOrShortName enum const
+	AuditsWebInstallIssueReasonManifestMissingNameOrShortName AuditsWebInstallIssueReason = "ManifestMissingNameOrShortName"
+
+	// AuditsWebInstallIssueReasonManifestMissingID enum const
+	AuditsWebInstallIssueReasonManifestMissingID AuditsWebInstallIssueReason = "ManifestMissingId"
+
+	// AuditsWebInstallIssueReasonNoManifest enum const
+	AuditsWebInstallIssueReasonNoManifest AuditsWebInstallIssueReason = "NoManifest"
+)
+
+// AuditsWebInstallIssueDetails This issue reports a failure involving a web app manifest used by a Web
+// Install operation.
+type AuditsWebInstallIssueDetails struct {
+	// ManifestURL (optional) ...
+	ManifestURL string `json:"manifestUrl,omitempty"`
+
+	// Reason ...
+	Reason AuditsWebInstallIssueReason `json:"reason"`
+}
+
+// AuditsSelectivePermissionsInterventionIssueDetails The issue warns about blocked calls to privacy sensitive APIs via the
+// Selective Permissions Intervention.
+type AuditsSelectivePermissionsInterventionIssueDetails struct {
+	// APIName Which API was intervened on.
+	APIName string `json:"apiName"`
+
+	// AdAncestry Why the ad script using the API is considered an ad.
+	AdAncestry *NetworkAdAncestry `json:"adAncestry"`
+
+	// StackTrace (optional) The stack trace at the time of the intervention.
+	StackTrace *RuntimeStackTrace `json:"stackTrace,omitempty"`
+}
+
+// AuditsLazyLoadImageIssueDetails Details for issues about lazy-loaded images without explicit dimensions.
+type AuditsLazyLoadImageIssueDetails struct {
+	// NodeID DOM node of the problematic HTMLImageElement.
+	NodeID DOMBackendNodeID `json:"nodeId"`
+
+	// URL or src attribute of the image.
+	URL string `json:"url"`
+
+	// FrameID Frame containing the image.
+	FrameID PageFrameID `json:"frameId"`
+}
+
 // AuditsInspectorIssueCode A unique identifier for the type of issue. Each type may use one of the
 // optional fields in InspectorIssueDetails to convey more specific
 // information about the kind of issue.
 type AuditsInspectorIssueCode string
 
 const (
-	// AuditsInspectorIssueCodeCookieIssue enum const.
+	// AuditsInspectorIssueCodeCookieIssue enum const
 	AuditsInspectorIssueCodeCookieIssue AuditsInspectorIssueCode = "CookieIssue"
 
-	// AuditsInspectorIssueCodeMixedContentIssue enum const.
+	// AuditsInspectorIssueCodeMixedContentIssue enum const
 	AuditsInspectorIssueCodeMixedContentIssue AuditsInspectorIssueCode = "MixedContentIssue"
 
-	// AuditsInspectorIssueCodeBlockedByResponseIssue enum const.
+	// AuditsInspectorIssueCodeBlockedByResponseIssue enum const
 	AuditsInspectorIssueCodeBlockedByResponseIssue AuditsInspectorIssueCode = "BlockedByResponseIssue"
 
-	// AuditsInspectorIssueCodeHeavyAdIssue enum const.
+	// AuditsInspectorIssueCodeHeavyAdIssue enum const
 	AuditsInspectorIssueCodeHeavyAdIssue AuditsInspectorIssueCode = "HeavyAdIssue"
 
-	// AuditsInspectorIssueCodeContentSecurityPolicyIssue enum const.
+	// AuditsInspectorIssueCodeContentSecurityPolicyIssue enum const
 	AuditsInspectorIssueCodeContentSecurityPolicyIssue AuditsInspectorIssueCode = "ContentSecurityPolicyIssue"
 
-	// AuditsInspectorIssueCodeSharedArrayBufferIssue enum const.
+	// AuditsInspectorIssueCodeSharedArrayBufferIssue enum const
 	AuditsInspectorIssueCodeSharedArrayBufferIssue AuditsInspectorIssueCode = "SharedArrayBufferIssue"
 
-	// AuditsInspectorIssueCodeLowTextContrastIssue enum const.
-	AuditsInspectorIssueCodeLowTextContrastIssue AuditsInspectorIssueCode = "LowTextContrastIssue"
-
-	// AuditsInspectorIssueCodeCorsIssue enum const.
+	// AuditsInspectorIssueCodeCorsIssue enum const
 	AuditsInspectorIssueCodeCorsIssue AuditsInspectorIssueCode = "CorsIssue"
 
-	// AuditsInspectorIssueCodeAttributionReportingIssue enum const.
-	AuditsInspectorIssueCodeAttributionReportingIssue AuditsInspectorIssueCode = "AttributionReportingIssue"
-
-	// AuditsInspectorIssueCodeQuirksModeIssue enum const.
+	// AuditsInspectorIssueCodeQuirksModeIssue enum const
 	AuditsInspectorIssueCodeQuirksModeIssue AuditsInspectorIssueCode = "QuirksModeIssue"
 
-	// AuditsInspectorIssueCodeNavigatorUserAgentIssue enum const.
+	// AuditsInspectorIssueCodePartitioningBlobURLIssue enum const
+	AuditsInspectorIssueCodePartitioningBlobURLIssue AuditsInspectorIssueCode = "PartitioningBlobURLIssue"
+
+	// AuditsInspectorIssueCodeNavigatorUserAgentIssue enum const
 	AuditsInspectorIssueCodeNavigatorUserAgentIssue AuditsInspectorIssueCode = "NavigatorUserAgentIssue"
 
-	// AuditsInspectorIssueCodeGenericIssue enum const.
+	// AuditsInspectorIssueCodeGenericIssue enum const
 	AuditsInspectorIssueCodeGenericIssue AuditsInspectorIssueCode = "GenericIssue"
 
-	// AuditsInspectorIssueCodeDeprecationIssue enum const.
+	// AuditsInspectorIssueCodeDeprecationIssue enum const
 	AuditsInspectorIssueCodeDeprecationIssue AuditsInspectorIssueCode = "DeprecationIssue"
 
-	// AuditsInspectorIssueCodeClientHintIssue enum const.
+	// AuditsInspectorIssueCodeClientHintIssue enum const
 	AuditsInspectorIssueCodeClientHintIssue AuditsInspectorIssueCode = "ClientHintIssue"
 
-	// AuditsInspectorIssueCodeFederatedAuthRequestIssue enum const.
+	// AuditsInspectorIssueCodeFederatedAuthRequestIssue enum const
 	AuditsInspectorIssueCodeFederatedAuthRequestIssue AuditsInspectorIssueCode = "FederatedAuthRequestIssue"
 
-	// AuditsInspectorIssueCodeBounceTrackingIssue enum const.
+	// AuditsInspectorIssueCodeBounceTrackingIssue enum const
 	AuditsInspectorIssueCodeBounceTrackingIssue AuditsInspectorIssueCode = "BounceTrackingIssue"
 
-	// AuditsInspectorIssueCodeCookieDeprecationMetadataIssue enum const.
+	// AuditsInspectorIssueCodeCookieDeprecationMetadataIssue enum const
 	AuditsInspectorIssueCodeCookieDeprecationMetadataIssue AuditsInspectorIssueCode = "CookieDeprecationMetadataIssue"
 
-	// AuditsInspectorIssueCodeStylesheetLoadingIssue enum const.
+	// AuditsInspectorIssueCodeStylesheetLoadingIssue enum const
 	AuditsInspectorIssueCodeStylesheetLoadingIssue AuditsInspectorIssueCode = "StylesheetLoadingIssue"
 
-	// AuditsInspectorIssueCodeFederatedAuthUserInfoRequestIssue enum const.
+	// AuditsInspectorIssueCodeFederatedAuthUserInfoRequestIssue enum const
 	AuditsInspectorIssueCodeFederatedAuthUserInfoRequestIssue AuditsInspectorIssueCode = "FederatedAuthUserInfoRequestIssue"
 
-	// AuditsInspectorIssueCodePropertyRuleIssue enum const.
+	// AuditsInspectorIssueCodePropertyRuleIssue enum const
 	AuditsInspectorIssueCodePropertyRuleIssue AuditsInspectorIssueCode = "PropertyRuleIssue"
 
-	// AuditsInspectorIssueCodeSharedDictionaryIssue enum const.
+	// AuditsInspectorIssueCodeSharedDictionaryIssue enum const
 	AuditsInspectorIssueCodeSharedDictionaryIssue AuditsInspectorIssueCode = "SharedDictionaryIssue"
+
+	// AuditsInspectorIssueCodeElementAccessibilityIssue enum const
+	AuditsInspectorIssueCodeElementAccessibilityIssue AuditsInspectorIssueCode = "ElementAccessibilityIssue"
+
+	// AuditsInspectorIssueCodeSRIMessageSignatureIssue enum const
+	AuditsInspectorIssueCodeSRIMessageSignatureIssue AuditsInspectorIssueCode = "SRIMessageSignatureIssue"
+
+	// AuditsInspectorIssueCodeUnencodedDigestIssue enum const
+	AuditsInspectorIssueCodeUnencodedDigestIssue AuditsInspectorIssueCode = "UnencodedDigestIssue"
+
+	// AuditsInspectorIssueCodeConnectionAllowlistIssue enum const
+	AuditsInspectorIssueCodeConnectionAllowlistIssue AuditsInspectorIssueCode = "ConnectionAllowlistIssue"
+
+	// AuditsInspectorIssueCodeUserReidentificationIssue enum const
+	AuditsInspectorIssueCodeUserReidentificationIssue AuditsInspectorIssueCode = "UserReidentificationIssue"
+
+	// AuditsInspectorIssueCodePermissionElementIssue enum const
+	AuditsInspectorIssueCodePermissionElementIssue AuditsInspectorIssueCode = "PermissionElementIssue"
+
+	// AuditsInspectorIssueCodePerformanceIssue enum const
+	AuditsInspectorIssueCodePerformanceIssue AuditsInspectorIssueCode = "PerformanceIssue"
+
+	// AuditsInspectorIssueCodeSelectivePermissionsInterventionIssue enum const
+	AuditsInspectorIssueCodeSelectivePermissionsInterventionIssue AuditsInspectorIssueCode = "SelectivePermissionsInterventionIssue"
+
+	// AuditsInspectorIssueCodeEmailVerificationRequestIssue enum const
+	AuditsInspectorIssueCodeEmailVerificationRequestIssue AuditsInspectorIssueCode = "EmailVerificationRequestIssue"
+
+	// AuditsInspectorIssueCodeLazyLoadImageIssue enum const
+	AuditsInspectorIssueCodeLazyLoadImageIssue AuditsInspectorIssueCode = "LazyLoadImageIssue"
+
+	// AuditsInspectorIssueCodeWebInstallIssue enum const
+	AuditsInspectorIssueCodeWebInstallIssue AuditsInspectorIssueCode = "WebInstallIssue"
 )
 
 // AuditsInspectorIssueDetails This struct holds a list of optional fields with additional information
@@ -1162,17 +1769,14 @@ type AuditsInspectorIssueDetails struct {
 	// SharedArrayBufferIssueDetails (optional) ...
 	SharedArrayBufferIssueDetails *AuditsSharedArrayBufferIssueDetails `json:"sharedArrayBufferIssueDetails,omitempty"`
 
-	// LowTextContrastIssueDetails (optional) ...
-	LowTextContrastIssueDetails *AuditsLowTextContrastIssueDetails `json:"lowTextContrastIssueDetails,omitempty"`
-
 	// CorsIssueDetails (optional) ...
 	CorsIssueDetails *AuditsCorsIssueDetails `json:"corsIssueDetails,omitempty"`
 
-	// AttributionReportingIssueDetails (optional) ...
-	AttributionReportingIssueDetails *AuditsAttributionReportingIssueDetails `json:"attributionReportingIssueDetails,omitempty"`
-
 	// QuirksModeIssueDetails (optional) ...
 	QuirksModeIssueDetails *AuditsQuirksModeIssueDetails `json:"quirksModeIssueDetails,omitempty"`
+
+	// PartitioningBlobURLIssueDetails (optional) ...
+	PartitioningBlobURLIssueDetails *AuditsPartitioningBlobURLIssueDetails `json:"partitioningBlobURLIssueDetails,omitempty"`
 
 	// NavigatorUserAgentIssueDetails (deprecated) (optional) ...
 	NavigatorUserAgentIssueDetails *AuditsNavigatorUserAgentIssueDetails `json:"navigatorUserAgentIssueDetails,omitempty"`
@@ -1206,6 +1810,39 @@ type AuditsInspectorIssueDetails struct {
 
 	// SharedDictionaryIssueDetails (optional) ...
 	SharedDictionaryIssueDetails *AuditsSharedDictionaryIssueDetails `json:"sharedDictionaryIssueDetails,omitempty"`
+
+	// ElementAccessibilityIssueDetails (optional) ...
+	ElementAccessibilityIssueDetails *AuditsElementAccessibilityIssueDetails `json:"elementAccessibilityIssueDetails,omitempty"`
+
+	// SriMessageSignatureIssueDetails (optional) ...
+	SriMessageSignatureIssueDetails *AuditsSRIMessageSignatureIssueDetails `json:"sriMessageSignatureIssueDetails,omitempty"`
+
+	// UnencodedDigestIssueDetails (optional) ...
+	UnencodedDigestIssueDetails *AuditsUnencodedDigestIssueDetails `json:"unencodedDigestIssueDetails,omitempty"`
+
+	// ConnectionAllowlistIssueDetails (optional) ...
+	ConnectionAllowlistIssueDetails *AuditsConnectionAllowlistIssueDetails `json:"connectionAllowlistIssueDetails,omitempty"`
+
+	// UserReidentificationIssueDetails (optional) ...
+	UserReidentificationIssueDetails *AuditsUserReidentificationIssueDetails `json:"userReidentificationIssueDetails,omitempty"`
+
+	// PermissionElementIssueDetails (optional) ...
+	PermissionElementIssueDetails *AuditsPermissionElementIssueDetails `json:"permissionElementIssueDetails,omitempty"`
+
+	// PerformanceIssueDetails (optional) ...
+	PerformanceIssueDetails *AuditsPerformanceIssueDetails `json:"performanceIssueDetails,omitempty"`
+
+	// SelectivePermissionsInterventionIssueDetails (optional) ...
+	SelectivePermissionsInterventionIssueDetails *AuditsSelectivePermissionsInterventionIssueDetails `json:"selectivePermissionsInterventionIssueDetails,omitempty"`
+
+	// EmailVerificationRequestIssueDetails (optional) ...
+	EmailVerificationRequestIssueDetails *AuditsEmailVerificationRequestIssueDetails `json:"emailVerificationRequestIssueDetails,omitempty"`
+
+	// LazyLoadImageIssueDetails (optional) ...
+	LazyLoadImageIssueDetails *AuditsLazyLoadImageIssueDetails `json:"lazyLoadImageIssueDetails,omitempty"`
+
+	// WebInstallIssueDetails (optional) ...
+	WebInstallIssueDetails *AuditsWebInstallIssueDetails `json:"webInstallIssueDetails,omitempty"`
 }
 
 // AuditsIssueID A unique id for a DevTools inspector issue. Allows other entities (e.g.
@@ -1225,17 +1862,17 @@ type AuditsInspectorIssue struct {
 	IssueID AuditsIssueID `json:"issueId,omitempty"`
 }
 
-// AuditsGetEncodedResponseEncoding enum.
+// AuditsGetEncodedResponseEncoding enum
 type AuditsGetEncodedResponseEncoding string
 
 const (
-	// AuditsGetEncodedResponseEncodingWebp enum const.
+	// AuditsGetEncodedResponseEncodingWebp enum const
 	AuditsGetEncodedResponseEncodingWebp AuditsGetEncodedResponseEncoding = "webp"
 
-	// AuditsGetEncodedResponseEncodingJpeg enum const.
+	// AuditsGetEncodedResponseEncodingJpeg enum const
 	AuditsGetEncodedResponseEncodingJpeg AuditsGetEncodedResponseEncoding = "jpeg"
 
-	// AuditsGetEncodedResponseEncodingPng enum const.
+	// AuditsGetEncodedResponseEncodingPng enum const
 	AuditsGetEncodedResponseEncodingPng AuditsGetEncodedResponseEncoding = "png"
 )
 
@@ -1255,10 +1892,10 @@ type AuditsGetEncodedResponse struct {
 	SizeOnly bool `json:"sizeOnly,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m AuditsGetEncodedResponse) ProtoReq() string { return "Audits.getEncodedResponse" }
 
-// Call the request.
+// Call the request
 func (m AuditsGetEncodedResponse) Call(c Client) (*AuditsGetEncodedResponseResult, error) {
 	var res AuditsGetEncodedResponseResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1279,10 +1916,10 @@ type AuditsGetEncodedResponseResult struct {
 // AuditsDisable Disables issues domain, prevents further issues from being reported to the client.
 type AuditsDisable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AuditsDisable) ProtoReq() string { return "Audits.disable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AuditsDisable) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -1291,26 +1928,11 @@ func (m AuditsDisable) Call(c Client) error {
 // `issueAdded` event.
 type AuditsEnable struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AuditsEnable) ProtoReq() string { return "Audits.enable" }
 
-// Call sends the request.
+// Call sends the request
 func (m AuditsEnable) Call(c Client) error {
-	return call(m.ProtoReq(), m, nil, c)
-}
-
-// AuditsCheckContrast Runs the contrast check for the target page. Found issues are reported
-// using Audits.issueAdded event.
-type AuditsCheckContrast struct {
-	// ReportAAA (optional) Whether to report WCAG AAA level issues. Default is false.
-	ReportAAA bool `json:"reportAAA,omitempty"`
-}
-
-// ProtoReq name.
-func (m AuditsCheckContrast) ProtoReq() string { return "Audits.checkContrast" }
-
-// Call sends the request.
-func (m AuditsCheckContrast) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -1318,10 +1940,10 @@ func (m AuditsCheckContrast) Call(c Client) error {
 // using Audits.issueAdded event.
 type AuditsCheckFormsIssues struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m AuditsCheckFormsIssues) ProtoReq() string { return "Audits.checkFormsIssues" }
 
-// Call the request.
+// Call the request
 func (m AuditsCheckFormsIssues) Call(c Client) (*AuditsCheckFormsIssuesResult, error) {
 	var res AuditsCheckFormsIssuesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -1339,7 +1961,7 @@ type AuditsIssueAdded struct {
 	Issue *AuditsInspectorIssue `json:"issue"`
 }
 
-// ProtoEvent name.
+// ProtoEvent name
 func (evt AuditsIssueAdded) ProtoEvent() string {
 	return "Audits.issueAdded"
 }

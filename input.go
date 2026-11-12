@@ -18,6 +18,16 @@ type Keyboard struct {
 
 	// pressed keys must be released before it can be pressed again
 	pressed map[input.Key]struct{}
+
+	// root holds the shared state when this keyboard belongs to a page clone.
+	root *Keyboard
+}
+
+func (k *Keyboard) state() *Keyboard {
+	if k.root != nil {
+		return k.root
+	}
+	return k
 }
 
 func (p *Page) newKeyboard() *Page {
@@ -26,9 +36,10 @@ func (p *Page) newKeyboard() *Page {
 }
 
 func (k *Keyboard) getModifiers() int {
-	k.Lock()
-	defer k.Unlock()
-	return k.modifiers()
+	s := k.state()
+	s.Lock()
+	defer s.Unlock()
+	return s.modifiers()
 }
 
 func (k *Keyboard) modifiers() int {
@@ -46,28 +57,30 @@ func (k *Keyboard) Press(key input.Key) error {
 	defer k.page.tryTrace(TraceTypeInput, "press key: "+key.Info().Code)()
 	k.page.browser.trySlowMotion()
 
-	k.Lock()
-	defer k.Unlock()
+	s := k.state()
+	s.Lock()
+	defer s.Unlock()
 
-	k.pressed[key] = struct{}{}
+	s.pressed[key] = struct{}{}
 
-	return key.Encode(proto.InputDispatchKeyEventTypeKeyDown, k.modifiers()).Call(k.page)
+	return key.Encode(proto.InputDispatchKeyEventTypeKeyDown, s.modifiers()).Call(k.page)
 }
 
 // Release the key.
 func (k *Keyboard) Release(key input.Key) error {
 	defer k.page.tryTrace(TraceTypeInput, "release key: "+key.Info().Code)()
 
-	k.Lock()
-	defer k.Unlock()
+	s := k.state()
+	s.Lock()
+	defer s.Unlock()
 
-	if _, has := k.pressed[key]; !has {
+	if _, has := s.pressed[key]; !has {
 		return nil
 	}
 
-	delete(k.pressed, key)
+	delete(s.pressed, key)
 
-	return key.Encode(proto.InputDispatchKeyEventTypeKeyUp, k.modifiers()).Call(k.page)
+	return key.Encode(proto.InputDispatchKeyEventTypeKeyUp, s.modifiers()).Call(k.page)
 }
 
 // Type releases the key after the press.
@@ -202,6 +215,16 @@ type Mouse struct {
 
 	// the buttons is currently being pressed, reflects the press order
 	buttons []proto.InputMouseButton
+
+	// root holds the shared state when this mouse belongs to a page clone.
+	root *Mouse
+}
+
+func (m *Mouse) state() *Mouse {
+	if m.root != nil {
+		return m.root
+	}
+	return m
 }
 
 func (p *Page) newMouse() *Page {
@@ -211,17 +234,19 @@ func (p *Page) newMouse() *Page {
 
 // Position of current cursor.
 func (m *Mouse) Position() proto.Point {
-	m.Lock()
-	defer m.Unlock()
-	return m.pos
+	s := m.state()
+	s.Lock()
+	defer s.Unlock()
+	return s.pos
 }
 
 // MoveTo the absolute position.
 func (m *Mouse) MoveTo(p proto.Point) error {
-	m.Lock()
-	defer m.Unlock()
+	s := m.state()
+	s.Lock()
+	defer s.Unlock()
 
-	button, buttons := input.EncodeMouseButton(m.buttons)
+	button, buttons := input.EncodeMouseButton(s.buttons)
 
 	m.page.browser.trySlowMotion()
 
@@ -238,7 +263,7 @@ func (m *Mouse) MoveTo(p proto.Point) error {
 	}
 
 	// to make sure set only when call is successful
-	m.pos = p
+	s.pos = p
 
 	if m.page.browser.trace {
 		if !m.updateMouseTracer() {
@@ -287,8 +312,9 @@ func (m *Mouse) MoveLinear(to proto.Point, steps int) error {
 
 // Scroll the relative offset with specified steps.
 func (m *Mouse) Scroll(offsetX, offsetY float64, steps int) error {
-	m.Lock()
-	defer m.Unlock()
+	s := m.state()
+	s.Lock()
+	defer s.Unlock()
 
 	defer m.page.tryTrace(TraceTypeInput, fmt.Sprintf("scroll (%.2f, %.2f)", offsetX, offsetY))()
 	m.page.browser.trySlowMotion()
@@ -297,7 +323,7 @@ func (m *Mouse) Scroll(offsetX, offsetY float64, steps int) error {
 		steps = 1
 	}
 
-	button, buttons := input.EncodeMouseButton(m.buttons)
+	button, buttons := input.EncodeMouseButton(s.buttons)
 
 	stepX := offsetX / float64(steps)
 	stepY := offsetY / float64(steps)
@@ -310,8 +336,8 @@ func (m *Mouse) Scroll(offsetX, offsetY float64, steps int) error {
 			Modifiers: m.page.Keyboard.getModifiers(),
 			DeltaX:    stepX,
 			DeltaY:    stepY,
-			X:         m.pos.X,
-			Y:         m.pos.Y,
+			X:         s.pos.X,
+			Y:         s.pos.Y,
 		}.Call(m.page)
 		if err != nil {
 			return err
@@ -323,10 +349,11 @@ func (m *Mouse) Scroll(offsetX, offsetY float64, steps int) error {
 
 // Down holds the button down.
 func (m *Mouse) Down(button proto.InputMouseButton, clickCount int) error {
-	m.Lock()
-	defer m.Unlock()
+	s := m.state()
+	s.Lock()
+	defer s.Unlock()
 
-	toButtons := append(append([]proto.InputMouseButton{}, m.buttons...), button)
+	toButtons := append(append([]proto.InputMouseButton{}, s.buttons...), button)
 
 	_, buttons := input.EncodeMouseButton(toButtons)
 
@@ -336,23 +363,24 @@ func (m *Mouse) Down(button proto.InputMouseButton, clickCount int) error {
 		Buttons:    gson.Int(buttons),
 		ClickCount: clickCount,
 		Modifiers:  m.page.Keyboard.getModifiers(),
-		X:          m.pos.X,
-		Y:          m.pos.Y,
+		X:          s.pos.X,
+		Y:          s.pos.Y,
 	}.Call(m.page)
 	if err != nil {
 		return err
 	}
-	m.buttons = toButtons
+	s.buttons = toButtons
 	return nil
 }
 
 // Up releases the button.
 func (m *Mouse) Up(button proto.InputMouseButton, clickCount int) error {
-	m.Lock()
-	defer m.Unlock()
+	s := m.state()
+	s.Lock()
+	defer s.Unlock()
 
 	toButtons := []proto.InputMouseButton{}
-	for _, btn := range m.buttons {
+	for _, btn := range s.buttons {
 		if btn == button {
 			continue
 		}
@@ -367,13 +395,13 @@ func (m *Mouse) Up(button proto.InputMouseButton, clickCount int) error {
 		Buttons:    gson.Int(buttons),
 		ClickCount: clickCount,
 		Modifiers:  m.page.Keyboard.getModifiers(),
-		X:          m.pos.X,
-		Y:          m.pos.Y,
+		X:          s.pos.X,
+		Y:          s.pos.Y,
 	}.Call(m.page)
 	if err != nil {
 		return err
 	}
-	m.buttons = toButtons
+	s.buttons = toButtons
 	return nil
 }
 

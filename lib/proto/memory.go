@@ -12,10 +12,10 @@ Memory
 type MemoryPressureLevel string
 
 const (
-	// MemoryPressureLevelModerate enum const.
+	// MemoryPressureLevelModerate enum const
 	MemoryPressureLevelModerate MemoryPressureLevel = "moderate"
 
-	// MemoryPressureLevelCritical enum const.
+	// MemoryPressureLevelCritical enum const
 	MemoryPressureLevelCritical MemoryPressureLevel = "critical"
 )
 
@@ -40,7 +40,7 @@ type MemorySamplingProfile struct {
 	Modules []*MemoryModule `json:"modules"`
 }
 
-// MemoryModule Executable module information.
+// MemoryModule Executable module information
 type MemoryModule struct {
 	// Name of the module.
 	Name string `json:"name"`
@@ -56,13 +56,23 @@ type MemoryModule struct {
 	Size float64 `json:"size"`
 }
 
-// MemoryGetDOMCounters ...
+// MemoryDOMCounter DOM object counter data.
+type MemoryDOMCounter struct {
+	// Name Object name. Note: object names should be presumed volatile and clients should not expect
+	// the returned names to be consistent across runs.
+	Name string `json:"name"`
+
+	// Count Object count.
+	Count int `json:"count"`
+}
+
+// MemoryGetDOMCounters Retruns current DOM object counters.
 type MemoryGetDOMCounters struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryGetDOMCounters) ProtoReq() string { return "Memory.getDOMCounters" }
 
-// Call the request.
+// Call the request
 func (m MemoryGetDOMCounters) Call(c Client) (*MemoryGetDOMCountersResult, error) {
 	var res MemoryGetDOMCountersResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -80,13 +90,34 @@ type MemoryGetDOMCountersResult struct {
 	JsEventListeners int `json:"jsEventListeners"`
 }
 
-// MemoryPrepareForLeakDetection ...
+// MemoryGetDOMCountersForLeakDetection Retruns DOM object counters after preparing renderer for leak detection.
+type MemoryGetDOMCountersForLeakDetection struct{}
+
+// ProtoReq name
+func (m MemoryGetDOMCountersForLeakDetection) ProtoReq() string {
+	return "Memory.getDOMCountersForLeakDetection"
+}
+
+// Call the request
+func (m MemoryGetDOMCountersForLeakDetection) Call(c Client) (*MemoryGetDOMCountersForLeakDetectionResult, error) {
+	var res MemoryGetDOMCountersForLeakDetectionResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// MemoryGetDOMCountersForLeakDetectionResult ...
+type MemoryGetDOMCountersForLeakDetectionResult struct {
+	// Counters DOM object counters.
+	Counters []*MemoryDOMCounter `json:"counters"`
+}
+
+// MemoryPrepareForLeakDetection Prepares for leak detection by terminating workers, stopping spellcheckers,
+// dropping non-essential internal caches, running garbage collections, etc.
 type MemoryPrepareForLeakDetection struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryPrepareForLeakDetection) ProtoReq() string { return "Memory.prepareForLeakDetection" }
 
-// Call sends the request.
+// Call sends the request
 func (m MemoryPrepareForLeakDetection) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -94,12 +125,12 @@ func (m MemoryPrepareForLeakDetection) Call(c Client) error {
 // MemoryForciblyPurgeJavaScriptMemory Simulate OomIntervention by purging V8 memory.
 type MemoryForciblyPurgeJavaScriptMemory struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryForciblyPurgeJavaScriptMemory) ProtoReq() string {
 	return "Memory.forciblyPurgeJavaScriptMemory"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m MemoryForciblyPurgeJavaScriptMemory) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -110,12 +141,12 @@ type MemorySetPressureNotificationsSuppressed struct {
 	Suppressed bool `json:"suppressed"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemorySetPressureNotificationsSuppressed) ProtoReq() string {
 	return "Memory.setPressureNotificationsSuppressed"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m MemorySetPressureNotificationsSuppressed) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -126,12 +157,12 @@ type MemorySimulatePressureNotification struct {
 	Level MemoryPressureLevel `json:"level"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemorySimulatePressureNotification) ProtoReq() string {
 	return "Memory.simulatePressureNotification"
 }
 
-// Call sends the request.
+// Call sends the request
 func (m MemorySimulatePressureNotification) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -145,10 +176,10 @@ type MemoryStartSampling struct {
 	SuppressRandomness bool `json:"suppressRandomness,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryStartSampling) ProtoReq() string { return "Memory.startSampling" }
 
-// Call sends the request.
+// Call sends the request
 func (m MemoryStartSampling) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -156,10 +187,10 @@ func (m MemoryStartSampling) Call(c Client) error {
 // MemoryStopSampling Stop collecting native memory profile.
 type MemoryStopSampling struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryStopSampling) ProtoReq() string { return "Memory.stopSampling" }
 
-// Call sends the request.
+// Call sends the request
 func (m MemoryStopSampling) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -168,10 +199,10 @@ func (m MemoryStopSampling) Call(c Client) error {
 // collected since renderer process startup.
 type MemoryGetAllTimeSamplingProfile struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryGetAllTimeSamplingProfile) ProtoReq() string { return "Memory.getAllTimeSamplingProfile" }
 
-// Call the request.
+// Call the request
 func (m MemoryGetAllTimeSamplingProfile) Call(c Client) (*MemoryGetAllTimeSamplingProfileResult, error) {
 	var res MemoryGetAllTimeSamplingProfileResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -187,10 +218,10 @@ type MemoryGetAllTimeSamplingProfileResult struct {
 // collected since browser process startup.
 type MemoryGetBrowserSamplingProfile struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryGetBrowserSamplingProfile) ProtoReq() string { return "Memory.getBrowserSamplingProfile" }
 
-// Call the request.
+// Call the request
 func (m MemoryGetBrowserSamplingProfile) Call(c Client) (*MemoryGetBrowserSamplingProfileResult, error) {
 	var res MemoryGetBrowserSamplingProfileResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -206,10 +237,10 @@ type MemoryGetBrowserSamplingProfileResult struct {
 // `startSampling` call.
 type MemoryGetSamplingProfile struct{}
 
-// ProtoReq name.
+// ProtoReq name
 func (m MemoryGetSamplingProfile) ProtoReq() string { return "Memory.getSamplingProfile" }
 
-// Call the request.
+// Call the request
 func (m MemoryGetSamplingProfile) Call(c Client) (*MemoryGetSamplingProfileResult, error) {
 	var res MemoryGetSamplingProfileResult
 	return &res, call(m.ProtoReq(), m, &res, c)

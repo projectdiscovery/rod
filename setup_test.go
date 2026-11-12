@@ -50,6 +50,8 @@ func TestMain(m *testing.M) {
 
 	testerPool.Cleanup(func(g *G) {
 		g.browser.MustClose()
+		g.launcher.Kill()
+		g.launcher.Cleanup()
 	})
 
 	if err := gotrace.Check(0, gotrace.IgnoreFuncs("internal/poll.runtime_pollWait")); err != nil {
@@ -67,6 +69,10 @@ type G struct {
 	// a random browser instance from the pool. If you have changed state of it, you must reset it
 	// or it may affect other test cases.
 	browser *rod.Browser
+
+	// launcher owns the process behind browser. Closed after the suite so
+	// cmd.Wait cannot outlive the leak check.
+	launcher *launcher.Launcher
 
 	// a random page instance from the pool. If you have changed state of it, you must reset it
 	// or it may affect other test cases.
@@ -89,7 +95,8 @@ func newTesterPool() rod.Pool[G] {
 }
 
 func newTester() *G {
-	u := launcher.New().Set("proxy-bypass-list", "<-loopback>").NoSandbox(true).MustLaunch()
+	l := launcher.New().Set("proxy-bypass-list", "<-loopback>").NoSandbox(true)
+	u := l.MustLaunch()
 
 	mc := newMockClient(u)
 
@@ -105,9 +112,10 @@ func newTester() *G {
 	}
 
 	return &G{
-		mc:      mc,
-		browser: browser,
-		page:    page,
+		mc:       mc,
+		browser:  browser,
+		page:     page,
+		launcher: l,
 	}
 }
 
@@ -195,9 +203,15 @@ running goroutines: %s`, g.Name(), *TimeoutEach, t))
 		res, err := proto.TargetGetTargets{}.Call(g.browser)
 		g.E(err)
 		for _, info := range res.TargetInfos {
-			if info.TargetID != g.page.TargetID {
-				g.E(proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser))
+			if info.TargetID == g.page.TargetID {
+				continue
 			}
+			_, closeErr := proto.TargetCloseTarget{TargetID: info.TargetID}.Call(g.browser)
+			var gone *cdp.Error
+			if errors.As(closeErr, &gone) && gone.Code == -32602 {
+				continue
+			}
+			g.E(closeErr)
 		}
 
 		if g.browser.LoadState(g.page.SessionID, &proto.FetchEnable{}) {
@@ -291,7 +305,7 @@ func (mc *MockClient) stubCounter() {
 	l := sync.Mutex{}
 	mCount := map[string]int{}
 
-	fmt.Fprintln(os.Stdout, "[stubCounter] begin")
+	_, _ = fmt.Fprintln(os.Stdout, "[stubCounter] begin")
 
 	mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
 		l.Lock()

@@ -16,7 +16,10 @@ import (
 func TestMonitor(t *testing.T) {
 	g := setup(t)
 
-	b := rod.New().MustConnect()
+	l := launcher.New()
+	defer l.Cleanup()
+	defer l.Kill()
+	b := rod.New().ControlURL(l.MustLaunch()).MustConnect()
 	defer b.MustClose()
 	p := b.MustPage(g.blank()).MustWaitLoad()
 
@@ -43,6 +46,7 @@ func TestMonitorErr(t *testing.T) {
 
 	l := launcher.New()
 	u := l.MustLaunch()
+	defer l.Cleanup()
 	defer l.Kill()
 
 	g.Panic(func() {

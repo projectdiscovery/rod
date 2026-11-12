@@ -20,15 +20,15 @@ type IOClose struct {
 	Handle IOStreamHandle `json:"handle"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IOClose) ProtoReq() string { return "IO.close" }
 
-// Call sends the request.
+// Call sends the request
 func (m IOClose) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// IORead Read a chunk of the stream.
+// IORead Read a chunk of the stream
 type IORead struct {
 	// Handle of the stream to read.
 	Handle IOStreamHandle `json:"handle"`
@@ -41,10 +41,10 @@ type IORead struct {
 	Size *int `json:"size,omitempty"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IORead) ProtoReq() string { return "IO.read" }
 
-// Call the request.
+// Call the request
 func (m IORead) Call(c Client) (*IOReadResult, error) {
 	var res IOReadResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -62,22 +62,22 @@ type IOReadResult struct {
 	EOF bool `json:"eof"`
 }
 
-// IOResolveBlob Return UUID of Blob object specified by a remote object id.
+// IOResolveBlob (deprecated) Return UUID of Blob object specified by a remote object id.
 type IOResolveBlob struct {
 	// ObjectID Object id of a Blob object wrapper.
 	ObjectID RuntimeRemoteObjectID `json:"objectId"`
 }
 
-// ProtoReq name.
+// ProtoReq name
 func (m IOResolveBlob) ProtoReq() string { return "IO.resolveBlob" }
 
-// Call the request.
+// Call the request
 func (m IOResolveBlob) Call(c Client) (*IOResolveBlobResult, error) {
 	var res IOResolveBlobResult
 	return &res, call(m.ProtoReq(), m, &res, c)
 }
 
-// IOResolveBlobResult ...
+// IOResolveBlobResult (deprecated) ...
 type IOResolveBlobResult struct {
 	// UUID of the specified Blob.
 	UUID string `json:"uuid"`

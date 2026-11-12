@@ -3,6 +3,7 @@ package cdp_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -138,9 +139,15 @@ func TestCrash(t *testing.T) {
 
 	client := cdp.MustStartWithURL(ctx, launcher.New().MustLaunch(), nil)
 
+	loaded := make(chan struct{}, 1)
 	go func() {
-		for range client.Event() {
-			utils.Noop()
+		for e := range client.Event() {
+			if e.Method == "Page.loadEventFired" {
+				select {
+				case loaded <- struct{}{}:
+				default:
+				}
+			}
 		}
 	}()
 
@@ -148,7 +155,7 @@ func TestCrash(t *testing.T) {
 	g.E(err)
 
 	res, err := client.Call(ctx, "", "Target.createTarget", map[string]interface{}{
-		"url": "file://" + file,
+		"url": "about:blank",
 	})
 	g.E(err)
 
@@ -165,22 +172,30 @@ func TestCrash(t *testing.T) {
 	_, err = client.Call(ctx, sessionID, "Page.enable", nil)
 	g.E(err)
 
+	// An evaluate during navigation fails with "Execution context was destroyed".
+	_, err = client.Call(ctx, sessionID, "Page.navigate", map[string]interface{}{
+		"url": "file://" + file,
+	})
+	g.E(err)
+	<-loaded
+
 	go func() {
 		utils.Sleep(1)
 		_, err := client.Call(ctx, sessionID, "Browser.crash", nil)
-		g.Eq(err, io.EOF)
+		g.True(errors.Is(err, cdp.ErrConnClosed))
 	}()
 
 	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
 		"expression":   `new Promise(() => {})`,
 		"awaitPromise": true,
 	})
-	g.Eq(err, io.EOF)
+	g.True(errors.Is(err, cdp.ErrConnClosed))
 
 	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
 		"expression": `10`,
 	})
-	g.Has(err.Error(), "use of closed network connection")
+	g.True(errors.Is(err, cdp.ErrConnClosed))
+	g.Err(client.Err())
 }
 
 func TestFormat(t *testing.T) {

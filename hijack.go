@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
@@ -22,6 +23,8 @@ func (b *Browser) HijackRequests() *HijackRouter {
 // HijackRequests creates a new router instance for requests hijacking.
 // When use Fetch domain outside the router should be stopped. Enabling hijacking disables page caching,
 // but such as 304 Not Modified will still work as expected.
+// Requests a service worker makes on its own are not seen by a page router,
+// because they belong to the worker target. Use [Browser.HijackRequests] for those.
 // The entire process of hijacking one request:
 //
 //	browser --req-> rod ---> server ---> rod --res-> browser
@@ -31,14 +34,22 @@ func (p *Page) HijackRequests() *HijackRouter {
 	return newHijackRouter(p.browser, p).initEvents()
 }
 
+// DefaultHijackBodyLimit is the maximum response body LoadResponse will buffer.
+const DefaultHijackBodyLimit = 64 << 20
+
 // HijackRouter context.
 type HijackRouter struct {
 	run      func()
 	stop     func()
+	mu       sync.RWMutex
 	handlers []*hijackHandler
+	response []*hijackResponseHandler
 	enable   *proto.FetchEnable
 	client   proto.Client
 	browser  *Browser
+
+	// MaxBody caps LoadResponse and HijackResponseStage.Body. Zero means DefaultHijackBodyLimit.
+	MaxBody int
 }
 
 func newHijackRouter(browser *Browser, client proto.Client) *HijackRouter {
@@ -50,7 +61,7 @@ func newHijackRouter(browser *Browser, client proto.Client) *HijackRouter {
 	}
 }
 
-func (r *HijackRouter) initEvents() *HijackRouter { //nolint: gocognit
+func (r *HijackRouter) initEvents() *HijackRouter {
 	ctx := r.browser.ctx
 	if cta, ok := r.client.(proto.Contextable); ok {
 		ctx = cta.GetContext()
@@ -64,84 +75,143 @@ func (r *HijackRouter) initEvents() *HijackRouter { //nolint: gocognit
 	eventCtx, cancel := context.WithCancel(ctx)
 	r.stop = cancel
 
-	_ = r.enable.Call(r.client)
-
-	r.run = r.browser.Context(eventCtx).eachEvent(sessionID, func(e *proto.FetchRequestPaused) bool {
-		go func() {
-			ctx := r.new(eventCtx, e)
-			for _, h := range r.handlers {
-				if !h.regexp.MatchString(e.Request.URL) {
-					continue
-				}
-
-				h.handler(ctx)
-
-				if ctx.continueRequest != nil {
-					ctx.continueRequest.RequestID = e.RequestID
-					err := ctx.continueRequest.Call(r.client)
-					if err != nil {
-						ctx.OnError(err)
-					}
-					return
-				}
-
-				if ctx.Skip {
-					continue
-				}
-
-				if ctx.Response.fail.ErrorReason != "" {
-					err := ctx.Response.fail.Call(r.client)
-					if err != nil {
-						ctx.OnError(err)
-					}
-					return
-				}
-
-				err := ctx.Response.payload.Call(r.client)
-				if err != nil {
-					ctx.OnError(err)
-					return
-				}
-			}
-		}()
-
+	r.run = r.browser.Context(eventCtx).eachEvent(sessionID, func(e *proto.FetchRequestPaused, from proto.TargetSessionID) bool {
+		// A browser-level router must leave requests paused by page routers alone.
+		if from != sessionID {
+			return false
+		}
+		go r.handle(eventCtx, e)
 		return false
 	})
 	return r
 }
 
+func (r *HijackRouter) handle(eventCtx context.Context, e *proto.FetchRequestPaused) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
+		}
+	}()
+
+	if e.ResponseStatusCode != nil || e.ResponseErrorReason != "" {
+		r.handleResponse(e)
+		return
+	}
+
+	r.mu.RLock()
+	handlers := r.handlers
+	r.mu.RUnlock()
+
+	ctx := r.new(eventCtx, e)
+	for _, h := range handlers {
+		if !h.regexp.MatchString(e.Request.URL) {
+			continue
+		}
+		if h.resource != "" && h.resource != e.ResourceType {
+			continue
+		}
+
+		h.handler(ctx)
+
+		if ctx.continueRequest != nil {
+			ctx.continueRequest.RequestID = e.RequestID
+			if err := ctx.continueRequest.Call(r.client); err != nil {
+				ctx.OnError(err)
+			}
+			return
+		}
+
+		if ctx.Skip {
+			continue
+		}
+
+		if ctx.Response.fail.ErrorReason != "" {
+			if err := ctx.Response.fail.Call(r.client); err != nil {
+				ctx.OnError(err)
+			}
+			return
+		}
+
+		if err := ctx.Response.payload.Call(r.client); err != nil {
+			ctx.OnError(err)
+		}
+		return
+	}
+	_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
+}
+
+// patternsLocked returns the Fetch patterns of every handler. r.mu must be held.
+func (r *HijackRouter) patternsLocked() []*proto.FetchRequestPattern {
+	patterns := make([]*proto.FetchRequestPattern, 0, len(r.handlers)+len(r.response))
+	for _, h := range r.handlers {
+		patterns = append(patterns, &proto.FetchRequestPattern{URLPattern: h.pattern, ResourceType: h.resource})
+	}
+	for _, h := range r.response {
+		patterns = append(patterns, &proto.FetchRequestPattern{
+			URLPattern:   h.pattern,
+			ResourceType: h.resource,
+			RequestStage: proto.FetchRequestStageResponse,
+		})
+	}
+	return patterns
+}
+
+// apply enables Fetch with the current patterns, or disables it when there
+// are none, so requests are only paused when some handler can want them.
+func (r *HijackRouter) apply() error {
+	r.mu.Lock()
+	patterns := r.patternsLocked()
+	r.enable.Patterns = patterns
+	enable := proto.FetchEnable{Patterns: patterns, HandleAuthRequests: r.enable.HandleAuthRequests}
+	r.mu.Unlock()
+
+	if len(patterns) == 0 {
+		return proto.FetchDisable{}.Call(r.client)
+	}
+	return enable.Call(r.client)
+}
+
 // Add a hijack handler to router, the doc of the pattern is the same as "proto.FetchRequestPattern.URLPattern".
 func (r *HijackRouter) Add(pattern string, resourceType proto.NetworkResourceType, handler func(*Hijack)) error {
-	r.enable.Patterns = append(r.enable.Patterns, &proto.FetchRequestPattern{
-		URLPattern:   pattern,
-		ResourceType: resourceType,
+	reg, err := regexp.Compile(proto.PatternToReg(pattern))
+	if err != nil {
+		return err
+	}
+
+	r.mu.Lock()
+	handlers := make([]*hijackHandler, 0, len(r.handlers)+1)
+	handlers = append(handlers, r.handlers...)
+	r.handlers = append(handlers, &hijackHandler{
+		pattern:  pattern,
+		regexp:   reg,
+		handler:  handler,
+		resource: resourceType,
 	})
+	r.mu.Unlock()
 
-	reg := regexp.MustCompile(proto.PatternToReg(pattern))
-
-	r.handlers = append(r.handlers, &hijackHandler{
-		pattern: pattern,
-		regexp:  reg,
-		handler: handler,
-	})
-
-	return r.enable.Call(r.client)
+	return r.apply()
 }
 
 // Remove handler via the pattern.
 func (r *HijackRouter) Remove(pattern string) error {
-	patterns := []*proto.FetchRequestPattern{}
+	r.mu.Lock()
 	handlers := []*hijackHandler{}
 	for _, h := range r.handlers {
 		if h.pattern != pattern {
-			patterns = append(patterns, &proto.FetchRequestPattern{URLPattern: h.pattern})
 			handlers = append(handlers, h)
 		}
 	}
-	r.enable.Patterns = patterns
+	response := []*hijackResponseHandler{}
+	for _, h := range r.response {
+		if h.pattern != pattern {
+			response = append(response, h)
+		}
+	}
 	r.handlers = handlers
+	r.response = response
+	r.mu.Unlock()
 
-	return r.enable.Call(r.client)
+	return r.apply()
 }
 
 // new context.
@@ -157,6 +227,9 @@ func (r *HijackRouter) new(ctx context.Context, e *proto.FetchRequestPaused) *Hi
 		Method: e.Request.Method,
 		URL:    u,
 		Body:   io.NopCloser(strings.NewReader(e.Request.PostData)),
+		GetBody: func() (io.ReadCloser, error) {
+			return io.NopCloser(strings.NewReader(e.Request.PostData)), nil
+		},
 		Header: headers,
 	}
 
@@ -177,6 +250,7 @@ func (r *HijackRouter) new(ctx context.Context, e *proto.FetchRequestPaused) *Hi
 		OnError: func(_ error) {},
 
 		browser: r.browser,
+		maxBody: r.MaxBody,
 	}
 }
 
@@ -193,9 +267,10 @@ func (r *HijackRouter) Stop() error {
 
 // hijackHandler to handle each request that match the regexp.
 type hijackHandler struct {
-	pattern string
-	regexp  *regexp.Regexp
-	handler func(*Hijack)
+	pattern  string
+	regexp   *regexp.Regexp
+	handler  func(*Hijack)
+	resource proto.NetworkResourceType
 }
 
 // Hijack context.
@@ -213,6 +288,7 @@ type Hijack struct {
 	CustomState interface{}
 
 	browser *Browser
+	maxBody int
 }
 
 // ContinueRequest without hijacking. The RequestID will be set by the router, you don't have to set it.
@@ -239,9 +315,16 @@ func (h *Hijack) LoadResponse(client *http.Client, loadBody bool) error {
 	}
 
 	if loadBody {
-		b, err := io.ReadAll(res.Body)
+		limit := int64(h.maxBody)
+		if limit <= 0 {
+			limit = DefaultHijackBodyLimit
+		}
+		b, err := io.ReadAll(io.LimitReader(res.Body, limit+1))
 		if err != nil {
 			return err
+		}
+		if int64(len(b)) > limit {
+			return io.ErrShortBuffer
 		}
 		h.Response.payload.Body = b
 	}
@@ -253,6 +336,14 @@ func (h *Hijack) LoadResponse(client *http.Client, loadBody bool) error {
 type HijackRequest struct {
 	event *proto.FetchRequestPaused
 	req   *http.Request
+}
+
+// Event is the paused Fetch.requestPaused event that created this request. It
+// carries the request id, the frame and the resource type exactly as Chrome
+// reported them, and fields such as ResponseStatusCode when the request is
+// paused at the response stage. Treat it as read-only.
+func (ctx *HijackRequest) Event() *proto.FetchRequestPaused {
+	return ctx.event
 }
 
 // Type of the resource.
@@ -409,47 +500,68 @@ func (ctx *HijackResponse) Fail(reason proto.NetworkErrorReason) *HijackResponse
 	return ctx
 }
 
-// HandleAuth for the next basic HTTP authentication.
-// It will prevent the popup that requires user to input user name and password.
+// HandleAuth answers the next HTTP authentication challenge with the given
+// credentials. Interception starts when HandleAuth is called; the returned
+// function blocks until one challenge is answered or the browser context ends.
+// Only browser-level Fetch events are handled, so page-level [HijackRouter]
+// instances keep their requests. When a browser-level Fetch interception is
+// already active its owner keeps continuing paused requests.
 // Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 func (b *Browser) HandleAuth(username, password string) func() error {
-	enable := b.DisableDomain("", &proto.FetchEnable{})
-	disable := b.EnableDomain("", &proto.FetchEnable{
-		HandleAuthRequests: true,
+	ctx, cancel := context.WithCancel(b.ctx)
+	messages := b.listen(ctx, "", map[string]struct{}{
+		(proto.FetchRequestPaused{}).ProtoEvent(): {},
+		(proto.FetchAuthRequired{}).ProtoEvent():  {},
 	})
 
-	paused := &proto.FetchRequestPaused{}
-	auth := &proto.FetchAuthRequired{}
+	prev := &proto.FetchEnable{}
+	owned := !b.LoadState("", prev)
+	enableErr := proto.FetchEnable{
+		Patterns:           prev.Patterns,
+		HandleAuthRequests: true,
+	}.Call(b)
 
-	ctx, cancel := context.WithCancel(b.ctx)
-	waitPaused := b.Context(ctx).WaitEvent(paused)
-	waitAuth := b.Context(ctx).WaitEvent(auth)
+	restore := func() {
+		cancel()
+		c := b.Context(context.Background())
+		if owned {
+			_ = proto.FetchDisable{}.Call(c)
+		} else {
+			_ = prev.Call(c)
+		}
+	}
 
-	return func() (err error) {
-		defer enable()
-		defer disable()
-		defer cancel()
-
-		waitPaused()
-
-		err = proto.FetchContinueRequest{
-			RequestID: paused.RequestID,
-		}.Call(b)
-		if err != nil {
-			return
+	return func() error {
+		defer restore()
+		if enableErr != nil {
+			return enableErr
 		}
 
-		waitAuth()
-
-		err = proto.FetchContinueWithAuth{
-			RequestID: auth.RequestID,
-			AuthChallengeResponse: &proto.FetchAuthChallengeResponse{
-				Response: proto.FetchAuthChallengeResponseResponseProvideCredentials,
-				Username: username,
-				Password: password,
-			},
-		}.Call(b)
-
-		return
+		for msg := range messages {
+			if msg.SessionID != "" {
+				continue
+			}
+			paused := proto.FetchRequestPaused{}
+			auth := proto.FetchAuthRequired{}
+			switch {
+			case msg.Load(&paused):
+				if owned {
+					err := proto.FetchContinueRequest{RequestID: paused.RequestID}.Call(b.Context(ctx))
+					if err != nil {
+						return err
+					}
+				}
+			case msg.Load(&auth):
+				return proto.FetchContinueWithAuth{
+					RequestID: auth.RequestID,
+					AuthChallengeResponse: &proto.FetchAuthChallengeResponse{
+						Response: proto.FetchAuthChallengeResponseResponseProvideCredentials,
+						Username: username,
+						Password: password,
+					},
+				}.Call(b.Context(ctx))
+			}
+		}
+		return ctx.Err()
 	}
 }

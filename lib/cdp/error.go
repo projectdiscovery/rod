@@ -16,10 +16,22 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%v", *e)
 }
 
-// Is stdlib interface.
+// errTargetNavigated is the message Chrome 157 uses where older versions say
+// "Execution context was destroyed.": a pending evaluation was cut off by a
+// navigation or close of the inspected target.
+const errTargetNavigated = "Inspected target navigated or closed"
+
+// Is stdlib interface. ErrCtxDestroyed also matches the navigation message,
+// so the retry logic keeps working on newer Chrome.
 func (e Error) Is(target error) bool {
 	err, ok := target.(*Error)
-	return ok && e == *err
+	if !ok {
+		return false
+	}
+	if e == *err {
+		return true
+	}
+	return err == ErrCtxDestroyed && e.Code == ErrCtxDestroyed.Code && e.Message == errTargetNavigated
 }
 
 // ErrCtxNotFound type.

@@ -29,6 +29,7 @@ linters:
     - canonicalheader
     - copyloopvar
     - intrange
+    - recvcheck
 
     # Deprecated ones:
     - execinquery
@@ -75,6 +76,8 @@ issues:
         - gocritic
         - dupword
         - forcetypeassert
+        - revive
+        - stylecheck
     - path: lib/devices/list.go
       linters:
         - lll
