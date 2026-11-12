@@ -14,7 +14,7 @@ import (
 )
 
 func getSchema() gson.JSON {
-	l := launcher.New().Bin(launcher.NewBrowser().MustGet())
+	l := launcher.New().Bin(launcher.NewBrowser().MustGet()).NoSandbox(true)
 	defer l.Kill()
 
 	u := l.MustLaunch()
