@@ -140,6 +140,12 @@ func TestLaunchUserMode(t *testing.T) {
 		"about:blank",
 	})
 
+	// The args above are asserted without a sandbox switch. CI hosts and containers
+	// cannot run Chrome's sandbox, so allow the real launch to proceed there.
+	if utils.InContainer || os.Getenv("GITHUB_ACTIONS") == "true" {
+		l.NoSandbox(true)
+	}
+
 	url := l.MustLaunch()
 
 	g.Eq(url, launcher.NewUserMode().RemoteDebuggingPort(port).MustLaunch())
