@@ -179,7 +179,7 @@ func TestBrowserCrash(t *testing.T) {
 	utils.Sleep(0.3)
 
 	_, err := page.Eval(js)
-	g.Has(err.Error(), "use of closed network connection")
+	g.Regex(`use of closed network connection|connection closed`, err.Error())
 }
 
 func TestBrowserCall(t *testing.T) {
