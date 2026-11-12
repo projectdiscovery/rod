@@ -243,7 +243,7 @@ func TestElementContext(t *testing.T) {
 func TestElementCancelContext(t *testing.T) {
 	g := setup(t)
 
-	p := g.page.MustNavigate(g.srcFile("fixtures/click.html"))
+	p := g.page.MustNavigate(g.srcFile("fixtures/click.html")).MustWaitLoad()
 	el := p.Timeout(time.Second).MustElement("button")
 	el = el.CancelTimeout()
 	utils.Sleep(1.1)
