@@ -7,11 +7,14 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/url"
+	"os"
 
 	"github.com/go-rod/rod/lib/utils"
 )
 
-var inContainer = utils.InContainer
+// GitHub-hosted runners are not containers, and Chrome still refuses to start
+// there without --no-sandbox.
+var inContainer = utils.InContainer || os.Getenv("GITHUB_ACTIONS") == "true"
 
 func toHTTP(u url.URL) *url.URL {
 	newURL := u

@@ -57,12 +57,13 @@ func TestLaunchOptions(t *testing.T) {
 
 	defaults.Show = true
 	defaults.Devtools = true
+	wasContainer := inContainer
 	inContainer = true
 
 	// restore
 	defer func() {
 		defaults.ResetWith("")
-		inContainer = utils.InContainer
+		inContainer = wasContainer
 	}()
 
 	l := New()
