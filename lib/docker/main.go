@@ -42,6 +42,12 @@ func releaseLatest(at archType) {
 	login()
 	test(at)
 
+	// Only the upstream repo may publish. Forks run the tests and skip the push.
+	if os.Getenv("ROD_PUBLISH_IMAGE") != "true" {
+		fmt.Println("skip publish, ROD_PUBLISH_IMAGE is not set")
+		return
+	}
+
 	utils.Exec("docker push", at.tagDev())
 	utils.Exec("docker push", at.tag())
 }

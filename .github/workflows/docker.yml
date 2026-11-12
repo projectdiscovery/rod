@@ -27,6 +27,7 @@ jobs:
       - run: go run ./lib/docker $GITHUB_REF
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          ROD_PUBLISH_IMAGE: ${{ github.repository == 'go-rod/rod' && 'true' || 'false' }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -55,3 +56,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           ARCH: arm
+          ROD_PUBLISH_IMAGE: ${{ github.repository == 'go-rod/rod' && 'true' || 'false' }}
