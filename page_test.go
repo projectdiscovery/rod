@@ -519,7 +519,8 @@ func TestPageCaptureDOMSnapshot(t *testing.T) {
 	g.Is(domSnapshot.Strings, []string{})
 
 	timeOutPage := p.Timeout(1 * time.Second)
-	utils.Sleep(1)
+	// The deadline is one second from Timeout, so the sleep has to outlast it.
+	utils.Sleep(1.5)
 	snapshot, err := timeOutPage.CaptureDOMSnapshot()
 	g.Is(err, context.DeadlineExceeded)
 	g.Nil(snapshot)

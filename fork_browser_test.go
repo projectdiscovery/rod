@@ -392,25 +392,16 @@ func TestForkPageNavigateFailClosesTarget(t *testing.T) {
 	b := g.browser.MustIncognito()
 	defer b.MustClose()
 
-	// Chrome may already have a page in the new context. Only a target
-	// created by the failed Page call is a leak.
-	before := map[proto.TargetTargetID]bool{}
-	list, err := proto.TargetGetTargets{}.Call(b)
-	g.E(err)
-	for _, info := range list.TargetInfos {
-		if info.BrowserContextID == b.BrowserContextID {
-			before[info.TargetID] = true
-		}
-	}
-
-	_, err = b.Timeout(time.Second).Page(proto.TargetCreateTarget{URL: s.URL("/hang")})
+	_, err := b.Timeout(time.Second).Page(proto.TargetCreateTarget{URL: s.URL("/hang")})
 	g.Is(err, context.DeadlineExceeded)
 
 	open := func() bool {
 		list, err := proto.TargetGetTargets{}.Call(b)
 		g.E(err)
 		for _, info := range list.TargetInfos {
-			if info.BrowserContextID == b.BrowserContextID && !before[info.TargetID] {
+			// A new incognito context can grow its own about:blank after the
+			// snapshot. The leak is the navigation that Page failed to close.
+			if info.BrowserContextID == b.BrowserContextID && strings.Contains(info.URL, "/hang") {
 				return true
 			}
 		}

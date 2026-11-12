@@ -336,21 +336,31 @@ func (b *Browser) Page(opts proto.TargetCreateTarget) (p *Page, err error) {
 		if err != nil {
 			closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			// A target stuck in navigation can ignore the first close.
+			closer := b.Context(closeCtx)
+			// A target stuck in navigation can ignore the first close, and
+			// Chrome may have opened a child of that target. A failed
+			// GetTargets is not proof the target is gone.
 			for closeCtx.Err() == nil {
-				_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(b.Context(closeCtx))
-				list, listErr := proto.TargetGetTargets{}.Call(b.Context(closeCtx))
+				_, _ = proto.TargetCloseTarget{TargetID: target.TargetID}.Call(closer)
+				list, listErr := proto.TargetGetTargets{}.Call(closer)
 				if listErr != nil {
-					return
+					time.Sleep(50 * time.Millisecond)
+					continue
 				}
-				gone := true
+				left := false
 				for _, info := range list.TargetInfos {
-					if info.TargetID == target.TargetID {
-						gone = false
-						break
+					owned := info.TargetID == target.TargetID ||
+						info.OpenerID == target.TargetID ||
+						info.ParentID == target.TargetID
+					if !owned {
+						continue
+					}
+					left = true
+					if info.TargetID != target.TargetID {
+						_, _ = proto.TargetCloseTarget{TargetID: info.TargetID}.Call(closer)
 					}
 				}
-				if gone {
+				if !left {
 					return
 				}
 				time.Sleep(50 * time.Millisecond)
