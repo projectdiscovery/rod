@@ -68,6 +68,10 @@ type Browser struct {
 	domains     map[stateKey]int
 	autoAttach  *atomic.Bool
 
+	// opening joins concurrent PageFromTarget calls for one target so the
+	// attach and emulation run once, and never while targetsLock is held.
+	opening map[proto.TargetTargetID]*pageOpen
+
 	// stores all the previous cdp call of same type. Browser doesn't have enough API
 	// for us to retrieve all its internal states. This is an workaround to map them to local.
 	// For example you can't use cdp API to get the current position of mouse.
@@ -93,6 +97,7 @@ func New() *Browser {
 		domains:       map[stateKey]int{},
 		autoAttach:    &atomic.Bool{},
 		states:        &sync.Map{},
+		opening:       map[proto.TargetTargetID]*pageOpen{},
 		profile:       &compliantProfile{},
 	}).WithPanic(utils.Panic)
 }
@@ -437,6 +442,18 @@ func (b *Browser) PageFromSession(sessionID proto.TargetSessionID) *Page {
 	return page
 }
 
+// PageSetupTimeout bounds attach and the first emulation when the caller set
+// no deadline. A Chrome command that never returns must not pin the browser:
+// every later page used to wait behind that one.
+var PageSetupTimeout = 30 * time.Second
+
+// pageOpen is one in-flight attach of a target.
+type pageOpen struct {
+	done chan struct{}
+	page *Page
+	err  error
+}
+
 // PageFromTarget gets or creates a Page instance.
 func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 	if b.compliant {
@@ -444,30 +461,82 @@ func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 			return nil, err
 		}
 	}
+	return b.pageFromTarget(targetID, true)
+}
 
-	b.targetsLock.Lock()
-	defer b.targetsLock.Unlock()
-
-	page := b.loadCachedPage(targetID)
-	if page != nil {
+// pageFromTarget attaches to targetID. When prepare is set, the default
+// device or the compliant user agent is applied. The browser lock is not
+// held across those calls.
+func (b *Browser) pageFromTarget(targetID proto.TargetTargetID, prepare bool) (*Page, error) {
+	if page := b.loadCachedPage(targetID); page != nil {
 		return page, nil
 	}
+
+	b.targetsLock.Lock()
+	if page := b.loadCachedPage(targetID); page != nil {
+		b.targetsLock.Unlock()
+		return page, nil
+	}
+	if b.opening == nil {
+		b.opening = map[proto.TargetTargetID]*pageOpen{}
+	}
+	if op, ok := b.opening[targetID]; ok {
+		b.targetsLock.Unlock()
+		<-op.done
+		return op.page, op.err
+	}
+	op := &pageOpen{done: make(chan struct{})}
+	b.opening[targetID] = op
+	b.targetsLock.Unlock()
+
+	page, err := b.openTarget(targetID, prepare)
+
+	b.targetsLock.Lock()
+	if err == nil {
+		if existing := b.loadCachedPage(targetID); existing != nil {
+			page.sessionCancel()
+			page = existing
+		} else {
+			b.cachePage(page)
+		}
+	}
+	op.page, op.err = page, err
+	delete(b.opening, targetID)
+	close(op.done)
+	b.targetsLock.Unlock()
+	return page, err
+}
+
+func (b *Browser) pageSetupContext() (context.Context, context.CancelFunc) {
+	if _, ok := b.ctx.Deadline(); ok {
+		return b.ctx, func() {}
+	}
+	timeout := PageSetupTimeout
+	if timeout <= 0 {
+		timeout = 30 * time.Second
+	}
+	return context.WithTimeout(b.ctx, timeout)
+}
+
+func (b *Browser) openTarget(targetID proto.TargetTargetID, prepare bool) (page *Page, err error) {
+	ctx, cancel := b.pageSetupContext()
+	defer cancel()
+	caller := b.Context(ctx)
 
 	session, err := proto.TargetAttachToTarget{
 		TargetID: targetID,
 		Flatten:  true, // if it's not set no response will return
-	}.Call(b)
+	}.Call(caller)
 	if err != nil {
 		return nil, err
 	}
 
-	sessionCtx, cancel, cancelCause := b.sessionContext()
-
+	sessionCtx, cancelSession, cancelCause := b.sessionContext()
 	page = &Page{
 		e:             b.e,
 		ctx:           sessionCtx,
 		session:       sessionCtx,
-		sessionCancel: cancel,
+		sessionCancel: cancelSession,
 		cancelCause:   cancelCause,
 		sleeper:       b.sleeper,
 		browser:       b,
@@ -478,28 +547,36 @@ func (b *Browser) PageFromTarget(targetID proto.TargetTargetID) (*Page, error) {
 		jsCtxID:       new(proto.RuntimeRemoteObjectID),
 		helpersLock:   &sync.Mutex{},
 	}
-
 	page.root = page
 	page.newKeyboard().newMouse().newTouch()
 
-	if b.compliant {
-		err = page.applyCompliant()
-		if err != nil {
-			return nil, err
+	// return nil, err clears the named page result before this runs.
+	opened := page
+	defer func() {
+		if err != nil && opened.sessionCancel != nil {
+			opened.sessionCancel()
 		}
-	} else if !b.defaultDevice.IsClear() {
-		err = page.Emulate(b.defaultDevice)
+	}()
+
+	if prepare {
+		if b.compliant {
+			err = page.Context(ctx).applyCompliant()
+		} else if !b.defaultDevice.IsClear() {
+			err = page.Context(ctx).Emulate(b.defaultDevice)
+		}
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	b.cachePage(page)
-
 	// If we don't enable it, it will cause a lot of unexpected browser behavior.
 	// Such as proto.PageAddScriptToEvaluateOnNewDocument won't work.
-	page.EnableDomain(&proto.PageEnable{})
-
+	// A stuck Page.enable used to sit on the browser lock until the caller gave up.
+	restore := page.Context(ctx).EnableDomain(&proto.PageEnable{})
+	if err = ctx.Err(); err != nil {
+		restore()
+		return nil, err
+	}
 	return page, nil
 }
 

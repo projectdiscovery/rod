@@ -920,8 +920,16 @@ func (p *Page) WaitStable(d time.Duration) error {
 }
 
 // WaitIdle waits until the next window.requestIdleCallback is called.
+// timeout is also a deadline for the call. A frozen page used to leave the
+// promise pending after the page-side timer had already expired.
 func (p *Page) WaitIdle(timeout time.Duration) (err error) {
-	_, err = p.Evaluate(evalHelper(js.WaitIdle, timeout.Milliseconds()).ByPromise())
+	ctx := p.ctx
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(p.ctx, timeout+500*time.Millisecond)
+		defer cancel()
+	}
+	_, err = p.Context(ctx).Evaluate(evalHelper(js.WaitIdle, timeout.Milliseconds()).ByPromise())
 	return err
 }
 

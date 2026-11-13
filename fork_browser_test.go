@@ -506,3 +506,79 @@ func TestForkHijackEventExposed(t *testing.T) {
 	p.MustNavigate(s.URL("/event"))
 	g.Eq(seen.Load(), int32(1))
 }
+
+func TestForkStuckEmulationDoesNotBlockPages(t *testing.T) {
+	g := setup(t)
+
+	res, err := proto.TargetCreateTarget{URL: "about:blank"}.Call(g.browser)
+	g.E(err)
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, _ = proto.TargetCloseTarget{TargetID: res.TargetID}.Call(g.browser.Context(ctx))
+	})
+
+	started := make(chan struct{})
+	var once atomic.Int32
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+		if method == (proto.EmulationSetDeviceMetricsOverride{}).ProtoReq() && once.CompareAndSwap(0, 1) {
+			close(started)
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		return g.mc.principal.Call(ctx, sessionID, method, params)
+	})
+	t.Cleanup(g.mc.resetCall)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := g.browser.Context(ctx).PageFromTarget(res.TargetID)
+		errCh <- err
+	}()
+
+	select {
+	case <-started:
+	case <-time.After(15 * time.Second):
+		t.Fatal("emulation was not reached")
+	}
+
+	other, err := g.browser.Page(proto.TargetCreateTarget{URL: g.blank()})
+	g.E(err)
+	g.E(other.Close())
+
+	select {
+	case err := <-errCh:
+		if err == nil {
+			t.Fatal("stuck emulation returned success")
+		}
+	case <-time.After(8 * time.Second):
+		t.Fatal("stuck emulation did not return")
+	}
+}
+
+func TestForkWaitIdleDeadline(t *testing.T) {
+	g := setup(t)
+
+	p := g.page.MustNavigate(g.blank())
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+		req, ok := params.(proto.RuntimeCallFunctionOn)
+		if ok && req.AwaitPromise && strings.Contains(req.FunctionDeclaration, "waitIdle") {
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		return g.mc.principal.Call(ctx, sessionID, method, params)
+	})
+	t.Cleanup(g.mc.resetCall)
+
+	start := time.Now()
+	err := p.WaitIdle(200 * time.Millisecond)
+	if err == nil {
+		t.Fatal("frozen idle wait returned success")
+	}
+	if time.Since(start) > 3*time.Second {
+		t.Fatalf("idle wait ignored its timeout after %s", time.Since(start))
+	}
+}

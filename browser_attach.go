@@ -3,7 +3,6 @@ package rod
 import (
 	"context"
 	"encoding/json"
-	"sync"
 	"time"
 
 	"github.com/go-rod/rod/lib/proto"
@@ -31,38 +30,5 @@ func (b *Browser) framePage(targetID proto.TargetTargetID) (*Page, error) {
 		return nil, nil //nolint: nilerr
 	}
 
-	b.targetsLock.Lock()
-	defer b.targetsLock.Unlock()
-
-	if page := b.loadCachedPage(targetID); page != nil {
-		return page, nil
-	}
-
-	session, err := proto.TargetAttachToTarget{TargetID: targetID, Flatten: true}.Call(b)
-	if err != nil {
-		return nil, err
-	}
-
-	sessionCtx, cancel, cancelCause := b.sessionContext()
-	page := &Page{
-		e:             b.e,
-		ctx:           sessionCtx,
-		session:       sessionCtx,
-		sessionCancel: cancel,
-		cancelCause:   cancelCause,
-		sleeper:       b.sleeper,
-		browser:       b,
-		TargetID:      targetID,
-		SessionID:     session.SessionID,
-		FrameID:       proto.PageFrameID(targetID),
-		jsCtxLock:     &sync.Mutex{},
-		jsCtxID:       new(proto.RuntimeRemoteObjectID),
-		helpersLock:   &sync.Mutex{},
-	}
-	page.root = page
-	page.newKeyboard().newMouse().newTouch()
-
-	b.cachePage(page)
-	page.EnableDomain(&proto.PageEnable{})
-	return page, nil
+	return b.pageFromTarget(targetID, false)
 }
