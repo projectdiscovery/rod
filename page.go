@@ -894,7 +894,17 @@ const settleWorld = "rod_settle"
 // world, so a page script that replaces setTimeout can not hold the input.
 // Chrome reuses the world of the same name in a frame.
 func (p *Page) nextTask() error {
-	world, err := proto.PageCreateIsolatedWorld{FrameID: p.FrameID, WorldName: settleWorld}.Call(p)
+	frame := p.FrameID
+	if frame == "" {
+		// A page from [Browser.PageFromSession] has no frame ID. The wait
+		// then runs in the top frame of the session.
+		tree, err := proto.PageGetFrameTree{}.Call(p)
+		if err != nil {
+			return err
+		}
+		frame = tree.FrameTree.Frame.ID
+	}
+	world, err := proto.PageCreateIsolatedWorld{FrameID: frame, WorldName: settleWorld}.Call(p)
 	if err != nil {
 		return err
 	}

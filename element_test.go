@@ -146,6 +146,25 @@ func TestInputIgnoresPageTimers(t *testing.T) {
 	g.E(el.Click(proto.InputMouseButtonLeft, 1))
 }
 
+// A page from PageFromSession has no frame ID. The wait after an input must
+// still find the frame.
+func TestInputOnSessionPage(t *testing.T) {
+	g := setup(t)
+
+	p := g.newPage(g.html(`<button onclick="this.setAttribute('a', 'ok')">click</button>
+		<input onkeyup="this.setAttribute('a', 'ok')">`)).MustWaitLoad()
+	s, err := proto.TargetAttachToTarget{TargetID: p.TargetID, Flatten: true}.Call(g.browser)
+	g.E(err)
+	sp := g.browser.PageFromSession(s.SessionID).Timeout(5 * time.Second)
+	g.Eq(sp.FrameID, proto.PageFrameID(""))
+
+	g.E(sp.MustElement("button").Click(proto.InputMouseButtonLeft, 1))
+	g.True(p.MustHas("button[a=ok]"))
+
+	g.E(sp.MustElement("input").Type(input.Enter))
+	g.True(p.MustHas("input[a=ok]"))
+}
+
 func TestClickWrapped(t *testing.T) {
 	g := setup(t)
 
