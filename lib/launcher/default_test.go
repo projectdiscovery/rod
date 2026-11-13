@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/projectdiscovery/rod/lib/launcher/flags"
@@ -118,6 +120,24 @@ func TestDefaultDownloadsLatestChrome(t *testing.T) {
 	_, err = os.Stat(b.Dir() + ".sha256")
 	if err != nil {
 		t.Fatal("pin not recorded", err)
+	}
+}
+
+func TestDownloadSuccessIgnoresLegacyChromium(t *testing.T) {
+	fakeCFT(t)
+
+	root := t.TempDir()
+	legacy := installLegacy(t, root, 1321438, fakeDumpDOSScript)
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin == legacy || !strings.Contains(bin, "157.0.1.0") {
+		t.Fatalf("bin %s, want the downloaded latest Chrome for Testing", bin)
 	}
 }
 
@@ -247,6 +267,170 @@ func TestOfflineWithNothingInstalledFails(t *testing.T) {
 	_, err := b.Get()
 	if err == nil {
 		t.Fatal("expected an error without network or cache")
+	}
+}
+
+// installLegacy places a Chromium snapshot under root in the layout that
+// go-rod used for its default download, such as chromium-1321438.
+func installLegacy(t *testing.T, root string, rev int, script string) string {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		t.Skip("the fake browser is a shell script")
+	}
+	bin := filepath.Join(root, fmt.Sprintf("chromium-%d", rev), filepath.FromSlash(chromiumBin()))
+	err := os.MkdirAll(filepath.Dir(bin), 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.WriteFile(bin, []byte(script), 0o755)
+	if err != nil { //nolint: gosec
+		t.Fatal(err)
+	}
+	return bin
+}
+
+func offlineCFT(t *testing.T) {
+	t.Helper()
+	// Nothing listens on port 1, so the versions file cannot be fetched.
+	oldVersions := ChromeForTestingVersionsURL
+	ChromeForTestingVersionsURL = "http://127.0.0.1:1/versions.json"
+	t.Cleanup(func() { ChromeForTestingVersionsURL = oldVersions })
+}
+
+func TestOfflineFallsBackToLegacyChromium(t *testing.T) {
+	offlineCFT(t)
+
+	root := t.TempDir()
+	installLegacy(t, root, 1131657, fakeDumpDOSScript)
+	want := installLegacy(t, root, 1321438, fakeDumpDOSScript)
+	installLegacy(t, root, 1400000, "#!/bin/sh\nexit 1\n")
+	for _, dir := range []string{"chromium-latest", "chromium-1500000"} {
+		err := os.MkdirAll(filepath.Join(root, dir), 0o755)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	layout := map[string]string{
+		"darwin":  "Chromium.app/Contents/MacOS/Chromium",
+		"linux":   "chrome",
+		"windows": "chrome.exe",
+	}[runtime.GOOS]
+	if want != filepath.Join(root, "chromium-1321438", filepath.FromSlash(layout)) {
+		t.Fatalf("fixture %s is not the go-rod cache layout", want)
+	}
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin != want {
+		t.Fatalf("bin %s, want the newest valid snapshot %s", bin, want)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	b.Context = ctx
+	_, err = b.Get()
+	if err == nil {
+		t.Fatal("a canceled context must not fall back")
+	}
+}
+
+func TestOfflinePrefersChromeForTestingOverLegacy(t *testing.T) {
+	offlineCFT(t)
+
+	root := t.TempDir()
+	installLegacy(t, root, 1321438, fakeDumpDOSScript)
+	want := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin != want {
+		t.Fatalf("bin %s, want the installed Chrome for Testing %s", bin, want)
+	}
+}
+
+func TestDownloadFailureFallsBackToLegacyChromium(t *testing.T) {
+	var downloads atomic.Int32
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/versions.json" {
+			_, _ = fmt.Fprint(w, `{"channels":{"Stable":{"version":"157.0.1.0"}}}`)
+			return
+		}
+		downloads.Add(1)
+		http.NotFound(w, r)
+	}))
+	t.Cleanup(s.Close)
+	oldVersions, oldStorage := ChromeForTestingVersionsURL, chromeForTestingStorage
+	ChromeForTestingVersionsURL = s.URL + "/versions.json"
+	chromeForTestingStorage = s.URL + "/cft"
+	t.Cleanup(func() {
+		ChromeForTestingVersionsURL = oldVersions
+		chromeForTestingStorage = oldStorage
+	})
+
+	root := t.TempDir()
+	want := installLegacy(t, root, 1321438, fakeDumpDOSScript)
+
+	// An explicit Chromium revision does not fall back.
+	snap := NewBrowser()
+	snap.RootDir = root
+	snap.Revision = 1400000
+	snap.Hosts = []Host{func(int) string { return s.URL + "/snapshot.zip" }}
+	snap.Logger = utils.LoggerQuiet
+	_, err := snap.Get()
+	if err == nil {
+		t.Fatal("an explicit revision must fail when its download fails")
+	}
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	bin, err := b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin != want {
+		t.Fatalf("bin %s, want the cached snapshot %s", bin, want)
+	}
+
+	// An older cached Chrome for Testing build wins over the snapshot.
+	cft := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
+	bin, err = b.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bin != cft {
+		t.Fatalf("bin %s, want the cached Chrome for Testing %s", bin, cft)
+	}
+	if downloads.Load() == 0 {
+		t.Fatal("the Chrome for Testing download was not tried")
+	}
+
+	// Without a cached snapshot the download error is returned.
+	empty := NewBrowser()
+	empty.RootDir = t.TempDir()
+	empty.Logger = utils.LoggerQuiet
+	_, err = empty.Get()
+	if err == nil {
+		t.Fatal("a failed download without a cached snapshot must fail")
+	}
+
+	// An explicit Chrome for Testing version must not fall back.
+	pinned := NewChromeForTesting("157.0.1.0", false)
+	pinned.RootDir = root
+	pinned.Logger = utils.LoggerQuiet
+	_, err = pinned.Get()
+	if err == nil {
+		t.Fatal("an explicit version must fail when its download fails")
 	}
 }
 
