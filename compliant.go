@@ -13,6 +13,12 @@ import (
 )
 
 const compliantHintJS = `(() => {
+	// chrome://version's first document has no userAgentData. Reading it
+	// then would stick the browser with no client hints. Wait until that
+	// page has loaded, then a missing userAgentData is the real answer.
+	if (location.protocol !== "chrome:" || document.readyState !== "complete") {
+		return JSON.stringify({ua: ""})
+	}
 	const ua = navigator.userAgent
 	if (!navigator.userAgentData) return JSON.stringify({ua})
 	return navigator.userAgentData.getHighEntropyValues([
@@ -108,8 +114,7 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 			case meta != nil:
 				return ua, meta, nil
 			case ua != "":
-				// No navigator.userAgentData. The answer is final, so waiting
-				// longer would not change it.
+				// chrome://version has loaded and this browser has no client hints.
 				return ua, nil, nil
 			default:
 				last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())

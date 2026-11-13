@@ -17,3 +17,14 @@ func TestCompliantFromEvalNoHints(t *testing.T) {
 		t.Fatalf("ua = %q, want %q", ua, want)
 	}
 }
+
+// An empty user agent is the page not being ready yet. The caller retries it.
+func TestCompliantFromEvalNotReady(t *testing.T) {
+	ua, meta, err := compliantFromEval(`{"ua":""}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ua != "" || meta != nil {
+		t.Fatalf("ua = %q, meta = %v", ua, meta)
+	}
+}
