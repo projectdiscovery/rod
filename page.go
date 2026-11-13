@@ -870,6 +870,19 @@ func (p *Page) WaitRepaint() error {
 	return err
 }
 
+// settleClick waits until the renderer has run the click's default action.
+// A form submission or link navigation replaces the document. The evaluation
+// is then retried on the new document, so [Mouse.Click] does not return until
+// that document can be read. A click that does not navigate resolves on the
+// next task.
+func (p *Page) settleClick() error {
+	_, err := p.Eval(`() => new Promise(r => setTimeout(r, 0))`)
+	if errors.Is(err, cdp.ErrCtxDestroyed) {
+		return p.WaitLoad()
+	}
+	return err
+}
+
 // WaitLoad waits for the `window.onload` event, it returns immediately if the event is already fired.
 func (p *Page) WaitLoad() error {
 	defer p.tryTrace(TraceTypeWait, "load")()

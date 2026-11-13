@@ -7,9 +7,13 @@ import (
 	"fmt"
 	"image/color"
 	"image/png"
+	"io"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -47,6 +51,43 @@ func TestClick(t *testing.T) {
 		g.mc.stubErr(8, proto.RuntimeCallFunctionOn{})
 		el.MustClick()
 	})
+}
+
+func TestClickSubmitsForm(t *testing.T) {
+	g := setup(t)
+
+	dir := t.TempDir()
+	file := filepath.Join(dir, "payload.txt")
+	g.E(os.WriteFile(file, []byte("Basic File Upload\n"), 0o644))
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			_, _ = io.WriteString(w, `<!doctype html><body>
+				<form method="post" enctype="multipart/form-data">
+				<input type="file" name="file">
+				<input type="submit" value="Upload">
+				</form></body>`)
+			return
+		}
+		uploaded, _, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer uploaded.Close()
+		body, _ := io.ReadAll(uploaded)
+		// The response has to arrive after the mouse event. Click must not
+		// return until this document is the one the caller reads.
+		time.Sleep(200 * time.Millisecond)
+		_, _ = w.Write(body)
+	}))
+	t.Cleanup(srv.Close)
+
+	p := g.page.MustNavigate(srv.URL).MustWaitLoad()
+	p.MustElement(`input[type="file"]`).MustSetFiles(file)
+	p.MustElement(`input[type="submit"]`).MustClick()
+
+	g.True(strings.Contains(p.MustHTML(), "Basic File Upload"))
 }
 
 func TestClickWrapped(t *testing.T) {

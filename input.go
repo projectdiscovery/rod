@@ -405,8 +405,14 @@ func (m *Mouse) Click(button proto.InputMouseButton, clickCount int) error {
 	if err != nil {
 		return err
 	}
-
-	return m.Up(button, clickCount)
+	err = m.Up(button, clickCount)
+	if err != nil {
+		return err
+	}
+	// Chrome 157 runs the click's default action, such as submitting a form,
+	// on a later task. Older headless builds finished that navigation before
+	// the mouse event returned, and callers read the new document immediately.
+	return m.page.settleClick()
 }
 
 func (m *Mouse) state() *Mouse {
