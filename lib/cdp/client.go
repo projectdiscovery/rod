@@ -17,10 +17,10 @@ import (
 
 // Request to send to browser.
 type Request struct {
-	ID        int         `json:"id"`
-	SessionID string      `json:"sessionId,omitempty"`
-	Method    string      `json:"method"`
-	Params    interface{} `json:"params,omitempty"`
+	ID        int    `json:"id"`
+	SessionID string `json:"sessionId,omitempty"`
+	Method    string `json:"method"`
+	Params    any    `json:"params,omitempty"`
 }
 
 // Response from browser.
@@ -63,7 +63,7 @@ type pendingShard struct {
 
 // Client is a devtools protocol connection instance.
 type Client struct {
-	count uint64
+	count atomic.Uint64
 
 	ws WebSocketable
 
@@ -123,21 +123,6 @@ type writeJob struct {
 	done chan error
 }
 
-func (cdp *Client) writer() {
-	for {
-		select {
-		case <-cdp.dead:
-			return
-		case job := <-cdp.writes:
-			err := cdp.ws.Send(job.data)
-			select {
-			case job.done <- err:
-			default:
-			}
-		}
-	}
-}
-
 // Close the underlying transport. Pending and later calls fail with an error
 // matching [ErrConnClosed]. Safe to call more than once.
 func (cdp *Client) Close() error {
@@ -171,14 +156,12 @@ type result struct {
 	err error
 }
 
-func (cdp *Client) shard(id int) *pendingShard {
-	return &cdp.pending[uint(id)%pendingShards]
-}
-
 // Call a method and wait for its response.
-func (cdp *Client) Call(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+//
+//nolint:gocyclo,cyclop // one request path with cancellation branches
+func (cdp *Client) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 	req := &Request{
-		ID:        int(atomic.AddUint64(&cdp.count, 1)),
+		ID:        int(cdp.count.Add(1)),
 		SessionID: sessionID,
 		Method:    method,
 		Params:    params,
@@ -202,7 +185,8 @@ func (cdp *Client) Call(ctx context.Context, sessionID, method string, params in
 		sh.mu.Unlock()
 	}()
 
-	if err := cdp.Err(); err != nil {
+	err = cdp.Err()
+	if err != nil {
 		return nil, err
 	}
 
@@ -216,14 +200,16 @@ func (cdp *Client) Call(ctx context.Context, sessionID, method string, params in
 		return nil, cdp.cause
 	case cdp.writes <- job:
 	}
-	if err := ctx.Err(); err != nil {
+	err = ctx.Err()
+	if err != nil {
 		return nil, err
 	}
 
 	select {
 	case err := <-job.done:
 		if err != nil {
-			if cause := cdp.Err(); cause != nil {
+			cause := cdp.Err()
+			if cause != nil {
 				return nil, cause
 			}
 			return nil, err
@@ -258,6 +244,25 @@ func (cdp *Client) Call(ctx context.Context, sessionID, method string, params in
 // It is closed when the connection ends.
 func (cdp *Client) Event() <-chan *Event {
 	return cdp.event
+}
+
+func (cdp *Client) shard(id int) *pendingShard {
+	return &cdp.pending[uint(id)%pendingShards]
+}
+
+func (cdp *Client) writer() {
+	for {
+		select {
+		case <-cdp.dead:
+			return
+		case job := <-cdp.writes:
+			err := cdp.ws.Send(job.data)
+			select {
+			case job.done <- err:
+			default:
+			}
+		}
+	}
 }
 
 func (cdp *Client) consumeMessages() {

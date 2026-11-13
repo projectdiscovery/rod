@@ -206,10 +206,9 @@ func Example_error_handling() {
 
 	// We use Go's standard way to check error types, no magic.
 	check := func(err error) {
-		var evalErr *rod.EvalError
 		if errors.Is(err, context.DeadlineExceeded) { // timeout error
 			fmt.Println("timeout err")
-		} else if errors.As(err, &evalErr) { // eval error
+		} else if evalErr, ok := errors.AsType[*rod.EvalError](err); ok { // eval error
 			fmt.Println(evalErr.LineNumber)
 		} else if err != nil {
 			fmt.Println("can't handle", err)
@@ -271,7 +270,7 @@ func Example_page_screenshot() {
 	// customization version
 	img, _ := page.Screenshot(true, &proto.PageCaptureScreenshot{
 		Format:  proto.PageCaptureScreenshotFormatJpeg,
-		Quality: gson.Int(90),
+		Quality: new(90),
 		Clip: &proto.PageViewport{
 			X:      0,
 			Y:      0,
@@ -290,7 +289,7 @@ func Example_page_scroll_screenshot() {
 	// capture entire browser viewport, returning jpg with quality=90
 	img, err := browser.MustPage(localFixture("search.html")).MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
 		Format:  proto.PageCaptureScreenshotFormatJpeg,
-		Quality: gson.Int(90),
+		Quality: new(90),
 	})
 	if err != nil {
 		panic(err)
@@ -307,7 +306,7 @@ func Example_page_pdf() {
 
 	// customized version
 	pdf, _ := page.PDF(&proto.PagePrintToPDF{
-		PaperWidth:  gson.Num(8.5),
+		PaperWidth:  new(8.5),
 		PaperHeight: gson.Num(11),
 		PageRanges:  "1-3",
 	})
@@ -645,11 +644,9 @@ func ExamplePage_pool() {
 	// Run jobs concurrently
 	wg := sync.WaitGroup{}
 	for range "...." {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			yourJob()
-		}()
+		})
 	}
 	wg.Wait()
 
@@ -676,11 +673,8 @@ func ExampleBrowser_pool() {
 
 	// Use the browser instances in separate goroutines
 	var wg sync.WaitGroup
-	for i := 0; i < 3; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
+	for range 3 {
+		wg.Go(func() {
 			// Get a browser instance from the pool
 			browser := pool.MustGet(create)
 
@@ -691,7 +685,7 @@ func ExampleBrowser_pool() {
 			// Use the browser instance
 			page := browser.MustPage(localFixture("titled.html"))
 			fmt.Println(page.MustInfo().Title)
-		}()
+		})
 	}
 
 	// Wait for all the goroutines to finish
@@ -731,7 +725,7 @@ func Example_load_extension() {
 func Example_log_cdp_traffic() {
 	cdp := cdp.New().
 		// Here we can customize how to log the requests, responses, and events transferred between Rod and the browser.
-		Logger(utils.Log(func(args ...interface{}) {
+		Logger(utils.Log(func(args ...any) {
 			switch v := args[0].(type) {
 			case *cdp.Request:
 				fmt.Printf("id: %d", v.ID)

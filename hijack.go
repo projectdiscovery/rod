@@ -61,116 +61,6 @@ func newHijackRouter(browser *Browser, client proto.Client) *HijackRouter {
 	}
 }
 
-func (r *HijackRouter) initEvents() *HijackRouter {
-	ctx := r.browser.ctx
-	if cta, ok := r.client.(proto.Contextable); ok {
-		ctx = cta.GetContext()
-	}
-
-	var sessionID proto.TargetSessionID
-	if tsa, ok := r.client.(proto.Sessionable); ok {
-		sessionID = tsa.GetSessionID()
-	}
-
-	eventCtx, cancel := context.WithCancel(ctx)
-	r.stop = cancel
-
-	r.run = r.browser.Context(eventCtx).eachEvent(sessionID, func(e *proto.FetchRequestPaused, from proto.TargetSessionID) bool {
-		// A browser-level router must leave requests paused by page routers alone.
-		if from != sessionID {
-			return false
-		}
-		go r.handle(eventCtx, e)
-		return false
-	})
-	return r
-}
-
-func (r *HijackRouter) handle(eventCtx context.Context, e *proto.FetchRequestPaused) {
-	defer func() {
-		if rec := recover(); rec != nil {
-			_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
-		}
-	}()
-
-	if e.ResponseStatusCode != nil || e.ResponseErrorReason != "" {
-		r.handleResponse(e)
-		return
-	}
-
-	r.mu.RLock()
-	handlers := r.handlers
-	r.mu.RUnlock()
-
-	ctx := r.new(eventCtx, e)
-	for _, h := range handlers {
-		if !h.regexp.MatchString(e.Request.URL) {
-			continue
-		}
-		if h.resource != "" && h.resource != e.ResourceType {
-			continue
-		}
-
-		h.handler(ctx)
-
-		if ctx.continueRequest != nil {
-			ctx.continueRequest.RequestID = e.RequestID
-			if err := ctx.continueRequest.Call(r.client); err != nil {
-				ctx.OnError(err)
-			}
-			return
-		}
-
-		if ctx.Skip {
-			continue
-		}
-
-		if ctx.Response.fail.ErrorReason != "" {
-			if err := ctx.Response.fail.Call(r.client); err != nil {
-				ctx.OnError(err)
-			}
-			return
-		}
-
-		if err := ctx.Response.payload.Call(r.client); err != nil {
-			ctx.OnError(err)
-		}
-		return
-	}
-	_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
-}
-
-// patternsLocked returns the Fetch patterns of every handler. r.mu must be held.
-func (r *HijackRouter) patternsLocked() []*proto.FetchRequestPattern {
-	patterns := make([]*proto.FetchRequestPattern, 0, len(r.handlers)+len(r.response))
-	for _, h := range r.handlers {
-		patterns = append(patterns, &proto.FetchRequestPattern{URLPattern: h.pattern, ResourceType: h.resource})
-	}
-	for _, h := range r.response {
-		patterns = append(patterns, &proto.FetchRequestPattern{
-			URLPattern:   h.pattern,
-			ResourceType: h.resource,
-			RequestStage: proto.FetchRequestStageResponse,
-		})
-	}
-	return patterns
-}
-
-// apply enables Fetch with the current patterns, or disables it when there
-// are none, so requests are only paused when some handler can want them.
-func (r *HijackRouter) apply() error {
-	r.mu.Lock()
-	patterns := r.patternsLocked()
-	r.enable.Patterns = patterns
-	enable := proto.FetchEnable{Patterns: patterns, HandleAuthRequests: r.enable.HandleAuthRequests}
-	r.mu.Unlock()
-
-	if len(patterns) == 0 {
-		return proto.FetchDisable{}.Call(r.client)
-	}
-	return enable.Call(r.client)
-}
-
 // Add a hijack handler to router, the doc of the pattern is the same as "proto.FetchRequestPattern.URLPattern".
 func (r *HijackRouter) Add(pattern string, resourceType proto.NetworkResourceType, handler func(*Hijack)) error {
 	reg, err := regexp.Compile(proto.PatternToReg(pattern))
@@ -181,12 +71,13 @@ func (r *HijackRouter) Add(pattern string, resourceType proto.NetworkResourceTyp
 	r.mu.Lock()
 	handlers := make([]*hijackHandler, 0, len(r.handlers)+1)
 	handlers = append(handlers, r.handlers...)
-	r.handlers = append(handlers, &hijackHandler{
+	handlers = append(handlers, &hijackHandler{
 		pattern:  pattern,
 		regexp:   reg,
 		handler:  handler,
 		resource: resourceType,
 	})
+	r.handlers = handlers
 	r.mu.Unlock()
 
 	return r.apply()
@@ -212,6 +103,17 @@ func (r *HijackRouter) Remove(pattern string) error {
 	r.mu.Unlock()
 
 	return r.apply()
+}
+
+// Run the router, after you call it, you shouldn't add new handler to it.
+func (r *HijackRouter) Run() {
+	r.run()
+}
+
+// Stop the router.
+func (r *HijackRouter) Stop() error {
+	r.stop()
+	return proto.FetchDisable{}.Call(r.client)
 }
 
 // new context.
@@ -254,15 +156,118 @@ func (r *HijackRouter) new(ctx context.Context, e *proto.FetchRequestPaused) *Hi
 	}
 }
 
-// Run the router, after you call it, you shouldn't add new handler to it.
-func (r *HijackRouter) Run() {
-	r.run()
+// apply enables Fetch with the current patterns, or disables it when there
+// are none, so requests are only paused when some handler can want them.
+func (r *HijackRouter) apply() error {
+	r.mu.Lock()
+	patterns := r.patternsLocked()
+	r.enable.Patterns = patterns
+	enable := proto.FetchEnable{Patterns: patterns, HandleAuthRequests: r.enable.HandleAuthRequests}
+	r.mu.Unlock()
+
+	if len(patterns) == 0 {
+		return proto.FetchDisable{}.Call(r.client)
+	}
+	return enable.Call(r.client)
 }
 
-// Stop the router.
-func (r *HijackRouter) Stop() error {
-	r.stop()
-	return proto.FetchDisable{}.Call(r.client)
+// patternsLocked returns the Fetch patterns of every handler. r.mu must be held.
+func (r *HijackRouter) patternsLocked() []*proto.FetchRequestPattern {
+	patterns := make([]*proto.FetchRequestPattern, 0, len(r.handlers)+len(r.response))
+	for _, h := range r.handlers {
+		patterns = append(patterns, &proto.FetchRequestPattern{URLPattern: h.pattern, ResourceType: h.resource})
+	}
+	for _, h := range r.response {
+		patterns = append(patterns, &proto.FetchRequestPattern{
+			URLPattern:   h.pattern,
+			ResourceType: h.resource,
+			RequestStage: proto.FetchRequestStageResponse,
+		})
+	}
+	return patterns
+}
+
+func (r *HijackRouter) handle(eventCtx context.Context, e *proto.FetchRequestPaused) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
+		}
+	}()
+
+	if e.ResponseStatusCode != nil || e.ResponseErrorReason != "" {
+		r.handleResponse(e)
+		return
+	}
+
+	r.mu.RLock()
+	handlers := r.handlers
+	r.mu.RUnlock()
+
+	ctx := r.new(eventCtx, e)
+	for _, h := range handlers {
+		if !h.regexp.MatchString(e.Request.URL) {
+			continue
+		}
+		if h.resource != "" && h.resource != e.ResourceType {
+			continue
+		}
+
+		h.handler(ctx)
+
+		if ctx.continueRequest != nil {
+			ctx.continueRequest.RequestID = e.RequestID
+			err := ctx.continueRequest.Call(r.client)
+			if err != nil {
+				ctx.OnError(err)
+			}
+			return
+		}
+
+		if ctx.Skip {
+			continue
+		}
+
+		if ctx.Response.fail.ErrorReason != "" {
+			err := ctx.Response.fail.Call(r.client)
+			if err != nil {
+				ctx.OnError(err)
+			}
+			return
+		}
+
+		err := ctx.Response.payload.Call(r.client)
+		if err != nil {
+			ctx.OnError(err)
+		}
+		return
+	}
+	_ = proto.FetchContinueRequest{RequestID: e.RequestID}.Call(r.client)
+}
+
+func (r *HijackRouter) initEvents() *HijackRouter {
+	ctx := r.browser.ctx
+	if cta, ok := r.client.(proto.Contextable); ok {
+		ctx = cta.GetContext()
+	}
+
+	var sessionID proto.TargetSessionID
+	if tsa, ok := r.client.(proto.Sessionable); ok {
+		sessionID = tsa.GetSessionID()
+	}
+
+	eventCtx, cancel := context.WithCancel(ctx)
+	r.stop = cancel
+
+	onPaused := func(e *proto.FetchRequestPaused, from proto.TargetSessionID) bool {
+		// A browser-level router must leave requests paused by page routers alone.
+		if from != sessionID {
+			return false
+		}
+		go r.handle(eventCtx, e)
+		return false
+	}
+	r.run = r.browser.Context(eventCtx).eachEvent(sessionID, onPaused)
+	return r
 }
 
 // hijackHandler to handle each request that match the regexp.
@@ -285,7 +290,7 @@ type Hijack struct {
 	continueRequest *proto.FetchContinueRequest
 
 	// CustomState is used to store things for this context
-	CustomState interface{}
+	CustomState any
 
 	browser *Browser
 	maxBody int
@@ -394,7 +399,7 @@ func (ctx *HijackRequest) SetContext(c context.Context) *HijackRequest {
 }
 
 // SetBody of the request, if obj is []byte or string, raw body will be used, else it will be encoded as json.
-func (ctx *HijackRequest) SetBody(obj interface{}) *HijackRequest {
+func (ctx *HijackRequest) SetBody(obj any) *HijackRequest {
 	var b []byte
 
 	switch body := obj.(type) {
@@ -482,7 +487,7 @@ func (ctx *HijackResponse) AddHeader(pairs ...string) *HijackResponse {
 }
 
 // SetBody of the payload, if obj is []byte or string, raw body will be used, else it will be encoded as json.
-func (ctx *HijackResponse) SetBody(obj interface{}) *HijackResponse {
+func (ctx *HijackResponse) SetBody(obj any) *HijackResponse {
 	switch body := obj.(type) {
 	case []byte:
 		ctx.payload.Body = body

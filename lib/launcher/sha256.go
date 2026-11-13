@@ -18,10 +18,11 @@ func CheckFileSHA256(path, sum string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
+	_, err = io.Copy(h, f)
+	if err != nil {
 		return err
 	}
 	got := hex.EncodeToString(h.Sum(nil))

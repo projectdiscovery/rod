@@ -9,7 +9,7 @@ import (
 
 func countStates(b *Browser) int {
 	n := 0
-	b.states.Range(func(_, _ interface{}) bool {
+	b.states.Range(func(_, _ any) bool {
 		n++
 		return true
 	})
@@ -21,7 +21,7 @@ func TestClosedPagesLeaveNoStates(t *testing.T) {
 	defer b.MustClose()
 
 	base := countStates(b)
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		p := b.MustPage("about:blank").MustWaitLoad()
 		p.MustEval(`() => 1`)
 		p.MustSetViewport(800, 600, 1, false)

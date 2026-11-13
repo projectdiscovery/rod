@@ -22,10 +22,7 @@ func (b *limitBuf) Write(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if len(b.buf) < b.max {
-		n := b.max - len(b.buf)
-		if n > len(p) {
-			n = len(p)
-		}
+		n := min(b.max-len(b.buf), len(p))
 		b.buf = append(b.buf, p[:n]...)
 	}
 	return len(p), nil

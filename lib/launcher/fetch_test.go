@@ -38,7 +38,8 @@ func buildZip(t *testing.T, entries ...zipEntry) []byte {
 		}
 		_, _ = w.Write([]byte(e.body))
 	}
-	if err := z.Close(); err != nil {
+	err := z.Close()
+	if err != nil {
 		t.Fatal(err)
 	}
 	return buf.Bytes()
@@ -74,7 +75,8 @@ func TestFetchArchiveExtracts(t *testing.T) {
 	if err != nil || info.Mode().Perm()&0o100 == 0 {
 		t.Fatalf("mode: %v %v", info, err)
 	}
-	if l, err := os.Readlink(filepath.Join(dir, "lib", "link")); err != nil || l != filepath.FromSlash("../bin/chrome") {
+	l, err := os.Readlink(filepath.Join(dir, "lib", "link"))
+	if err != nil || l != filepath.FromSlash("../bin/chrome") {
 		t.Fatalf("link: %q %v", l, err)
 	}
 	left, _ := filepath.Glob(filepath.Join(filepath.Dir(dir), ".rod-*"))
@@ -90,7 +92,8 @@ func TestFetchArchiveChecksum(t *testing.T) {
 	if err == nil {
 		t.Fatal("checksum mismatch accepted")
 	}
-	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+	_, err = os.Stat(dir)
+	if !os.IsNotExist(err) {
 		t.Fatal("dir created on checksum failure")
 	}
 }
@@ -113,7 +116,8 @@ func TestFetchArchiveRejectsEscapes(t *testing.T) {
 			if !errors.Is(err, ErrUnsafeArchive) {
 				t.Fatalf("expected unsafe archive, got %v", err)
 			}
-			if _, err := os.Stat(filepath.Join(root, "evil")); !os.IsNotExist(err) {
+			_, err = os.Stat(filepath.Join(root, "evil"))
+			if !os.IsNotExist(err) {
 				t.Fatal("escaped file written")
 			}
 		})
@@ -127,10 +131,12 @@ func TestFetchArchiveFallsBack(t *testing.T) {
 	defer bad.Close()
 	good := serveZip(t, buildZip(t, zipEntry{name: "a/b", body: "x"}))
 	dir := filepath.Join(t.TempDir(), "browser")
-	if _, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL, good.URL}); err != nil {
+	_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL, good.URL})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL}); err == nil {
+	_, err = fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL})
+	if err == nil {
 		t.Fatal("404 accepted")
 	}
 }

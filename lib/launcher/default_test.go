@@ -19,8 +19,9 @@ const fakeDumpDOSScript = "#!/bin/sh\necho '<html><head></head><body></body></ht
 // fakeCFT serves a Stable versions file and fake Chrome for Testing archives
 // for the current platform, both headless-shell and full Chrome. It points the
 // package at the server for the duration of the test.
-func fakeCFT(t *testing.T, version string) {
+func fakeCFT(t *testing.T) {
 	t.Helper()
+	version := "157.0.1.0"
 	if runtime.GOOS == "windows" {
 		t.Skip("the fake browser is a shell script")
 	}
@@ -62,10 +63,12 @@ func fakeCFT(t *testing.T, version string) {
 func installFake(t *testing.T, root string, c *chromeForTesting) string {
 	t.Helper()
 	bin := filepath.Join(root, c.dirName(), filepath.FromSlash(c.binName()))
-	if err := os.MkdirAll(filepath.Dir(bin), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(bin), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(bin, []byte(fakeDumpDOSScript), 0o755); err != nil { //nolint: gosec
+	err = os.WriteFile(bin, []byte(fakeDumpDOSScript), 0o755)
+	if err != nil { //nolint: gosec
 		t.Fatal(err)
 	}
 	return bin
@@ -86,13 +89,14 @@ func TestCFTPlatformFor(t *testing.T) {
 			t.Fatalf("%v: got %q %v, want %q", k, got, err, want)
 		}
 	}
-	if _, err := cftPlatformFor("linux", "386"); err == nil {
+	_, err := cftPlatformFor("linux", "386")
+	if err == nil {
 		t.Fatal("linux/386 has no build")
 	}
 }
 
 func TestDefaultDownloadsLatestChrome(t *testing.T) {
-	fakeCFT(t, "157.0.1.0")
+	fakeCFT(t)
 
 	b := NewBrowser()
 	b.RootDir = t.TempDir()
@@ -107,16 +111,18 @@ func TestDefaultDownloadsLatestChrome(t *testing.T) {
 	if bin != want {
 		t.Fatalf("bin %s, want %s", bin, want)
 	}
-	if err := b.Validate(); err != nil {
+	err = b.Validate()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(b.Dir() + ".sha256"); err != nil {
+	_, err = os.Stat(b.Dir() + ".sha256")
+	if err != nil {
 		t.Fatal("pin not recorded", err)
 	}
 }
 
 func TestHeadfulDownloadsFullChrome(t *testing.T) {
-	fakeCFT(t, "157.0.1.0")
+	fakeCFT(t)
 
 	b := NewBrowser()
 	b.RootDir = t.TempDir()
@@ -133,7 +139,7 @@ func TestHeadfulDownloadsFullChrome(t *testing.T) {
 }
 
 func TestLaunchPicksBuildByHeadless(t *testing.T) {
-	fakeCFT(t, "157.0.1.0")
+	fakeCFT(t)
 
 	headless := New()
 	headless.browser.RootDir = t.TempDir()
@@ -185,7 +191,7 @@ func TestLaunchPicksBuildByHeadless(t *testing.T) {
 }
 
 func TestLatestPrunesOlderVersion(t *testing.T) {
-	fakeCFT(t, "157.0.1.0")
+	fakeCFT(t)
 
 	root := t.TempDir()
 	old := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
@@ -194,13 +200,16 @@ func TestLatestPrunesOlderVersion(t *testing.T) {
 	b := NewBrowser()
 	b.RootDir = root
 	b.Logger = utils.LoggerQuiet
-	if _, err := b.Get(); err != nil {
+	_, err := b.Get()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Dir(old)); !os.IsNotExist(err) {
+	_, err = os.Stat(filepath.Dir(old))
+	if !os.IsNotExist(err) {
 		t.Fatal("older full chrome still cached", err)
 	}
-	if _, err := os.Stat(filepath.Dir(shell)); err != nil {
+	_, err = os.Stat(filepath.Dir(shell))
+	if err != nil {
 		t.Fatal("older headless-shell of another product must stay", err)
 	}
 }
@@ -235,7 +244,8 @@ func TestOfflineWithNothingInstalledFails(t *testing.T) {
 	b := NewBrowser()
 	b.RootDir = t.TempDir()
 	b.Logger = utils.LoggerQuiet
-	if _, err := b.Get(); err == nil {
+	_, err := b.Get()
+	if err == nil {
 		t.Fatal("expected an error without network or cache")
 	}
 }

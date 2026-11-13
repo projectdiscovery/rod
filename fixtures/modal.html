@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <body>
     <button data-target="#exampleModalLive" type="button">Open</button>
@@ -11,16 +11,19 @@
       }
     </style>
     <script>
-      document.querySelector("[data-target]").addEventListener("click", () => {
-        const b = document.querySelector("#exampleModalLive button");
-        b.style.transform = "translateY(24px)";
+      document.querySelector('[data-target]').addEventListener('click', () => {
+        const b = document.querySelector('#exampleModalLive button')
+        b.style.transform = 'translateY(24px)'
         requestAnimationFrame(() => {
-          b.style.transform = "none";
-        });
-      });
-      document.querySelector("#exampleModalLive button").addEventListener("click", () => {
-        document.querySelector("#exampleModalLive button").style.display = "none";
-      });
+          b.style.transform = 'none'
+        })
+      })
+      document
+        .querySelector('#exampleModalLive button')
+        .addEventListener('click', () => {
+          document.querySelector('#exampleModalLive button').style.display =
+            'none'
+        })
     </script>
   </body>
 </html>

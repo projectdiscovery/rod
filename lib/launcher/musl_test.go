@@ -36,15 +36,18 @@ func writeELF(t *testing.T, interp string) string {
 		Align:  1,
 	}
 	var buf bytes.Buffer
-	if err := binary.Write(&buf, binary.LittleEndian, hdr); err != nil {
+	err := binary.Write(&buf, binary.LittleEndian, hdr)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := binary.Write(&buf, binary.LittleEndian, prog); err != nil {
+	err = binary.Write(&buf, binary.LittleEndian, prog)
+	if err != nil {
 		t.Fatal(err)
 	}
 	buf.Write(data)
 	path := filepath.Join(t.TempDir(), "sh")
-	if err := os.WriteFile(path, buf.Bytes(), 0o755); err != nil {
+	err = os.WriteFile(path, buf.Bytes(), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
 	return path
@@ -59,7 +62,8 @@ func TestElfUsesMusl(t *testing.T) {
 	}
 
 	text := filepath.Join(t.TempDir(), "text")
-	if err := os.WriteFile(text, []byte("#!/bin/sh\n"), 0o755); err != nil {
+	err := os.WriteFile(text, []byte("#!/bin/sh\n"), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if elfUsesMusl(text) || elfUsesMusl(filepath.Join(t.TempDir(), "missing")) {

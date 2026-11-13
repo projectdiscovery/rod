@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -165,7 +166,7 @@ func TestURLParserErr(t *testing.T) {
 
 func TestTestOpen(_ *testing.T) {
 	openExec = func(_ string, _ ...string) *exec.Cmd {
-		cmd := exec.Command("not-exists")
+		cmd := exec.CommandContext(context.Background(), "not-exists")
 		cmd.Process = &os.Process{}
 		return cmd
 	}

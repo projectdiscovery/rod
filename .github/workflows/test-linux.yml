@@ -38,15 +38,10 @@ jobs:
       # TestUseNode parses the output of use-node, so fetch it before the tests start.
       - run: go run github.com/ysmood/use-node@latest -p v20
 
-      - run: go run ./lib/utils/ci-test -race -coverprofile=coverage.out -run=^Test . ./lib/utils ./lib/proto ./lib/cdp ./lib/defaults ./lib/devices ./lib/launcher ./lib/input
-
-      # Per-file coverage is temporarily off. Restore check-cov once the new code is covered.
-      # - run: go run github.com/ysmood/got/cmd/check-cov@latest
+      - run: go run ./lib/utils/ci-test -race -run=^Test . ./lib/utils ./lib/proto ./lib/cdp ./lib/defaults ./lib/devices ./lib/launcher ./lib/input
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: cdp-log-linux
-          path: |
-            tmp/cdp-log
-            coverage.out
+          path: tmp/cdp-log

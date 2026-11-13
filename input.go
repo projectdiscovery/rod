@@ -7,7 +7,6 @@ import (
 	"github.com/go-rod/rod/lib/input"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/rod/lib/utils"
-	"github.com/ysmood/gson"
 )
 
 // Keyboard represents the keyboard on a page, it's always related the main frame.
@@ -21,33 +20,6 @@ type Keyboard struct {
 
 	// root holds the shared state when this keyboard belongs to a page clone.
 	root *Keyboard
-}
-
-func (k *Keyboard) state() *Keyboard {
-	if k.root != nil {
-		return k.root
-	}
-	return k
-}
-
-func (p *Page) newKeyboard() *Page {
-	p.Keyboard = &Keyboard{page: p, pressed: map[input.Key]struct{}{}}
-	return p
-}
-
-func (k *Keyboard) getModifiers() int {
-	s := k.state()
-	s.Lock()
-	defer s.Unlock()
-	return s.modifiers()
-}
-
-func (k *Keyboard) modifiers() int {
-	ms := 0
-	for key := range k.pressed {
-		ms |= key.Modifier()
-	}
-	return ms
 }
 
 // Press the key down.
@@ -96,6 +68,28 @@ func (k *Keyboard) Type(keys ...input.Key) (err error) {
 		}
 	}
 	return
+}
+
+func (k *Keyboard) modifiers() int {
+	ms := 0
+	for key := range k.pressed {
+		ms |= key.Modifier()
+	}
+	return ms
+}
+
+func (k *Keyboard) getModifiers() int {
+	s := k.state()
+	s.Lock()
+	defer s.Unlock()
+	return s.modifiers()
+}
+
+func (k *Keyboard) state() *Keyboard {
+	if k.root != nil {
+		return k.root
+	}
+	return k
 }
 
 // KeyActionType enum.
@@ -203,6 +197,11 @@ func (p *Page) InsertText(text string) error {
 	return err
 }
 
+func (p *Page) newKeyboard() *Page {
+	p.Keyboard = &Keyboard{page: p, pressed: map[input.Key]struct{}{}}
+	return p
+}
+
 // Mouse represents the mouse on a page, it's always related the main frame.
 type Mouse struct {
 	sync.Mutex
@@ -218,13 +217,6 @@ type Mouse struct {
 
 	// root holds the shared state when this mouse belongs to a page clone.
 	root *Mouse
-}
-
-func (m *Mouse) state() *Mouse {
-	if m.root != nil {
-		return m.root
-	}
-	return m
 }
 
 func (p *Page) newMouse() *Page {
@@ -255,7 +247,7 @@ func (m *Mouse) MoveTo(p proto.Point) error {
 		X:         p.X,
 		Y:         p.Y,
 		Button:    button,
-		Buttons:   gson.Int(buttons),
+		Buttons:   new(buttons),
 		Modifiers: m.page.Keyboard.getModifiers(),
 	}.Call(m.page)
 	if err != nil {
@@ -332,7 +324,7 @@ func (m *Mouse) Scroll(offsetX, offsetY float64, steps int) error {
 		err := proto.InputDispatchMouseEvent{
 			Type:      proto.InputDispatchMouseEventTypeMouseWheel,
 			Button:    button,
-			Buttons:   gson.Int(buttons),
+			Buttons:   new(buttons),
 			Modifiers: m.page.Keyboard.getModifiers(),
 			DeltaX:    stepX,
 			DeltaY:    stepY,
@@ -360,7 +352,7 @@ func (m *Mouse) Down(button proto.InputMouseButton, clickCount int) error {
 	err := proto.InputDispatchMouseEvent{
 		Type:       proto.InputDispatchMouseEventTypeMousePressed,
 		Button:     button,
-		Buttons:    gson.Int(buttons),
+		Buttons:    new(buttons),
 		ClickCount: clickCount,
 		Modifiers:  m.page.Keyboard.getModifiers(),
 		X:          s.pos.X,
@@ -392,7 +384,7 @@ func (m *Mouse) Up(button proto.InputMouseButton, clickCount int) error {
 	err := proto.InputDispatchMouseEvent{
 		Type:       proto.InputDispatchMouseEventTypeMouseReleased,
 		Button:     button,
-		Buttons:    gson.Int(buttons),
+		Buttons:    new(buttons),
 		ClickCount: clickCount,
 		Modifiers:  m.page.Keyboard.getModifiers(),
 		X:          s.pos.X,
@@ -417,15 +409,21 @@ func (m *Mouse) Click(button proto.InputMouseButton, clickCount int) error {
 	return m.Up(button, clickCount)
 }
 
+func (m *Mouse) state() *Mouse {
+	if m.root != nil {
+		return m.root
+	}
+	return m
+}
+
 // Touch presents a touch device, such as a hand with fingers, each finger is a [proto.InputTouchPoint].
 // Touch events is stateless, we use the struct here only as a namespace to make the API style unified.
 type Touch struct {
 	page *Page
 }
 
-func (p *Page) newTouch() *Page {
+func (p *Page) newTouch() {
 	p.Touch = &Touch{page: p}
-	return p
 }
 
 // Start a touch action.

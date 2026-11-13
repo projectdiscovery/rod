@@ -3,6 +3,7 @@
 package launcher
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"syscall"
@@ -19,7 +20,7 @@ func TestMain(m *testing.M) {
 	case "parent":
 		// Stdout nil would be /dev/null. The grandchild has to inherit the
 		// pipe this process was given, then outlive it from a new session.
-		cmd := exec.Command(os.Args[0])
+		cmd := exec.CommandContext(context.Background(), os.Args[0])
 		cmd.Env = append(os.Environ(), "ROD_HOLD_STDOUT=child")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -31,17 +32,19 @@ func TestMain(m *testing.M) {
 
 func TestCleanupWhenChildHoldsStdout(t *testing.T) {
 	l := New()
-	cmd := exec.Command(os.Args[0])
+	cmd := exec.CommandContext(context.Background(), os.Args[0])
 	cmd.Env = append(os.Environ(), "ROD_HOLD_STDOUT=parent")
 	l.setupCmd(cmd)
-	if err := startLocked(l, cmd); err != nil {
+	err := startLocked(l, cmd)
+	if err != nil {
 		t.Fatal(err)
 	}
 	// Wait until the parent has exited and the grandchild has called setsid,
 	// so Kill cannot reach the process that still holds the pipe.
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
-		if err := syscall.Kill(l.PID(), 0); err != nil {
+		err := syscall.Kill(l.PID(), 0)
+		if err != nil {
 			break
 		}
 		time.Sleep(20 * time.Millisecond)

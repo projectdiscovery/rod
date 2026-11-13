@@ -49,7 +49,7 @@ func TestBasic(t *testing.T) {
 
 	targetID := gson.New(res).Get("targetId").String()
 
-	res, err = client.Call(ctx, "", "Target.attachToTarget", map[string]interface{}{
+	res, err = client.Call(ctx, "", "Target.attachToTarget", map[string]any{
 		"targetId": targetID,
 		"flatten":  true, // if it's not set no response will return
 	})
@@ -60,7 +60,7 @@ func TestBasic(t *testing.T) {
 	_, err = client.Call(ctx, sessionID, "Page.enable", nil)
 	g.E(err)
 
-	_, err = client.Call(ctx, "", "Target.attachToTarget", map[string]interface{}{
+	_, err = client.Call(ctx, "", "Target.attachToTarget", map[string]any{
 		"targetId": "abc",
 	})
 	g.Err(err)
@@ -74,20 +74,20 @@ func TestBasic(t *testing.T) {
 	// cancel call
 	tmpCtx, tmpCancel := context.WithCancel(ctx)
 	tmpCancel()
-	_, err = client.Call(tmpCtx, sessionID, "Runtime.evaluate", map[string]interface{}{
+	_, err = client.Call(tmpCtx, sessionID, "Runtime.evaluate", map[string]any{
 		"expression": `10`,
 	})
 	g.Eq(err.Error(), context.Canceled.Error())
 
 	g.E(utils.Retry(timeout, sleeper(), func() (bool, error) {
-		res, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
+		res, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]any{
 			"expression": `document.querySelector('iframe')`,
 		})
 
 		return err == nil && gson.New(res).Get("result.subtype").String() != "null", nil
 	}))
 
-	res, err = client.Call(ctx, sessionID, "DOM.describeNode", map[string]interface{}{
+	res, err = client.Call(ctx, sessionID, "DOM.describeNode", map[string]any{
 		"objectId": gson.New(res).Get("result.objectId").String(),
 	})
 	g.E(err)
@@ -99,12 +99,12 @@ func TestBasic(t *testing.T) {
 	g.E(utils.Retry(timeout, sleeper(), func() (bool, error) {
 		// we might need to recreate the world because world can be
 		// destroyed after the frame is reloaded
-		res, err = client.Call(ctx, sessionID, "Page.createIsolatedWorld", map[string]interface{}{
+		res, err = client.Call(ctx, sessionID, "Page.createIsolatedWorld", map[string]any{
 			"frameId": frameID,
 		})
 		g.E(err)
 
-		res, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
+		res, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]any{
 			"contextId":  gson.New(res).Get("executionContextId").Int(),
 			"expression": `document.querySelector('h4')`,
 		})
@@ -112,7 +112,7 @@ func TestBasic(t *testing.T) {
 		return err == nil && gson.New(res).Get("result.subtype").String() != "null", nil
 	}))
 
-	res, err = client.Call(ctx, sessionID, "DOM.getOuterHTML", map[string]interface{}{
+	res, err = client.Call(ctx, sessionID, "DOM.getOuterHTML", map[string]any{
 		"objectId": gson.New(res).Get("result.objectId").String(),
 	})
 	g.E(err)
@@ -154,14 +154,14 @@ func TestCrash(t *testing.T) {
 	file, err := filepath.Abs(filepath.FromSlash("fixtures/iframe.html"))
 	g.E(err)
 
-	res, err := client.Call(ctx, "", "Target.createTarget", map[string]interface{}{
+	res, err := client.Call(ctx, "", "Target.createTarget", map[string]any{
 		"url": "about:blank",
 	})
 	g.E(err)
 
 	targetID := gson.New(res).Get("targetId").String()
 
-	res, err = client.Call(ctx, "", "Target.attachToTarget", map[string]interface{}{
+	res, err = client.Call(ctx, "", "Target.attachToTarget", map[string]any{
 		"targetId": targetID,
 		"flatten":  true,
 	})
@@ -173,7 +173,7 @@ func TestCrash(t *testing.T) {
 	g.E(err)
 
 	// An evaluate during navigation fails with "Execution context was destroyed".
-	_, err = client.Call(ctx, sessionID, "Page.navigate", map[string]interface{}{
+	_, err = client.Call(ctx, sessionID, "Page.navigate", map[string]any{
 		"url": "file://" + file,
 	})
 	g.E(err)
@@ -185,13 +185,13 @@ func TestCrash(t *testing.T) {
 		g.True(errors.Is(err, cdp.ErrConnClosed))
 	}()
 
-	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
+	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]any{
 		"expression":   `new Promise(() => {})`,
 		"awaitPromise": true,
 	})
 	g.True(errors.Is(err, cdp.ErrConnClosed))
 
-	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]interface{}{
+	_, err = client.Call(ctx, sessionID, "Runtime.evaluate", map[string]any{
 		"expression": `10`,
 	})
 	g.True(errors.Is(err, cdp.ErrConnClosed))
@@ -261,7 +261,7 @@ func TestCancelCallLeak(t *testing.T) {
 
 	gotrace.CheckLeak(g, 0)
 
-	for i := 0; i < 30; i++ {
+	for range 30 {
 		id := 0
 		wait := make(chan int)
 
@@ -329,8 +329,7 @@ func TestConcurrentCall(t *testing.T) {
 
 	c := cdp.New().Start(ws)
 
-	for i := 0; i < 1000; i++ {
-		i := i
+	for i := range 1000 {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			g := setup(t)
 			g.Parallel()
@@ -342,13 +341,13 @@ func TestConcurrentCall(t *testing.T) {
 	}
 }
 
-func TestMassBrowserClose(t *testing.T) { //nolint: tparallel
+func TestMassBrowserClose(t *testing.T) {
 	t.Skip()
 
 	g := setup(t)
 	s := g.Serve()
 
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Parallel()
 			browser := rod.New().MustConnect()

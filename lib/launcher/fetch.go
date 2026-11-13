@@ -25,7 +25,11 @@ var ErrUnsafeArchive = errors.New("archive entry escapes target directory")
 // fetchArchive downloads the first url that answers 200, verifies sum when it
 // is not empty, and extracts it into dir. dir is replaced atomically.
 // The returned sum is the SHA-256 of the archive.
-func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger, dir, sum string, urls []string) (string, error) {
+//
+//nolint:funlen // the download, verify, and extract steps read in order
+func fetchArchive(
+	ctx context.Context, client *http.Client, logger utils.Logger, dir, sum string, urls []string,
+) (string, error) {
 	if client == nil {
 		client = http.DefaultClient
 	}
@@ -45,7 +49,8 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 	}()
 	logger.Println("Download:", u)
 
-	if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(dir), 0o755)
+	if err != nil {
 		return "", err
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(dir), ".rod-download-*.zip")
@@ -76,7 +81,8 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 	}
 	defer func() { _ = os.RemoveAll(staging) }()
 
-	if err := unzipSafe(tmp, n, staging); err != nil {
+	err = unzipSafe(tmp, n, staging)
+	if err != nil {
 		return "", err
 	}
 	root, err := stripSingleDir(staging)
@@ -85,7 +91,8 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 	}
 
 	_ = os.RemoveAll(dir)
-	if err := os.Rename(root, dir); err != nil {
+	err = os.Rename(root, dir)
+	if err != nil {
 		return "", err
 	}
 	logger.Println("Downloaded:", dir)
@@ -93,6 +100,8 @@ func fetchArchive(ctx context.Context, client *http.Client, logger utils.Logger,
 }
 
 // fastest returns the first successful response and cancels the others.
+//
+//nolint:funlen // the race over several hosts is one select loop
 func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Response, string, error) {
 	type result struct {
 		res    *http.Response
@@ -102,7 +111,6 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 	}
 	ch := make(chan result, len(urls))
 	for _, u := range urls {
-		u := u
 		c, cancel := context.WithCancel(ctx)
 		go func() {
 			req, err := http.NewRequestWithContext(c, http.MethodGet, u, nil)
@@ -139,7 +147,7 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 		// Keep draining in the background so the losers get cancelled.
 		remaining := len(urls) - 1 - len(errs)
 		go func() {
-			for i := 0; i < remaining; i++ {
+			for range remaining {
 				l := <-ch
 				if l.res != nil {
 					_ = l.res.Body.Close()
@@ -160,6 +168,7 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 
 type cancelBody struct {
 	io.ReadCloser
+
 	cancel context.CancelFunc
 }
 
@@ -192,15 +201,18 @@ func unzipSafe(r io.ReaderAt, size int64, to string) error {
 
 		switch {
 		case f.FileInfo().IsDir():
-			if err := os.MkdirAll(p, 0o755); err != nil {
+			err := os.MkdirAll(p, 0o755)
+			if err != nil {
 				return err
 			}
 		case mode&os.ModeSymlink != 0:
-			if err := extractSymlink(f, to, p); err != nil {
+			err := extractSymlink(f, to, p)
+			if err != nil {
 				return err
 			}
 		default:
-			if err := extractFile(f, p, mode.Perm()); err != nil {
+			err := extractFile(f, p, mode.Perm())
+			if err != nil {
 				return err
 			}
 		}
@@ -209,7 +221,8 @@ func unzipSafe(r io.ReaderAt, size int64, to string) error {
 }
 
 func extractFile(f *zip.File, p string, perm os.FileMode) error {
-	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(p), 0o755)
+	if err != nil {
 		return err
 	}
 	src, err := f.Open()
@@ -246,7 +259,8 @@ func extractSymlink(f *zip.File, root, p string) error {
 	if !within(root, resolved) {
 		return fmt.Errorf("%w: %s -> %s", ErrUnsafeArchive, f.Name, link)
 	}
-	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(p), 0o755)
+	if err != nil {
 		return err
 	}
 	return os.Symlink(link, p)

@@ -9,7 +9,7 @@ import (
 
 func TestDropPrivilegesCredential(t *testing.T) {
 	l := New().DropPrivileges(1, 2)
-	cmd := exec.Command("true")
+	cmd := exec.CommandContext(t.Context(), "true")
 	l.osSetupCmd(cmd)
 	cred := cmd.SysProcAttr.Credential
 	if cred == nil || cred.Uid != 1 || cred.Gid != 2 {

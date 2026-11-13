@@ -3,6 +3,7 @@
 package launcher
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -25,7 +26,7 @@ func afterStart(cmd *exec.Cmd) (stop func()) {
 		return
 	}
 	script := fmt.Sprintf("trap '' INT TERM HUP; read x <&3; kill -9 -%d 2>/dev/null", cmd.Process.Pid)
-	wd := exec.Command("/bin/sh", "-c", script)
+	wd := exec.CommandContext(context.Background(), "/bin/sh", "-c", script)
 	wd.ExtraFiles = []*os.File{r}
 	wd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	err = wd.Start()

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -19,17 +18,15 @@ import (
 )
 
 func TestLaunchTimeout(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("shell script fixture")
-	}
 	bin := filepath.Join(t.TempDir(), "fake-chrome")
-	if err := os.WriteFile(bin, []byte("#!/bin/sh\nexec sleep 30\n"), 0o755); err != nil {
+	err := os.WriteFile(bin, []byte("#!/bin/sh\nexec sleep 30\n"), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	l := launcher.New().Bin(bin).LaunchTimeout(300 * time.Millisecond)
 	start := time.Now()
-	_, err := l.Launch()
+	_, err = l.Launch()
 	if !errors.Is(err, launcher.ErrLaunchTimeout) {
 		t.Fatalf("got %v", err)
 	}
@@ -48,15 +45,13 @@ func TestLaunchTimeout(t *testing.T) {
 }
 
 func TestLaunchErrorIncludesOutput(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("shell script fixture")
-	}
 	bin := filepath.Join(t.TempDir(), "fake-chrome")
 	script := "#!/bin/sh\necho boom-from-chrome >&2\nexit 1\n"
-	if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
+	err := os.WriteFile(bin, []byte(script), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_, err := launcher.New().Bin(bin).LaunchTimeout(2 * time.Second).Launch()
+	_, err = launcher.New().Bin(bin).LaunchTimeout(2 * time.Second).Launch()
 	if err == nil || !strings.Contains(err.Error(), "boom-from-chrome") {
 		t.Fatalf("got %v", err)
 	}
@@ -80,9 +75,6 @@ func TestHardenedDefaults(t *testing.T) {
 }
 
 func TestLaunchPipe(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("ExtraFiles is not supported on windows")
-	}
 	l := launcher.New()
 	defer l.Cleanup()
 	client, err := l.LaunchPipe()
@@ -91,7 +83,8 @@ func TestLaunchPipe(t *testing.T) {
 	}
 
 	b := rod.New().Client(client)
-	if err := b.Connect(); err != nil {
+	err = b.Connect()
+	if err != nil {
 		t.Fatal(err)
 	}
 	p := b.MustPage("about:blank")
@@ -131,7 +124,8 @@ func TestChromeForTestingHeadlessShell(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := b.Validate(); err != nil {
+	err = b.Validate()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -153,16 +147,19 @@ func TestSweepUserDataDirs(t *testing.T) {
 	host, _ := os.Hostname()
 	mkWith := func(name, lock, owner string) string {
 		dir := filepath.Join(root, name)
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		err := os.MkdirAll(dir, 0o755)
+		if err != nil {
 			t.Fatal(err)
 		}
 		if lock != "" {
-			if err := os.Symlink(lock, filepath.Join(dir, "SingletonLock")); err != nil {
+			err := os.Symlink(lock, filepath.Join(dir, "SingletonLock"))
+			if err != nil {
 				t.Fatal(err)
 			}
 		}
 		if owner != "" {
-			if err := os.WriteFile(filepath.Join(dir, "rod.lock"), []byte(owner), 0o600); err != nil {
+			err := os.WriteFile(filepath.Join(dir, "rod.lock"), []byte(owner), 0o600)
+			if err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -189,12 +186,14 @@ func TestSweepUserDataDirs(t *testing.T) {
 		t.Fatalf("removed %d", n)
 	}
 	for _, d := range []string{stale, noLock, shellStale} {
-		if _, err := os.Stat(d); !os.IsNotExist(err) {
+		_, err := os.Stat(d)
+		if !os.IsNotExist(err) {
 			t.Fatalf("%s not removed", d)
 		}
 	}
 	for _, d := range []string{live, other, fresh, shellLive} {
-		if _, err := os.Stat(d); err != nil {
+		_, err := os.Stat(d)
+		if err != nil {
 			t.Fatalf("%s removed", d)
 		}
 	}

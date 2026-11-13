@@ -17,6 +17,11 @@
   ],
   // words - list of words to be always considered correct
   "words": [
+    "cyclop",
+    "funlen",
+    "gosmopolitan",
+    "nestif",
+    "words",
     "Ahéllo",
     "APPDATA",
     "Arraybuffer",

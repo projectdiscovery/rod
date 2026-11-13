@@ -229,13 +229,13 @@ func TestBrowserValid(t *testing.T) {
 	g.E(utils.Mkdir(filepath.Dir(b.BinPath())))
 	g.Cleanup(func() { _ = os.RemoveAll(b.Dir()) })
 
-	g.E(exec.Command("go", "build", "-o", b.BinPath(), "./fixtures/chrome-exit-err").CombinedOutput())
+	g.E(exec.CommandContext(g.Context(), "go", "build", "-o", b.BinPath(), "./fixtures/chrome-exit-err").CombinedOutput())
 	g.Has(b.Validate().Error(), "failed to run the browser")
 
-	g.E(exec.Command("go", "build", "-o", b.BinPath(), "./fixtures/chrome-empty").CombinedOutput())
+	g.E(exec.CommandContext(g.Context(), "go", "build", "-o", b.BinPath(), "./fixtures/chrome-empty").CombinedOutput())
 	g.Eq(b.Validate().Error(), "the browser executable doesn't support headless mode")
 
-	g.E(exec.Command("go", "build", "-o", b.BinPath(), "./fixtures/chrome-lib-missing").CombinedOutput())
+	g.E(exec.CommandContext(g.Context(), "go", "build", "-o", b.BinPath(), "./fixtures/chrome-lib-missing").CombinedOutput())
 	g.Nil(b.Validate())
 }
 

@@ -73,17 +73,21 @@ func TestKeepStateSkipsFulfillBody(t *testing.T) {
 
 func TestCloseReapsLaunchedBrowser(t *testing.T) {
 	b := New()
-	if err := b.Connect(); err != nil {
+	err := b.Connect()
+	if err != nil {
 		t.Fatal(err)
 	}
 	dir := b.launcher.Get(flags.UserDataDir)
-	if _, err := os.Stat(dir); err != nil {
+	_, err = os.Stat(dir)
+	if err != nil {
 		t.Fatalf("profile dir missing: %v", err)
 	}
-	if err := b.Close(); err != nil {
+	err = b.Close()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+	_, err = os.Stat(dir)
+	if !os.IsNotExist(err) {
 		t.Fatalf("profile dir left behind: %v", err)
 	}
 }

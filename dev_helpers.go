@@ -5,6 +5,7 @@
 package rod
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -130,12 +131,12 @@ func (p *Page) Overlay(left, top, width, height float64, msg string) (remove fun
 	return
 }
 
-func (p *Page) tryTrace(typ TraceType, msg ...interface{}) func() {
+func (p *Page) tryTrace(typ TraceType, msg ...any) func() {
 	if !p.browser.trace {
 		return func() {}
 	}
 
-	msg = append([]interface{}{typ}, msg...)
+	msg = append([]any{typ}, msg...)
 	msg = append(msg, p)
 
 	p.browser.logger.Println(msg...)
@@ -210,12 +211,12 @@ func (el *Element) Overlay(msg string) (removeOverlay func()) {
 	return
 }
 
-func (el *Element) tryTrace(typ TraceType, msg ...interface{}) func() {
+func (el *Element) tryTrace(typ TraceType, msg ...any) func() {
 	if !el.page.browser.trace {
 		return func() {}
 	}
 
-	msg = append([]interface{}{typ}, msg...)
+	msg = append([]any{typ}, msg...)
 	msg = append(msg, el)
 
 	el.page.browser.logger.Println(msg...)
@@ -253,7 +254,7 @@ func serve(host string) (string, *http.ServeMux, func() error) {
 		mux.ServeHTTP(w, r)
 	})}
 
-	l, err := net.Listen("tcp", host)
+	l, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", host)
 	utils.E(err)
 
 	go func() { _ = srv.Serve(l) }()
