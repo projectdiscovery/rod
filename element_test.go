@@ -113,6 +113,39 @@ func TestEnterSubmitsForm(t *testing.T) {
 	g.True(strings.Contains(p.MustHTML(), "submitted ok"))
 }
 
+// A page can replace its own timers. The wait after an input must not use
+// them, or the page holds every click and key until the timeout.
+func TestInputIgnoresPageTimers(t *testing.T) {
+	g := setup(t)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, `<!doctype html><body>
+			<script>window.setTimeout = function() {}</script>
+			<button onclick="this.setAttribute('a', 'ok')">click</button>
+			<input onkeyup="this.setAttribute('a', 'ok')">
+			</body>`)
+	}))
+	t.Cleanup(srv.Close)
+
+	p := g.page.MustNavigate(srv.URL).MustWaitLoad()
+	g.False(p.MustEval(`() => String(window.setTimeout).includes("native code")`).Bool())
+	short := p.Timeout(5 * time.Second)
+
+	g.E(short.MustElement("button").Click(proto.InputMouseButtonLeft, 1))
+	g.True(p.MustHas("button[a=ok]"))
+
+	g.E(short.MustElement("input").Type(input.Enter))
+	g.True(p.MustHas("input[a=ok]"))
+
+	// A navigation can remove the isolated world between its creation and
+	// the wait. The input then waits for the new document.
+	el := short.MustElement("button")
+	g.mc.stub(1, proto.RuntimeEvaluate{}, func(StubSend) (gson.JSON, error) {
+		return gson.New(nil), cdp.ErrCtxNotFound
+	})
+	g.E(el.Click(proto.InputMouseButtonLeft, 1))
+}
+
 func TestClickWrapped(t *testing.T) {
 	g := setup(t)
 

@@ -878,11 +878,38 @@ func (p *Page) WaitRepaint() error {
 // navigation before returning the input event. An input that does not
 // navigate resolves on the next task.
 func (p *Page) settleInput() error {
-	_, err := p.Eval(`() => new Promise(r => setTimeout(r, 0))`)
-	if errors.Is(err, cdp.ErrCtxDestroyed) {
+	err := p.nextTask()
+	// A navigation destroys the world during the wait, or removes it before
+	// the wait starts.
+	if errors.Is(err, cdp.ErrCtxDestroyed) || errors.Is(err, cdp.ErrCtxNotFound) {
 		return p.WaitLoad()
 	}
 	return err
+}
+
+// settleWorld is the isolated world that runs the wait of [Page.settleInput].
+const settleWorld = "rod_settle"
+
+// nextTask waits for the next task of the frame. The wait runs in an isolated
+// world, so a page script that replaces setTimeout can not hold the input.
+// Chrome reuses the world of the same name in a frame.
+func (p *Page) nextTask() error {
+	world, err := proto.PageCreateIsolatedWorld{FrameID: p.FrameID, WorldName: settleWorld}.Call(p)
+	if err != nil {
+		return err
+	}
+	res, err := proto.RuntimeEvaluate{
+		Expression:   `new Promise(r => setTimeout(r, 0))`,
+		ContextID:    world.ExecutionContextID,
+		AwaitPromise: true,
+	}.Call(p)
+	if err != nil {
+		return err
+	}
+	if res.ExceptionDetails != nil {
+		return &EvalError{res.ExceptionDetails}
+	}
+	return nil
 }
 
 // WaitLoad waits for the `window.onload` event, it returns immediately if the event is already fired.
