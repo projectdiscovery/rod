@@ -157,8 +157,6 @@ type result struct {
 }
 
 // Call a method and wait for its response.
-//
-//nolint:gocyclo,cyclop // one request path with cancellation branches
 func (cdp *Client) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 	req := &Request{
 		ID:        int(cdp.count.Add(1)),
@@ -190,60 +188,82 @@ func (cdp *Client) Call(ctx context.Context, sessionID, method string, params an
 		return nil, err
 	}
 
-	// The frame is queued even when ctx is already done: callers rely on
-	// cleanup calls such as domain disables reaching the browser. The
-	// writer, not the caller, blocks on the socket, and only for the
-	// transport's own write timeout.
-	job := writeJob{data: data, done: make(chan error, 1)}
-	select {
-	case <-cdp.dead:
-		return nil, cdp.cause
-	case cdp.writes <- job:
-	}
-	err = ctx.Err()
+	job, err := cdp.queue(ctx, data)
 	if err != nil {
 		return nil, err
 	}
-
-	select {
-	case err := <-job.done:
-		if err != nil {
-			cause := cdp.Err()
-			if cause != nil {
-				return nil, cause
-			}
-			return nil, err
-		}
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case <-cdp.dead:
-		select {
-		case res := <-done:
-			return res.msg, res.err
-		default:
-		}
-		return nil, cdp.cause
+	finished, msg, err := cdp.awaitWrite(ctx, job.done, done)
+	if finished {
+		return msg, err
 	}
-
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case res := <-done:
-		return res.msg, res.err
-	case <-cdp.dead:
-		select {
-		case res := <-done:
-			return res.msg, res.err
-		default:
-		}
-		return nil, cdp.cause
-	}
+	return cdp.awaitResponse(ctx, done)
 }
 
 // Event returns a channel of browser events. The channel is buffered.
 // It is closed when the connection ends.
 func (cdp *Client) Event() <-chan *Event {
 	return cdp.event
+}
+
+// deadOutcome is the result of a call whose connection died. A response that
+// arrived first still wins over the cause.
+func (cdp *Client) deadOutcome(done <-chan result) ([]byte, error) {
+	select {
+	case res := <-done:
+		return res.msg, res.err
+	default:
+		return nil, cdp.cause
+	}
+}
+
+// awaitResponse waits for the response to a sent frame.
+func (cdp *Client) awaitResponse(ctx context.Context, done <-chan result) ([]byte, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case res := <-done:
+		return res.msg, res.err
+	case <-cdp.dead:
+		return cdp.deadOutcome(done)
+	}
+}
+
+// awaitWrite waits until the writer sends the frame. finished reports that the
+// call is over, with msg and err as its result. Otherwise the caller goes on to
+// wait for the response.
+func (cdp *Client) awaitWrite(
+	ctx context.Context, written <-chan error, done <-chan result,
+) (finished bool, msg []byte, err error) {
+	select {
+	case werr := <-written:
+		if werr == nil {
+			return false, nil, nil
+		}
+		cause := cdp.Err()
+		if cause != nil {
+			return true, nil, cause
+		}
+		return true, nil, werr
+	case <-ctx.Done():
+		return true, nil, ctx.Err()
+	case <-cdp.dead:
+		msg, err = cdp.deadOutcome(done)
+		return true, msg, err
+	}
+}
+
+// queue hands the frame to the writer. It runs even when ctx is already done:
+// callers rely on cleanup calls such as domain disables reaching the browser.
+// The writer, not the caller, blocks on the socket, and only for the
+// transport's own write timeout.
+func (cdp *Client) queue(ctx context.Context, data []byte) (writeJob, error) {
+	job := writeJob{data: data, done: make(chan error, 1)}
+	select {
+	case <-cdp.dead:
+		return job, cdp.cause
+	case cdp.writes <- job:
+	}
+	return job, ctx.Err()
 }
 
 func (cdp *Client) shard(id int) *pendingShard {

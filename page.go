@@ -1067,7 +1067,6 @@ func (p *Page) Event() <-chan *Message {
 	return p.browser.listen(ctx, p.SessionID, nil)
 }
 
-//nolint:gocyclo,cyclop // close retries and cancellation share one path
 func (p *Page) closeWith(timeout time.Duration) error {
 	// Closing the target ends the page session, and Chrome may report that
 	// before answering Page.close, so the close must not depend on it. A
@@ -1080,32 +1079,56 @@ func (p *Page) closeWith(timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(p.ctx), timeout)
 	defer cancel()
 
-	success := true
 	messages := p.browser.listen(ctx, "", map[string]struct{}{
 		(proto.TargetTargetDestroyed{}).ProtoEvent():      {},
 		(proto.PageJavascriptDialogClosed{}).ProtoEvent(): {},
 	})
 
+	err := p.retryPageClose(ctx)
+	if err != nil {
+		return err
+	}
+
+	success, stopped := p.waitForClose(messages)
+	if _, attached := p.browser.states.Load(sessionPageKey(p.SessionID)); !stopped && attached {
+		return ctx.Err()
+	}
+	if !success {
+		return &PageCloseCanceledError{}
+	}
+
+	p.cleanupStates()
+	if p.sessionCancel != nil {
+		p.sessionCancel()
+	}
+	return nil
+}
+
+// retryPageClose sends Page.close and retries while the page session is not
+// attached yet.
+func (p *Page) retryPageClose(ctx context.Context) error {
 	for {
 		err := ctx.Err()
 		if err != nil {
 			return err
 		}
 		err = proto.PageClose{}.Call(p.Context(ctx))
-		if errors.Is(err, cdp.ErrNotAttachedToActivePage) {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-time.After(100 * time.Millisecond):
-			}
-			continue
-		} else if err != nil {
+		if !errors.Is(err, cdp.ErrNotAttachedToActivePage) {
 			return err
 		}
-		break
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(100 * time.Millisecond):
+		}
 	}
+}
 
-	stopped := false
+// waitForClose reads close events until the target is destroyed or a dialog
+// reports the outcome. stopped reports that an outcome arrived. success is
+// false when a dialog was dismissed.
+func (p *Page) waitForClose(messages <-chan *Message) (success, stopped bool) {
+	success = true
 	for msg := range messages {
 		destroyed := proto.TargetTargetDestroyed{}
 		closed := proto.PageJavascriptDialogClosed{}
@@ -1120,20 +1143,7 @@ func (p *Page) closeWith(timeout time.Duration) error {
 			break
 		}
 	}
-	if _, attached := p.browser.states.Load(sessionPageKey(p.SessionID)); !stopped && attached {
-		return ctx.Err()
-	}
-
-	if success {
-		p.cleanupStates()
-		if p.sessionCancel != nil {
-			p.sessionCancel()
-		}
-	} else {
-		return &PageCloseCanceledError{}
-	}
-
-	return nil
+	return success, stopped
 }
 
 func (p *Page) getWindowID() (proto.BrowserWindowID, error) {
