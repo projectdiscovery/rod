@@ -99,25 +99,40 @@ func fetchArchive(
 }
 
 // installArchive extracts the zip in tmp into a staging dir and moves its
-// single top-level directory to dir, replacing whatever was there.
+// single top-level directory to dir, replacing whatever was there. All
+// staging and swap operations go through an os.Root on the parent directory,
+// so they cannot reach outside it.
 func installArchive(tmp *os.File, n int64, dir string) error {
-	staging, err := os.MkdirTemp(filepath.Dir(dir), ".rod-extract-*")
+	parent, base := filepath.Dir(dir), filepath.Base(dir)
+	root, err := os.OpenRoot(parent)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = os.RemoveAll(staging) }()
+	defer func() { _ = root.Close() }()
 
-	err = unzipSafe(tmp, n, staging)
+	stage := ".rod-extract-" + utils.RandString(8)
+	err = root.Mkdir(stage, 0o755)
 	if err != nil {
 		return err
 	}
-	root, err := stripSingleDir(staging)
+	defer func() { _ = root.RemoveAll(stage) }()
+
+	stagingPath := filepath.Join(parent, stage)
+	err = unzipSafe(tmp, n, stagingPath)
+	if err != nil {
+		return err
+	}
+	extracted, err := stripSingleDir(stagingPath)
+	if err != nil {
+		return err
+	}
+	rel, err := filepath.Rel(stagingPath, extracted)
 	if err != nil {
 		return err
 	}
 
-	_ = os.RemoveAll(dir)
-	return os.Rename(root, dir)
+	_ = root.RemoveAll(base)
+	return root.Rename(filepath.Join(stage, rel), base)
 }
 
 // idleBody re-arms the idle timer every time bytes arrive.

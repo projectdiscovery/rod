@@ -87,6 +87,40 @@ func TestFetchArchiveExtracts(t *testing.T) {
 	}
 }
 
+func TestFetchArchiveReplacesExisting(t *testing.T) {
+	data := buildZip(t, zipEntry{name: "top/bin/chrome", body: "new"})
+	s := serveZip(t, data)
+	dir := filepath.Join(t.TempDir(), "browser")
+
+	// A previous install with a stale file that the new archive does not have.
+	err := os.MkdirAll(filepath.Join(dir, "old"), 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.WriteFile(filepath.Join(dir, "old", "stale"), []byte("x"), 0o644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sum := sha256.Sum256(data)
+	_, err = fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, hex.EncodeToString(sum[:]), []string{s.URL + "/a.zip"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(dir, "bin", "chrome"))
+	if err != nil || string(b) != "new" {
+		t.Fatalf("bin: %q %v", b, err)
+	}
+	_, err = os.Stat(filepath.Join(dir, "old"))
+	if !os.IsNotExist(err) {
+		t.Fatalf("stale install not replaced: %v", err)
+	}
+	left, _ := filepath.Glob(filepath.Join(filepath.Dir(dir), ".rod-*"))
+	if len(left) != 0 {
+		t.Fatalf("temp files left: %v", left)
+	}
+}
+
 func TestFetchArchiveChecksum(t *testing.T) {
 	s := serveZip(t, buildZip(t, zipEntry{name: "a/b", body: "x"}))
 	dir := filepath.Join(t.TempDir(), "browser")
