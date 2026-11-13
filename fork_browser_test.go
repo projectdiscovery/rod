@@ -626,3 +626,128 @@ func TestForkConcurrentPageFromTarget(t *testing.T) {
 	}
 	g.Eq(pages[0].TargetID, res.TargetID)
 }
+
+// probeRedirect sends the compliant probe target to another URL. An empty URL
+// leaves the probe as it is.
+type probeRedirect struct {
+	*cdp.Client
+	to   atomic.Pointer[string]
+	hits atomic.Int32
+}
+
+func (c *probeRedirect) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
+	if req, ok := params.(proto.TargetCreateTarget); ok && req.URL == "chrome://version" {
+		if to := c.to.Load(); to != nil && *to != "" {
+			req.URL = *to
+			params = req
+			c.hits.Add(1)
+		}
+	}
+	return c.Client.Call(ctx, sessionID, method, params)
+}
+
+func launchProbeRedirect(t *testing.T, to string) (*rod.Browser, *probeRedirect) {
+	t.Helper()
+	l := launcher.New().NoSandbox(true)
+	t.Cleanup(l.Cleanup)
+	t.Cleanup(l.Kill)
+	client := &probeRedirect{Client: cdp.New().Start(cdp.MustConnectWS(l.MustLaunch()))}
+	client.to.Store(&to)
+	b := rod.New().Client(client).MustConnect()
+	t.Cleanup(func() { _ = b.Close() })
+	return b, client
+}
+
+// chrome-headless-shell has no chrome://version and commits an error page
+// instead. That page is final, so the probe must not wait for chrome://version.
+func TestForkCompliantProbeErrorPage(t *testing.T) {
+	setup(t)
+	// Nothing listens on port 1, so the probe commits chrome-error://chromewebdata.
+	b, client := launchProbeRedirect(t, "http://127.0.0.1:1/")
+
+	start := time.Now()
+	p, err := b.Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if took := time.Since(start); took > 2*time.Second {
+		t.Fatalf("first page took %v", took)
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
+	}
+	ua := p.MustEval(`() => navigator.userAgent`).Str()
+	if strings.Contains(ua, "Headless") {
+		t.Fatalf("ua %s", ua)
+	}
+}
+
+// A probe that never commits must stop when the caller's context ends. That
+// stop must not be kept, so a later caller with a live context still reads the
+// profile.
+func TestForkCompliantProbeHonorsContext(t *testing.T) {
+	setup(t)
+	// about:blank never leaves the first document, so the probe stays pending.
+	b, client := launchProbeRedirect(t, "about:blank")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+	_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("err = %v", err)
+	}
+	if took := time.Since(start); took > 1500*time.Millisecond {
+		t.Fatalf("cancel took %v", took)
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
+	}
+
+	none := ""
+	client.to.Store(&none)
+	p, err := b.Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if err != nil {
+		t.Fatalf("read after cancel: %v", err)
+	}
+	ua := p.MustEval(`() => navigator.userAgent`).Str()
+	if strings.Contains(ua, "Headless") {
+		t.Fatalf("ua %s", ua)
+	}
+}
+
+// A caller that waits behind another probe read must stop when its own
+// context ends.
+func TestForkCompliantProbeWaiterHonorsContext(t *testing.T) {
+	setup(t)
+	b, client := launchProbeRedirect(t, "about:blank")
+
+	first, cancelFirst := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelFirst()
+	firstDone := make(chan error, 1)
+	go func() {
+		_, err := b.Context(first).Page(proto.TargetCreateTarget{URL: "about:blank"})
+		firstDone <- err
+	}()
+	deadline := time.Now().Add(5 * time.Second)
+	for client.hits.Load() == 0 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if client.hits.Load() == 0 {
+		t.Fatal("the first probe did not start")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+	_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("err = %v", err)
+	}
+	if took := time.Since(start); took > 1500*time.Millisecond {
+		t.Fatalf("waiter took %v", took)
+	}
+	if err := <-firstDone; !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("first read err = %v", err)
+	}
+}

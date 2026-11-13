@@ -6,25 +6,25 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/projectdiscovery/rod/lib/proto"
 	"github.com/ysmood/gson"
 )
 
-// errCompliantPending means chrome://version is not loaded yet. The user agent
-// may already be known. A browser with no client hints, such as headless shell,
-// stays pending because that page never finishes, and the caller uses the user
-// agent it already saw.
+// errCompliantPending means the probe still shows its first document. The user
+// agent may already be known. If the navigation never commits, the caller
+// uses the user agent it already saw.
 var errCompliantPending = errors.New("compliant profile pending")
 
 const compliantHintJS = `(() => {
 	const ua = navigator.userAgent
-	// The first document has no userAgentData. Reading it then would stick
-	// the browser with no client hints. Wait until chrome://version has
-	// loaded. A missing userAgentData after that is the real answer.
-	if (location.protocol !== "chrome:" || document.readyState !== "complete") {
+	// The first document is about:blank and has no userAgentData. Reading it
+	// then would stick the browser with no client hints. Wait until the
+	// navigation commits. Full Chrome commits chrome://version. Headless shell
+	// has no such page and commits chrome-error://chromewebdata, which never
+	// becomes chrome://version. In both cases userAgentData is then final.
+	if (location.protocol === "about:" || document.readyState === "loading") {
 		return JSON.stringify({ua, pending: true})
 	}
 	if (!navigator.userAgentData) return JSON.stringify({ua})
@@ -36,21 +36,44 @@ const compliantHintJS = `(() => {
 
 // compliantProfile is the browser's own client hints, read once.
 type compliantProfile struct {
-	once sync.Once
+	// lock holds one token while a read runs. A channel lets a waiter give up
+	// when its context ends.
+	lock chan struct{}
+	done bool
 	ua   string
 	meta *proto.EmulationUserAgentMetadata
 	err  error
 }
 
-// ensureCompliant reads this browser's own client hints once.
+func newCompliantProfile() *compliantProfile {
+	return &compliantProfile{lock: make(chan struct{}, 1)}
+}
+
+// ensureCompliant reads this browser's own client hints once. A read that
+// stops because the caller's context ended is not kept. The next caller with
+// a live context reads again. A caller that waits for another read stops
+// when its own context ends.
 func (b *Browser) ensureCompliant() error {
 	if b.profile == nil {
-		b.profile = &compliantProfile{}
+		b.profile = newCompliantProfile()
 	}
-	b.profile.once.Do(func() {
-		b.profile.ua, b.profile.meta, b.profile.err = b.readCompliantProfile()
-	})
-	return b.profile.err
+	p := b.profile
+	select {
+	case p.lock <- struct{}{}:
+	case <-b.ctx.Done():
+		return b.ctx.Err()
+	}
+	defer func() { <-p.lock }()
+	if p.done {
+		return p.err
+	}
+	ua, meta, err := b.readCompliantProfile()
+	if err != nil && b.ctx.Err() != nil {
+		return err
+	}
+	p.ua, p.meta, p.err = ua, meta, err
+	p.done = true
+	return err
 }
 
 func (p *Page) applyCompliant() error {
@@ -111,6 +134,9 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 		}.Call(probe)
 		switch {
 		case err != nil:
+			if ctxErr := b.ctx.Err(); ctxErr != nil {
+				return "", nil, ctxErr
+			}
 			last = err
 		case res.ExceptionDetails != nil:
 			last = fmt.Errorf("compliant profile: %s", res.ExceptionDetails.Text)
@@ -127,16 +153,20 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 			case meta != nil:
 				return ua, meta, nil
 			case ua != "":
-				// chrome://version has loaded and this browser has no client hints.
+				// The navigation has committed and this page has no client hints.
 				return ua, nil, nil
 			default:
 				last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
 			}
 		}
-		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-b.ctx.Done():
+			return "", nil, b.ctx.Err()
+		case <-time.After(100 * time.Millisecond):
+		}
 	}
-	// Headless shell never finishes chrome://version. Keep the user agent it
-	// already reported and leave the metadata unset.
+	// The navigation did not commit. Keep the user agent the first document
+	// reported and leave the metadata unset.
 	if seenUA != "" {
 		return seenUA, nil, nil
 	}
