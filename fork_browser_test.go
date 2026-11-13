@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -581,4 +582,43 @@ func TestForkWaitIdleDeadline(t *testing.T) {
 	if time.Since(start) > 3*time.Second {
 		t.Fatalf("idle wait ignored its timeout after %s", time.Since(start))
 	}
+}
+
+// Concurrent callers for one target share a single page setup. Every caller
+// gets the same page and none of them errors.
+func TestForkConcurrentPageFromTarget(t *testing.T) {
+	g := setup(t)
+
+	res, err := proto.TargetCreateTarget{URL: "about:blank"}.Call(g.browser)
+	g.E(err)
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, _ = proto.TargetCloseTarget{TargetID: res.TargetID}.Call(g.browser.Context(ctx))
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	const callers = 8
+	pages := make([]*rod.Page, callers)
+	errs := make([]error, callers)
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	for i := range callers {
+		wg.Go(func() {
+			<-start
+			pages[i], errs[i] = g.browser.Context(ctx).PageFromTarget(res.TargetID)
+		})
+	}
+	close(start)
+	wg.Wait()
+
+	for i := range callers {
+		g.E(errs[i])
+		if pages[i] != pages[0] {
+			t.Fatalf("caller %d got a different page than caller 0", i)
+		}
+	}
+	g.Eq(pages[0].TargetID, res.TargetID)
 }

@@ -24,7 +24,6 @@ func decodeIncoming(b []byte) (incoming, error) {
 	return fallback, nil
 }
 
-//nolint:gocognit,gocyclo,cyclop,funlen // hand-written scanner on the hot decode path
 func scanIncoming(b []byte) (incoming, error) {
 	i := skipSpace(b, 0)
 	if i >= len(b) || b[i] != '{' {
@@ -38,7 +37,6 @@ func scanIncoming(b []byte) (incoming, error) {
 			return incoming{}, errors.New("cdp: truncated message")
 		}
 		if b[i] == '}' {
-			i++
 			break
 		}
 		key, next, err := parseString(b, i)
@@ -49,62 +47,81 @@ func scanIncoming(b []byte) (incoming, error) {
 		if i >= len(b) || b[i] != ':' {
 			return incoming{}, errors.New("cdp: expected colon")
 		}
-		i = skipSpace(b, i+1)
-		start := i
-		end, err := skipValue(b, i)
+		start := skipSpace(b, i+1)
+		end, err := skipValue(b, start)
 		if err != nil {
 			return incoming{}, err
 		}
-		raw := b[start:end]
-		switch key {
-		case "id":
-			n, err := strconv.Atoi(string(bytes.TrimSpace(raw)))
-			if err != nil {
-				return incoming{}, err
-			}
-			msg.ID = n
-		case "sessionId":
-			s, _, err := parseString(b, start)
-			if err != nil {
-				return incoming{}, err
-			}
-			msg.SessionID = s
-		case "method":
-			s, _, err := parseString(b, start)
-			if err != nil {
-				return incoming{}, err
-			}
-			msg.Method = s
-		case "params":
-			msg.Params = append([]byte(nil), raw...)
-		case "result":
-			msg.Result = append([]byte(nil), raw...)
-		case "error":
-			var cdpErr Error
-			err := json.Unmarshal(raw, &cdpErr)
-			if err != nil {
-				return incoming{}, err
-			}
-			msg.Error = &cdpErr
+		err = setField(&msg, key, b, start, b[start:end])
+		if err != nil {
+			return incoming{}, err
 		}
-		i = skipSpace(b, end)
-		if i >= len(b) {
-			return incoming{}, errors.New("cdp: truncated message")
+		var done bool
+		i, done, err = nextMember(b, end)
+		if err != nil {
+			return incoming{}, err
 		}
-		if b[i] == ',' {
-			i++
-			continue
-		}
-		if b[i] == '}' {
-			i++
+		if done {
 			break
 		}
-		return incoming{}, errors.New("cdp: expected comma or end")
 	}
 	if skipSpace(b, i) != len(b) {
 		return incoming{}, errors.New("cdp: trailing data")
 	}
 	return msg, nil
+}
+
+// setField stores one top-level member. start is the offset of its raw value
+// and raw is the value's bytes.
+func setField(msg *incoming, key string, b []byte, start int, raw []byte) error {
+	switch key {
+	case "id":
+		n, err := strconv.Atoi(string(bytes.TrimSpace(raw)))
+		if err != nil {
+			return err
+		}
+		msg.ID = n
+	case "sessionId":
+		s, _, err := parseString(b, start)
+		if err != nil {
+			return err
+		}
+		msg.SessionID = s
+	case "method":
+		s, _, err := parseString(b, start)
+		if err != nil {
+			return err
+		}
+		msg.Method = s
+	case "params":
+		msg.Params = append([]byte(nil), raw...)
+	case "result":
+		msg.Result = append([]byte(nil), raw...)
+	case "error":
+		var cdpErr Error
+		err := json.Unmarshal(raw, &cdpErr)
+		if err != nil {
+			return err
+		}
+		msg.Error = &cdpErr
+	}
+	return nil
+}
+
+// nextMember consumes the separator after a member value. done reports that
+// the object closed.
+func nextMember(b []byte, i int) (next int, done bool, err error) {
+	i = skipSpace(b, i)
+	if i >= len(b) {
+		return 0, false, errors.New("cdp: truncated message")
+	}
+	switch b[i] {
+	case ',':
+		return i + 1, false, nil
+	case '}':
+		return i + 1, true, nil
+	}
+	return 0, false, errors.New("cdp: expected comma or end")
 }
 
 func skipSpace(b []byte, i int) int {
@@ -119,7 +136,12 @@ func skipSpace(b []byte, i int) int {
 	return i
 }
 
-//nolint:gocyclo,cyclop,funlen // escape sequences each need their own case
+// simpleEscapes maps the one-byte JSON escapes to the byte they stand for.
+var simpleEscapes = map[byte]byte{
+	'"': '"', '\\': '\\', '/': '/',
+	'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t',
+}
+
 func parseString(b []byte, i int) (string, int, error) {
 	if i >= len(b) || b[i] != '"' {
 		return "", 0, errors.New("cdp: expected string")
@@ -128,56 +150,47 @@ func parseString(b []byte, i int) (string, int, error) {
 	var buf []byte
 	for i < len(b) {
 		c := b[i]
-		if c == '"' {
+		switch {
+		case c == '"':
 			return string(buf), i + 1, nil
-		}
-		if c == '\\' {
-			if i+1 >= len(b) {
-				return "", 0, errors.New("cdp: truncated escape")
+		case c == '\\':
+			var err error
+			buf, i, err = appendEscape(buf, b, i)
+			if err != nil {
+				return "", 0, err
 			}
-			switch b[i+1] {
-			case '"', '\\', '/':
-				buf = append(buf, b[i+1])
-				i += 2
-			case 'b':
-				buf = append(buf, '\b')
-				i += 2
-			case 'f':
-				buf = append(buf, '\f')
-				i += 2
-			case 'n':
-				buf = append(buf, '\n')
-				i += 2
-			case 'r':
-				buf = append(buf, '\r')
-				i += 2
-			case 't':
-				buf = append(buf, '\t')
-				i += 2
-			case 'u':
-				if i+6 > len(b) {
-					return "", 0, errors.New("cdp: truncated unicode escape")
-				}
-				r, err := strconv.ParseUint(string(b[i+2:i+6]), 16, 16)
-				if err != nil {
-					return "", 0, err
-				}
-				var tmp [utf8.UTFMax]byte
-				n := utf8.EncodeRune(tmp[:], rune(r))
-				buf = append(buf, tmp[:n]...)
-				i += 6
-			default:
-				return "", 0, errors.New("cdp: bad escape")
-			}
-			continue
-		}
-		if c < 0x20 {
+		case c < 0x20:
 			return "", 0, errors.New("cdp: control character in string")
+		default:
+			buf = append(buf, c)
+			i++
 		}
-		buf = append(buf, c)
-		i++
 	}
 	return "", 0, errors.New("cdp: truncated string")
+}
+
+// appendEscape decodes the escape that starts at b[i], a backslash. It returns
+// the extended buffer and the offset after the escape.
+func appendEscape(buf, b []byte, i int) ([]byte, int, error) {
+	if i+1 >= len(b) {
+		return nil, 0, errors.New("cdp: truncated escape")
+	}
+	if c, ok := simpleEscapes[b[i+1]]; ok {
+		return append(buf, c), i + 2, nil
+	}
+	if b[i+1] != 'u' {
+		return nil, 0, errors.New("cdp: bad escape")
+	}
+	if i+6 > len(b) {
+		return nil, 0, errors.New("cdp: truncated unicode escape")
+	}
+	r, err := strconv.ParseUint(string(b[i+2:i+6]), 16, 16)
+	if err != nil {
+		return nil, 0, err
+	}
+	var tmp [utf8.UTFMax]byte
+	n := utf8.EncodeRune(tmp[:], rune(r))
+	return append(buf, tmp[:n]...), i + 6, nil
 }
 
 func skipValue(b []byte, i int) (int, error) {
