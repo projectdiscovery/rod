@@ -25,6 +25,15 @@ var MaxDownloadSize int64 = 2 << 30
 // this long. Without it a stalled CDN connection blocks the launch forever.
 var DownloadIdleTimeout = 60 * time.Second
 
+// DownloadHeaderTimeout bounds the wait for a download host to answer with
+// response headers when [Browser.HTTPClient] is not set. It includes the
+// connect and TLS steps. Without it a host that accepts the connection and
+// sends nothing blocks the launch forever, and Get never reaches the cached
+// browser. It does not bound the body. [DownloadIdleTimeout] covers the body,
+// so a large download still works. A caller that sets its own client keeps its
+// own timeouts. Zero or less turns the bound off.
+var DownloadHeaderTimeout = 60 * time.Second
+
 // ErrUnsafeArchive is returned when an archive entry would escape the target directory.
 var ErrUnsafeArchive = errors.New("archive entry escapes target directory")
 
@@ -34,14 +43,16 @@ var ErrUnsafeArchive = errors.New("archive entry escapes target directory")
 func fetchArchive(
 	ctx context.Context, client *http.Client, logger utils.Logger, dir, sum string, urls []string,
 ) (string, error) {
+	var headerTimeout time.Duration
 	if client == nil {
 		client = http.DefaultClient
+		headerTimeout = DownloadHeaderTimeout
 	}
 	if len(urls) == 0 {
 		return "", errors.New("no download urls")
 	}
 
-	res, u, err := fastest(ctx, client, urls)
+	res, u, err := fastest(ctx, client, headerTimeout, urls)
 	if err != nil {
 		return "", err
 	}
@@ -158,12 +169,15 @@ type fetchResult struct {
 	cancel context.CancelFunc
 }
 
-// fastest returns the first successful response and cancels the others.
-func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Response, string, error) {
+// fastest returns the first successful response and cancels the others. A
+// headerTimeout above zero bounds each probe until its response headers arrive.
+func fastest(
+	ctx context.Context, client *http.Client, headerTimeout time.Duration, urls []string,
+) (*http.Response, string, error) {
 	ch := make(chan fetchResult, len(urls))
 	for _, u := range urls {
 		c, cancel := context.WithCancel(ctx)
-		go probe(c, client, u, cancel, ch)
+		go probe(c, client, headerTimeout, u, cancel, ch)
 	}
 
 	var winner *fetchResult
@@ -197,13 +211,31 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 }
 
 // probe requests u and sends the outcome on ch. A non-200 answer is an error.
-func probe(ctx context.Context, client *http.Client, u string, cancel context.CancelFunc, ch chan<- fetchResult) {
+// When headerTimeout is above zero and the headers do not arrive in that time,
+// the request is canceled and the probe is an error.
+func probe(
+	ctx context.Context, client *http.Client, headerTimeout time.Duration,
+	u string, cancel context.CancelFunc, ch chan<- fetchResult,
+) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		ch <- fetchResult{u: u, err: err, cancel: cancel}
 		return
 	}
+	var timer *time.Timer
+	if headerTimeout > 0 {
+		timer = time.AfterFunc(headerTimeout, cancel)
+	}
 	res, err := client.Do(req)
+	// A timer that already fired cancels the request and its body. Do not use
+	// a response that the cancel can cut off.
+	if timer != nil && !timer.Stop() {
+		if res != nil {
+			_ = res.Body.Close()
+			res = nil
+		}
+		err = fmt.Errorf("%s: no response headers within %s", u, headerTimeout)
+	}
 	if err == nil && res.StatusCode != http.StatusOK {
 		_ = res.Body.Close()
 		err = fmt.Errorf("%s: %s", u, res.Status)
