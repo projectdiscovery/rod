@@ -1,0 +1,47 @@
+name: 🔨 Build Test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: "Lint"
+    if: "${{ !endsWith(github.actor, '[bot]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: projectdiscovery/actions/setup/go@v1
+      - uses: projectdiscovery/actions/golangci-lint/v2@v1
+
+  build:
+    name: Test Builds
+    needs: ["lint"]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: projectdiscovery/actions/setup/go@v1
+
+      # TestUseNode parses the output of use-node, so fetch it before the tests start.
+      - name: Setup node helper
+        if: matrix.os == 'ubuntu-latest'
+        run: go run github.com/ysmood/use-node@latest -p v20
+
+      - name: Test
+        if: matrix.os == 'ubuntu-latest'
+        run: go run ./lib/utils/ci-test -race -run=^Test . ./lib/utils ./lib/proto ./lib/cdp ./lib/defaults ./lib/devices ./lib/launcher ./lib/input
+
+      - name: Test
+        if: matrix.os != 'ubuntu-latest'
+        run: go run ./lib/utils/ci-test -timeout-each=2m -run=^Test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cdp-log-${{ matrix.os }}
+          path: tmp/cdp-log
+          if-no-files-found: ignore
