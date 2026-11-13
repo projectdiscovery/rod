@@ -637,10 +637,12 @@ type probeRedirect struct {
 	polls atomic.Int32
 	// blanks counts the about:blank targets that Chrome created.
 	blanks atomic.Int32
+	// committed counts the probe reads that saw a committed page.
+	committed atomic.Int32
 }
 
 func (c *probeRedirect) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
-	blank := false
+	blank, poll := false, false
 	switch req := params.(type) {
 	case proto.TargetCreateTarget:
 		switch req.URL {
@@ -656,11 +658,15 @@ func (c *probeRedirect) Call(ctx context.Context, sessionID, method string, para
 	case proto.RuntimeEvaluate:
 		if strings.Contains(req.Expression, "pending: true") {
 			c.polls.Add(1)
+			poll = true
 		}
 	}
 	res, err := c.Client.Call(ctx, sessionID, method, params)
 	if blank && err == nil {
 		c.blanks.Add(1)
+	}
+	if poll && err == nil && !bytes.Contains(res, []byte("pending")) {
+		c.committed.Add(1)
 	}
 	return res, err
 }
@@ -697,13 +703,15 @@ func TestForkCompliantProbeErrorPage(t *testing.T) {
 	// Nothing listens on port 1, so the probe commits chrome-error://chromewebdata.
 	b, client := launchProbeRedirect(t, "http://127.0.0.1:1/")
 
-	start := time.Now()
 	p, err := b.Page(proto.TargetCreateTarget{URL: "about:blank"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if took := time.Since(start); took > 2*time.Second {
-		t.Fatalf("first page took %v", took)
+	// The probe must stop when the error page commits, and not poll until its
+	// limit. A time limit is not used: a slow runner can take seconds to
+	// create the first target.
+	if client.committed.Load() != 1 {
+		t.Fatalf("probe saw %d committed pages in %d reads", client.committed.Load(), client.polls.Load())
 	}
 	if client.hits.Load() != 1 {
 		t.Fatalf("probe redirected %d times", client.hits.Load())
