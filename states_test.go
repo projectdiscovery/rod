@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 func countStates(b *Browser) int {

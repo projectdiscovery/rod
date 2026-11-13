@@ -3,7 +3,7 @@ package rod
 import (
 	"time"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 // DefaultHealthPagePoolTimeout bounds each health check and reset of a pooled page.

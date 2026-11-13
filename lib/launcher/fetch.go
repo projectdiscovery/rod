@@ -12,12 +12,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
+	"time"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // MaxDownloadSize caps a browser archive and its extracted content.
 var MaxDownloadSize int64 = 2 << 30
+
+// DownloadIdleTimeout aborts a browser download that receives no bytes for
+// this long. Without it a stalled CDN connection blocks the launch forever.
+var DownloadIdleTimeout = 60 * time.Second
 
 // ErrUnsafeArchive is returned when an archive entry would escape the target directory.
 var ErrUnsafeArchive = errors.New("archive entry escapes target directory")
@@ -25,8 +31,6 @@ var ErrUnsafeArchive = errors.New("archive entry escapes target directory")
 // fetchArchive downloads the first url that answers 200, verifies sum when it
 // is not empty, and extracts it into dir. dir is replaced atomically.
 // The returned sum is the SHA-256 of the archive.
-//
-//nolint:funlen // the download, verify, and extract steps read in order
 func fetchArchive(
 	ctx context.Context, client *http.Client, logger utils.Logger, dir, sum string, urls []string,
 ) (string, error) {
@@ -62,9 +66,20 @@ func fetchArchive(
 		_ = os.Remove(tmp.Name())
 	}()
 
+	var stalled atomic.Bool
+	idle := time.AfterFunc(DownloadIdleTimeout, func() {
+		stalled.Store(true)
+		_ = res.Body.Close()
+	})
+	defer idle.Stop()
+
 	h := sha256.New()
-	n, err := io.Copy(io.MultiWriter(tmp, h), io.LimitReader(res.Body, MaxDownloadSize+1))
+	body := &idleBody{r: res.Body, timer: idle, timeout: DownloadIdleTimeout}
+	n, err := io.Copy(io.MultiWriter(tmp, h), io.LimitReader(body, MaxDownloadSize+1))
 	if err != nil {
+		if stalled.Load() {
+			return "", fmt.Errorf("browser download from %s stalled for %s", u, DownloadIdleTimeout)
+		}
 		return "", err
 	}
 	if n > MaxDownloadSize {
@@ -75,23 +90,7 @@ func fetchArchive(
 		return "", fmt.Errorf("browser archive sha256 mismatch for %s", u)
 	}
 
-	staging, err := os.MkdirTemp(filepath.Dir(dir), ".rod-extract-*")
-	if err != nil {
-		return "", err
-	}
-	defer func() { _ = os.RemoveAll(staging) }()
-
-	err = unzipSafe(tmp, n, staging)
-	if err != nil {
-		return "", err
-	}
-	root, err := stripSingleDir(staging)
-	if err != nil {
-		return "", err
-	}
-
-	_ = os.RemoveAll(dir)
-	err = os.Rename(root, dir)
+	err = installArchive(tmp, n, dir)
 	if err != nil {
 		return "", err
 	}
@@ -99,36 +98,75 @@ func fetchArchive(
 	return got, nil
 }
 
-// fastest returns the first successful response and cancels the others.
-//
-//nolint:funlen // the race over several hosts is one select loop
-func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Response, string, error) {
-	type result struct {
-		res    *http.Response
-		u      string
-		err    error
-		cancel context.CancelFunc
+// installArchive extracts the zip in tmp into a staging dir and moves its
+// single top-level directory to dir, replacing whatever was there. All
+// staging and swap operations go through an os.Root on the parent directory,
+// so they cannot reach outside it.
+func installArchive(tmp *os.File, n int64, dir string) error {
+	parent, base := filepath.Dir(dir), filepath.Base(dir)
+	root, err := os.OpenRoot(parent)
+	if err != nil {
+		return err
 	}
-	ch := make(chan result, len(urls))
-	for _, u := range urls {
-		c, cancel := context.WithCancel(ctx)
-		go func() {
-			req, err := http.NewRequestWithContext(c, http.MethodGet, u, nil)
-			if err != nil {
-				ch <- result{u: u, err: err, cancel: cancel}
-				return
-			}
-			res, err := client.Do(req)
-			if err == nil && res.StatusCode != http.StatusOK {
-				_ = res.Body.Close()
-				err = fmt.Errorf("%s: %s", u, res.Status)
-				res = nil
-			}
-			ch <- result{res: res, u: u, err: err, cancel: cancel}
-		}()
+	defer func() { _ = root.Close() }()
+
+	stage := ".rod-extract-" + utils.RandString(8)
+	err = root.Mkdir(stage, 0o755)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.RemoveAll(stage) }()
+
+	stagingPath := filepath.Join(parent, stage)
+	err = unzipSafe(tmp, n, stagingPath)
+	if err != nil {
+		return err
+	}
+	extracted, err := stripSingleDir(stagingPath)
+	if err != nil {
+		return err
+	}
+	rel, err := filepath.Rel(stagingPath, extracted)
+	if err != nil {
+		return err
 	}
 
-	var winner *result
+	_ = root.RemoveAll(base)
+	return root.Rename(filepath.Join(stage, rel), base)
+}
+
+// idleBody re-arms the idle timer every time bytes arrive.
+type idleBody struct {
+	r       io.Reader
+	timer   *time.Timer
+	timeout time.Duration
+}
+
+func (b *idleBody) Read(p []byte) (int, error) {
+	n, err := b.r.Read(p)
+	if n > 0 {
+		b.timer.Reset(b.timeout)
+	}
+	return n, err
+}
+
+// fetchResult is the outcome of one probe.
+type fetchResult struct {
+	res    *http.Response
+	u      string
+	err    error
+	cancel context.CancelFunc
+}
+
+// fastest returns the first successful response and cancels the others.
+func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Response, string, error) {
+	ch := make(chan fetchResult, len(urls))
+	for _, u := range urls {
+		c, cancel := context.WithCancel(ctx)
+		go probe(c, client, u, cancel, ch)
+	}
+
+	var winner *fetchResult
 	var errs []error
 	for range urls {
 		r := <-ch
@@ -146,15 +184,7 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 		winner = &rr
 		// Keep draining in the background so the losers get cancelled.
 		remaining := len(urls) - 1 - len(errs)
-		go func() {
-			for range remaining {
-				l := <-ch
-				if l.res != nil {
-					_ = l.res.Body.Close()
-				}
-				l.cancel()
-			}
-		}()
+		go drain(ch, remaining)
 		break
 	}
 	if winner == nil {
@@ -164,6 +194,33 @@ func fastest(ctx context.Context, client *http.Client, urls []string) (*http.Res
 	cancel := winner.cancel
 	winner.res.Body = &cancelBody{ReadCloser: body, cancel: cancel}
 	return winner.res, winner.u, nil
+}
+
+// probe requests u and sends the outcome on ch. A non-200 answer is an error.
+func probe(ctx context.Context, client *http.Client, u string, cancel context.CancelFunc, ch chan<- fetchResult) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		ch <- fetchResult{u: u, err: err, cancel: cancel}
+		return
+	}
+	res, err := client.Do(req)
+	if err == nil && res.StatusCode != http.StatusOK {
+		_ = res.Body.Close()
+		err = fmt.Errorf("%s: %s", u, res.Status)
+		res = nil
+	}
+	ch <- fetchResult{res: res, u: u, err: err, cancel: cancel}
+}
+
+// drain closes the remaining probe results and cancels them.
+func drain(ch <-chan fetchResult, remaining int) {
+	for range remaining {
+		l := <-ch
+		if l.res != nil {
+			_ = l.res.Body.Close()
+		}
+		l.cancel()
+	}
 }
 
 type cancelBody struct {

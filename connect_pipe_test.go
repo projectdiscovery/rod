@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/launcher"
 )
 
 // A default local Connect must talk CDP over the debugging pipe and open no

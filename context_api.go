@@ -5,8 +5,8 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 // ErrTargetClosed is matched by errors caused by the page's target being

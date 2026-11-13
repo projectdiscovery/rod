@@ -1,11 +1,11 @@
-module github.com/go-rod/rod
+module github.com/projectdiscovery/rod
 
-go 1.27
+go 1.27.4
 
 require (
-	github.com/ysmood/got v0.40.0
+	github.com/ysmood/got v0.43.0
 	github.com/ysmood/gotrace v0.6.0
 	github.com/ysmood/gson v0.7.3
 )
 
-require github.com/ysmood/gop v0.2.0 // indirect
+require github.com/ysmood/gop v0.4.2 // indirect

@@ -263,7 +263,120 @@ func (ws *WebSocket) keepAlive(_ net.Conn, closed chan struct{}) {
 	}
 }
 
-//nolint:gocognit,gocyclo,cyclop,funlen // the frame parser follows the RFC 6455 states in order
+// armReadDeadline bounds the next read when keepalive is on, so a silent peer
+// is detected in three keepalive intervals.
+func (ws *WebSocket) armReadDeadline(conn net.Conn) {
+	if ws.KeepAlive > 0 {
+		_ = conn.SetReadDeadline(time.Now().Add(3 * ws.KeepAlive))
+	}
+}
+
+// frame is one decoded WebSocket frame with its payload unmasked.
+type frame struct {
+	fin     bool
+	opcode  byte
+	payload []byte
+}
+
+// readFrame decodes one frame from r, following RFC 6455 section 5.2.
+func (ws *WebSocket) readFrame(r *bufio.Reader) (frame, error) {
+	h0, err := r.ReadByte()
+	if err != nil {
+		return frame{}, err
+	}
+	h1, err := r.ReadByte()
+	if err != nil {
+		return frame{}, err
+	}
+	if h0&0x70 != 0 {
+		return frame{}, errors.New("cdp: websocket reserved bits set")
+	}
+	f := frame{fin: h0&0x80 != 0, opcode: h0 & 0x0f}
+	masked := h1&0x80 != 0
+	size, err := ws.readLen(r, h1&0x7f)
+	if err != nil {
+		return frame{}, err
+	}
+	if size < 0 || size > ws.limit() {
+		return frame{}, ErrMessageTooLarge
+	}
+	var key [4]byte
+	if masked {
+		_, err = io.ReadFull(r, key[:])
+		if err != nil {
+			return frame{}, err
+		}
+	}
+	f.payload = make([]byte, size)
+	_, err = io.ReadFull(r, f.payload)
+	if err != nil {
+		return frame{}, err
+	}
+	if masked {
+		maskBytes(f.payload, key)
+	}
+	return f, nil
+}
+
+// validCloseCode reports whether a peer may send code in a close frame.
+func validCloseCode(code uint16) bool {
+	return code >= 1000 && code != 1004 && code != 1005 && code != 1006 && (code <= 1014 || code >= 3000)
+}
+
+// handleControl answers a ping or validates a close frame. done reports that
+// the peer closed the connection.
+func (ws *WebSocket) handleControl(f frame) (done bool, err error) {
+	switch f.opcode {
+	case 0x9: // ping
+		if !f.fin || len(f.payload) > maxControlFrame {
+			return false, errors.New("cdp: malformed ping")
+		}
+		return false, ws.writeControl(0x8A, f.payload)
+	case 0x8: // close
+		if !f.fin || len(f.payload) > maxControlFrame {
+			return false, errors.New("cdp: malformed close")
+		}
+		if len(f.payload) >= 2 {
+			code := binary.BigEndian.Uint16(f.payload[:2])
+			if !validCloseCode(code) {
+				return false, errors.New("cdp: invalid close code")
+			}
+			if len(f.payload) > 2 && !utf8.Valid(f.payload[2:]) {
+				return false, errors.New("cdp: close reason is not utf-8")
+			}
+		}
+		_ = ws.writeControl(0x88, f.payload)
+		return true, io.EOF
+	}
+	return false, nil
+}
+
+// assembler joins the data frames of one message.
+type assembler struct {
+	buf  []byte
+	cont bool
+}
+
+// add appends a text or continuation frame. complete reports that the message
+// is whole.
+func (a *assembler) add(f frame, limit int) (complete bool, err error) {
+	if f.opcode == 0x1 && a.cont {
+		return false, errors.New("cdp: unexpected text frame")
+	}
+	if f.opcode == 0x0 && !a.cont {
+		return false, errors.New("cdp: unexpected continuation")
+	}
+	a.buf = append(a.buf, f.payload...)
+	if len(a.buf) > limit {
+		return false, ErrMessageTooLarge
+	}
+	if f.fin {
+		return true, nil
+	}
+	a.cont = true
+	return false, nil
+}
+
 func (ws *WebSocket) read() ([]byte, error) {
 	ws.mu.Lock()
 	r := ws.r
@@ -273,110 +386,39 @@ func (ws *WebSocket) read() ([]byte, error) {
 		return nil, io.ErrClosedPipe
 	}
 
-	var assembled []byte
+	var asm assembler
 	frames := 0
-	expectCont := false
 
 	for {
-		if ws.KeepAlive > 0 {
-			_ = conn.SetReadDeadline(time.Now().Add(3 * ws.KeepAlive))
-		}
-		h0, err := r.ReadByte()
+		ws.armReadDeadline(conn)
+		f, err := ws.readFrame(r)
 		if err != nil {
 			return nil, err
 		}
-		h1, err := r.ReadByte()
-		if err != nil {
-			return nil, err
-		}
-		if h0&0x70 != 0 {
-			return nil, errors.New("cdp: websocket reserved bits set")
-		}
-		fin := h0&0x80 != 0
-		opcode := h0 & 0x0f
-		masked := h1&0x80 != 0
-		size, err := ws.readLen(r, h1&0x7f)
-		if err != nil {
-			return nil, err
-		}
-		if size < 0 || size > ws.limit() {
-			return nil, ErrMessageTooLarge
-		}
-		var key [4]byte
-		if masked {
-			_, err := io.ReadFull(r, key[:])
-			if err != nil {
-				return nil, err
-			}
-		}
-		payload := make([]byte, size)
-		_, err = io.ReadFull(r, payload)
-		if err != nil {
-			return nil, err
-		}
-		if masked {
-			maskBytes(payload, key)
-		}
-
 		frames++
 		if frames > maxFrames {
 			return nil, errors.New("cdp: too many websocket frames")
 		}
 
-		switch opcode {
-		case 0x9: // ping
-			if !fin || size > maxControlFrame {
-				return nil, errors.New("cdp: malformed ping")
+		switch f.opcode {
+		case 0x9, 0x8: // ping, close
+			done, err := ws.handleControl(f)
+			if err != nil || done {
+				return nil, err
 			}
-			err := ws.writeControl(0x8A, payload)
+		case 0xA: // pong
+		case 0x1, 0x0: // text, continuation
+			complete, err := asm.add(f, ws.limit())
 			if err != nil {
 				return nil, err
 			}
-			continue
-		case 0xA: // pong
-			continue
-		case 0x8: // close
-			if !fin || size > maxControlFrame {
-				return nil, errors.New("cdp: malformed close")
-			}
-			if size >= 2 {
-				code := binary.BigEndian.Uint16(payload[:2])
-				if code < 1000 || code == 1004 || code == 1005 || code == 1006 || (code > 1014 && code < 3000) {
-					return nil, errors.New("cdp: invalid close code")
-				}
-				if size > 2 && !utf8.Valid(payload[2:]) {
-					return nil, errors.New("cdp: close reason is not utf-8")
-				}
-			}
-			_ = ws.writeControl(0x88, payload)
-			return nil, io.EOF
-		case 0x1: // text
-			if expectCont {
-				return nil, errors.New("cdp: unexpected text frame")
-			}
-			assembled = append(assembled, payload...)
-			if len(assembled) > ws.limit() {
-				return nil, ErrMessageTooLarge
-			}
-			if fin {
-				return assembled, nil
-			}
-			expectCont = true
-		case 0x0: // continuation
-			if !expectCont {
-				return nil, errors.New("cdp: unexpected continuation")
-			}
-			assembled = append(assembled, payload...)
-			if len(assembled) > ws.limit() {
-				return nil, ErrMessageTooLarge
-			}
-			if fin {
-				return assembled, nil
+			if complete {
+				return asm.buf, nil
 			}
 		case 0x2:
 			return nil, errors.New("cdp: unexpected binary frame")
 		default:
-			return nil, fmt.Errorf("cdp: unknown opcode %d", opcode)
+			return nil, fmt.Errorf("cdp: unknown opcode %d", f.opcode)
 		}
 	}
 }

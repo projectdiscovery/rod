@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 

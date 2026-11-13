@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // GitHub-hosted runners are not containers, and Chrome still refuses to start

@@ -11,9 +11,11 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 type zipEntry struct {
@@ -85,6 +87,40 @@ func TestFetchArchiveExtracts(t *testing.T) {
 	}
 }
 
+func TestFetchArchiveReplacesExisting(t *testing.T) {
+	data := buildZip(t, zipEntry{name: "top/bin/chrome", body: "new"})
+	s := serveZip(t, data)
+	dir := filepath.Join(t.TempDir(), "browser")
+
+	// A previous install with a stale file that the new archive does not have.
+	err := os.MkdirAll(filepath.Join(dir, "old"), 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.WriteFile(filepath.Join(dir, "old", "stale"), []byte("x"), 0o644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sum := sha256.Sum256(data)
+	_, err = fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, hex.EncodeToString(sum[:]), []string{s.URL + "/a.zip"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(dir, "bin", "chrome"))
+	if err != nil || string(b) != "new" {
+		t.Fatalf("bin: %q %v", b, err)
+	}
+	_, err = os.Stat(filepath.Join(dir, "old"))
+	if !os.IsNotExist(err) {
+		t.Fatalf("stale install not replaced: %v", err)
+	}
+	left, _ := filepath.Glob(filepath.Join(filepath.Dir(dir), ".rod-*"))
+	if len(left) != 0 {
+		t.Fatalf("temp files left: %v", left)
+	}
+}
+
 func TestFetchArchiveChecksum(t *testing.T) {
 	s := serveZip(t, buildZip(t, zipEntry{name: "a/b", body: "x"}))
 	dir := filepath.Join(t.TempDir(), "browser")
@@ -138,5 +174,37 @@ func TestFetchArchiveFallsBack(t *testing.T) {
 	_, err = fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL})
 	if err == nil {
 		t.Fatal("404 accepted")
+	}
+}
+
+// A server that sends headers and a few bytes, then goes silent, must not hang
+// the download forever.
+func TestFetchArchiveStalledBody(t *testing.T) {
+	old := DownloadIdleTimeout
+	DownloadIdleTimeout = 300 * time.Millisecond
+	defer func() { DownloadIdleTimeout = old }()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("PK"))
+		w.(http.Flusher).Flush()
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+
+	dir := filepath.Join(t.TempDir(), "browser")
+	done := make(chan error, 1)
+	go func() {
+		_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{srv.URL})
+		done <- err
+	}()
+
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "stalled") {
+			t.Fatalf("expected stall error, got %v", err)
+		}
+	case <-time.After(15 * time.Second):
+		t.Fatal("download hung on a stalled body")
 	}
 }

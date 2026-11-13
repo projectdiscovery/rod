@@ -4,8 +4,8 @@ package main
 import (
 	"os"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 // This example demonstrates how to take a screenshot of a specific element and

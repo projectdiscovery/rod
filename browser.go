@@ -17,12 +17,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/defaults"
-	"github.com/go-rod/rod/lib/devices"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/defaults"
+	"github.com/projectdiscovery/rod/lib/devices"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // aboutBlank is the URL of an empty tab.
@@ -37,7 +37,7 @@ var (
 // Browser represents the browser.
 // It doesn't depends on file system, it should work with remote browser seamlessly.
 // To check the env var you can use to quickly enable options from CLI, check here:
-// https://pkg.go.dev/github.com/go-rod/rod/lib/defaults
+// https://pkg.go.dev/github.com/projectdiscovery/rod/lib/defaults
 type Browser struct {
 	// BrowserContextID is the id for incognito window
 	BrowserContextID proto.BrowserBrowserContextID
@@ -217,53 +217,10 @@ func (b *Browser) Compliant(enable bool) *Browser {
 // A local launch talks CDP over --remote-debugging-pipe, so no debugging port
 // is opened and other local processes cannot reach the browser. Where pipes
 // are not available (Windows), the browser is launched on a port instead.
-//
-//nolint:gocognit,gocyclo,cyclop,nestif // the launch modes branch on pipe, port, and control URL
 func (b *Browser) Connect() error {
-	if b.client == nil {
-		// Pipe launches do not wait on the context, so check it here.
-		err := b.ctx.Err()
-		if err != nil {
-			return err
-		}
-		u := b.controlURL
-		var l *launcher.Launcher
-		if u == "" {
-			l = launcher.New().Context(b.ctx)
-			if b.compliant {
-				l.Compliant(true)
-			}
-		}
-
-		var c CDPClient
-		if l != nil && launcher.PipeSupported() {
-			pc, err := l.LaunchPipe()
-			if err != nil {
-				return err
-			}
-			c = pc
-		} else {
-			if l != nil {
-				var err error
-				u, err = l.Launch()
-				if err != nil {
-					return err
-				}
-			}
-			cc, err := cdp.StartWithURL(b.ctx, u, nil)
-			if err != nil {
-				if l != nil {
-					l.Kill()
-					l.Cleanup()
-				}
-				return err
-			}
-			c = cc
-		}
-		b.launcher = l
-		b.client = c
-	} else if b.controlURL != "" {
-		return errors.New("Browser.Client and Browser.ControlURL can't be set at the same time")
+	err := b.startClient()
+	if err != nil {
+		return err
 	}
 
 	b.initEvents()
@@ -272,7 +229,7 @@ func (b *Browser) Connect() error {
 		launcher.Open(b.ServeMonitor(b.monitor))
 	}
 
-	err := (proto.TargetSetDiscoverTargets{Discover: true}).Call(b)
+	err = (proto.TargetSetDiscoverTargets{Discover: true}).Call(b)
 	if err != nil {
 		if b.launcher != nil {
 			b.abandonLaunch()
@@ -546,6 +503,68 @@ func (b *Browser) WaitDownload(dir string) func() (info *proto.PageDownloadWillB
 // Version info of the browser.
 func (b *Browser) Version() (*proto.BrowserGetVersionResult, error) {
 	return proto.BrowserGetVersion{}.Call(b)
+}
+
+// attach connects over a pipe when the platform supports it and over a
+// websocket otherwise. l is nil when the browser is remote and u is its URL.
+func (b *Browser) attach(l *launcher.Launcher, u string) (CDPClient, error) {
+	if l != nil && launcher.PipeSupported() {
+		pc, err := l.LaunchPipe()
+		if err != nil {
+			return nil, err
+		}
+		return pc, nil
+	}
+
+	if l != nil {
+		var err error
+		u, err = l.Launch()
+		if err != nil {
+			return nil, err
+		}
+	}
+	cc, err := cdp.StartWithURL(b.ctx, u, nil)
+	if err != nil {
+		if l != nil {
+			l.Kill()
+			l.Cleanup()
+		}
+		return nil, err
+	}
+	return cc, nil
+}
+
+// startClient launches or attaches the CDP client unless one is already set.
+func (b *Browser) startClient() error {
+	if b.client != nil {
+		if b.controlURL != "" {
+			return errors.New("Browser.Client and Browser.ControlURL can't be set at the same time")
+		}
+		return nil
+	}
+
+	// Pipe launches do not wait on the context, so check it here.
+	err := b.ctx.Err()
+	if err != nil {
+		return err
+	}
+
+	u := b.controlURL
+	var l *launcher.Launcher
+	if u == "" {
+		l = launcher.New().Context(b.ctx)
+		if b.compliant {
+			l.Compliant(true)
+		}
+	}
+
+	c, err := b.attach(l, u)
+	if err != nil {
+		return err
+	}
+	b.launcher = l
+	b.client = c
+	return nil
 }
 
 func (b *Browser) isHeadless() (enabled bool) {

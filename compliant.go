@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 	"github.com/ysmood/gson"
 )
 

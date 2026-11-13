@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 
@@ -160,7 +160,7 @@ func symbol(n string) string {
 	n = replaceLower(n, "Ui")
 	n = replaceLower(n, "Https")
 
-	n = strings.Replace(n, "Ids", "IDs", -1)
+	n = strings.ReplaceAll(n, "Ids", "IDs")
 
 	return n
 }
