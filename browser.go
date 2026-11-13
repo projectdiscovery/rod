@@ -82,9 +82,10 @@ type Browser struct {
 }
 
 // New creates a controller.
-// DefaultDevice to emulate is set to [devices.LaptopWithMDPIScreen].Landscape(), it will change the default
-// user-agent and can make the actual view area smaller than the browser window on headful mode,
-// you can use [Browser.NoDefaultDevice] to disable it.
+// Compliant is on by default: pages report the browser's own user agent and
+// client hints, and the default device is not applied, so no stale Chrome
+// version is reported. Use [Browser.Compliant](false) to opt out, which
+// brings back [devices.LaptopWithMDPIScreen] as the default device.
 func New() *Browser {
 	return (&Browser{
 		ctx:           context.Background(),
@@ -102,6 +103,7 @@ func New() *Browser {
 		states:        &sync.Map{},
 		opening:       map[proto.TargetTargetID]*pageOpen{},
 		profile:       &compliantProfile{},
+		compliant:     true,
 	}).WithPanic(utils.Panic)
 }
 
@@ -568,9 +570,24 @@ func (b *Browser) startClient() error {
 }
 
 func (b *Browser) isHeadless() (enabled bool) {
-	res, _ := proto.BrowserGetBrowserCommandLine{}.Call(b)
-	for _, v := range res.Arguments {
-		if strings.Contains(v, "headless") {
+	res, err := proto.BrowserGetBrowserCommandLine{}.Call(b)
+	if err == nil {
+		for _, v := range res.Arguments {
+			if strings.Contains(v, "headless") {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Chrome only reports its arguments when --enable-automation is set, and
+	// compliant mode removes it. SystemInfo still reports the full command line.
+	info, err := proto.SystemInfoGetInfo{}.Call(b)
+	if err != nil {
+		return false
+	}
+	for _, arg := range strings.Fields(info.CommandLine) {
+		if strings.HasPrefix(arg, "--") && strings.Contains(arg, "headless") {
 			return true
 		}
 	}

@@ -41,12 +41,14 @@ func (b *Browser) ensureCompliant() error {
 }
 
 func (p *Page) applyCompliant() error {
-	if p.browser.profile == nil || p.browser.profile.ua == "" || p.browser.profile.meta == nil {
+	if p.browser.profile == nil || p.browser.profile.ua == "" {
 		if p.browser.profile != nil && p.browser.profile.err != nil {
 			return p.browser.profile.err
 		}
 		return fmt.Errorf("compliant profile was not read")
 	}
+	// Some builds, such as chrome-headless-shell, expose no client hints. The
+	// user agent alone is still aligned, and the metadata stays unset.
 	return proto.EmulationSetUserAgentOverride{
 		UserAgent:         p.browser.profile.ua,
 		UserAgentMetadata: p.browser.profile.meta,
@@ -70,6 +72,14 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 	if err != nil {
 		return "", nil, err
 	}
+	// The probe session must not outlive the read. Its enable state would
+	// otherwise stay in the browser's state table.
+	defer func() {
+		b.purgeSession(session.SessionID)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = proto.TargetDetachFromTarget{SessionID: session.SessionID}.Call(b.Context(ctx))
+	}()
 	probe := &Page{
 		ctx:       b.ctx,
 		session:   b.ctx,
@@ -97,6 +107,10 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 				last = fmt.Errorf("compliant profile: %w (%s)", err, res.Result.Value.Str())
 			case meta != nil:
 				return ua, meta, nil
+			case ua != "":
+				// No navigator.userAgentData. The answer is final, so waiting
+				// longer would not change it.
+				return ua, nil, nil
 			default:
 				last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
 			}
@@ -144,7 +158,13 @@ func compliantFromEval(raw string) (string, *proto.EmulationUserAgentMetadata, e
 	if err != nil {
 		return "", nil, err
 	}
-	if parsed.Hints == nil || len(parsed.Hints.Brands) == 0 || parsed.UA == "" {
+	if parsed.UA == "" {
+		return "", nil, nil
+	}
+	if parsed.Hints == nil {
+		return chromeUA(parsed.UA), nil, nil
+	}
+	if len(parsed.Hints.Brands) == 0 {
 		return "", nil, nil
 	}
 	brands := make([]*proto.EmulationUserAgentBrandVersion, len(parsed.Hints.Brands))

@@ -55,8 +55,14 @@ func TestDefaultDevice(t *testing.T) {
 		ua = r.Header.Get("User-Agent")
 	})
 
+	// Compliant is on by default and skips the default device, so the device
+	// path is only reached after opting out.
+	g.browser.MustPage(s.URL("/t")).MustClose()
+	g.Neq(ua, devices.IPhoneX.UserAgentEmulation().UserAgent)
+
 	// TODO: https://github.com/golang/go/issues/51459
 	b := *g.browser
+	b.Compliant(false)
 	b.DefaultDevice(devices.IPhoneX)
 
 	b.MustPage(s.URL("/t")).MustClose()
@@ -79,6 +85,11 @@ func TestPageErr(t *testing.T) {
 func TestPageFromTarget(t *testing.T) {
 	g := setup(t)
 
+	// The emulation path only runs when compliant mode is off. Use a copy so
+	// the pooled browser keeps its default.
+	browser := *g.browser
+	browser.Compliant(false)
+
 	g.Panic(func() {
 		res, err := proto.TargetCreateTarget{URL: "about:blank"}.Call(g.browser)
 		g.E(err)
@@ -87,7 +98,7 @@ func TestPageFromTarget(t *testing.T) {
 		}()
 
 		g.mc.stubErr(1, proto.EmulationSetDeviceMetricsOverride{})
-		g.browser.MustPageFromTargetID(res.TargetID)
+		browser.MustPageFromTargetID(res.TargetID)
 	})
 }
 
