@@ -74,7 +74,7 @@ func TestClickSubmitsForm(t *testing.T) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		defer uploaded.Close()
+		defer func() { _ = uploaded.Close() }()
 		body, _ := io.ReadAll(uploaded)
 		// The response has to arrive after the mouse event. Click must not
 		// return until this document is the one the caller reads.
@@ -88,6 +88,29 @@ func TestClickSubmitsForm(t *testing.T) {
 	p.MustElement(`input[type="submit"]`).MustClick()
 
 	g.True(strings.Contains(p.MustHTML(), "Basic File Upload"))
+}
+
+func TestEnterSubmitsForm(t *testing.T) {
+	g := setup(t)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			_, _ = io.WriteString(w, `<!doctype html><body>
+				<form method="post">
+				<input name="q">
+				</form></body>`)
+			return
+		}
+		time.Sleep(200 * time.Millisecond)
+		_, _ = io.WriteString(w, "submitted "+r.FormValue("q"))
+	}))
+	t.Cleanup(srv.Close)
+
+	p := g.page.MustNavigate(srv.URL).MustWaitLoad()
+	p.MustElement(`input[name="q"]`).MustInput("ok")
+	p.MustElement(`input[name="q"]`).MustType(input.Enter)
+
+	g.True(strings.Contains(p.MustHTML(), "submitted ok"))
 }
 
 func TestClickWrapped(t *testing.T) {

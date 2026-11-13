@@ -3,6 +3,7 @@ package rod
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -12,8 +13,20 @@ import (
 	"github.com/ysmood/gson"
 )
 
+// errCompliantPending means chrome://version is not loaded yet. The user agent
+// may already be known. A browser with no client hints, such as headless shell,
+// stays pending because that page never finishes, and the caller uses the user
+// agent it already saw.
+var errCompliantPending = errors.New("compliant profile pending")
+
 const compliantHintJS = `(() => {
 	const ua = navigator.userAgent
+	// The first document has no userAgentData. Reading it then would stick
+	// the browser with no client hints. Wait until chrome://version has
+	// loaded. A missing userAgentData after that is the real answer.
+	if (location.protocol !== "chrome:" || document.readyState !== "complete") {
+		return JSON.stringify({ua, pending: true})
+	}
 	if (!navigator.userAgentData) return JSON.stringify({ua})
 	return navigator.userAgentData.getHighEntropyValues([
 		"brands", "fullVersionList", "platform", "platformVersion",
@@ -89,6 +102,7 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 	_ = proto.PageEnable{}.Call(probe)
 
 	var last error
+	var seenUA string
 	for range 50 {
 		res, err := proto.RuntimeEvaluate{
 			Expression:    compliantHintJS,
@@ -103,13 +117,17 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 		default:
 			ua, meta, err := compliantFromValue(res.Result.Value)
 			switch {
+			case errors.Is(err, errCompliantPending):
+				if ua != "" {
+					seenUA = ua
+				}
+				last = err
 			case err != nil:
 				last = fmt.Errorf("compliant profile: %w (%s)", err, res.Result.Value.Str())
 			case meta != nil:
 				return ua, meta, nil
 			case ua != "":
-				// No navigator.userAgentData. The answer is final, so waiting
-				// longer would not change it.
+				// chrome://version has loaded and this browser has no client hints.
 				return ua, nil, nil
 			default:
 				last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
@@ -117,12 +135,18 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+	// Headless shell never finishes chrome://version. Keep the user agent it
+	// already reported and leave the metadata unset.
+	if seenUA != "" {
+		return seenUA, nil, nil
+	}
 	return "", nil, last
 }
 
 type compliantHints struct {
-	UA    string `json:"ua"`
-	Hints *struct {
+	UA      string `json:"ua"`
+	Pending bool   `json:"pending"`
+	Hints   *struct {
 		Architecture    string                                 `json:"architecture"`
 		Bitness         string                                 `json:"bitness"`
 		Brands          []proto.EmulationUserAgentBrandVersion `json:"brands"`
@@ -157,6 +181,9 @@ func compliantFromEval(raw string) (string, *proto.EmulationUserAgentMetadata, e
 	err := json.Unmarshal([]byte(raw), &parsed)
 	if err != nil {
 		return "", nil, err
+	}
+	if parsed.Pending {
+		return chromeUA(parsed.UA), nil, errCompliantPending
 	}
 	if parsed.UA == "" {
 		return "", nil, nil
