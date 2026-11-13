@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-rod/rod/lib/launcher/flags"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/launcher/flags"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 const fakeDumpDOSScript = "#!/bin/sh\necho '<html><head></head><body></body></html>'\n"

@@ -5,7 +5,7 @@ package launcher
 import (
 	"os"
 
-	"github.com/go-rod/rod/lib/launcher/flags"
+	"github.com/projectdiscovery/rod/lib/launcher/flags"
 )
 
 func (l *Launcher) preparePrivileges() error {

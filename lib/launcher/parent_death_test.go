@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/launcher"
 )
 
 //nolint:gocognit // the test runs as a subprocess and then checks the browser is gone

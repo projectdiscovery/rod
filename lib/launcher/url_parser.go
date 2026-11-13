@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 

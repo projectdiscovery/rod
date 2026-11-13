@@ -16,9 +16,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-rod/rod/lib/defaults"
-	"github.com/go-rod/rod/lib/launcher/flags"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/defaults"
+	"github.com/projectdiscovery/rod/lib/launcher/flags"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // DefaultUserDataDirPrefix ...

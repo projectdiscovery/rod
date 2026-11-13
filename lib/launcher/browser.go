@@ -13,8 +13,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/go-rod/rod/lib/defaults"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/defaults"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // Host formats a revision number to a downloadable URL for the browser.

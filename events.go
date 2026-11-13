@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 // DefaultEventQueue is the per-subscription queue length used when

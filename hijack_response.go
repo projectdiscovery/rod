@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 type hijackResponseHandler struct {

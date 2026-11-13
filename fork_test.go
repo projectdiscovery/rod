@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/go-rod/rod/lib/launcher/flags"
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/launcher/flags"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 func TestMessageLoadBadJSON(t *testing.T) {

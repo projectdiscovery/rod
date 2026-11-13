@@ -4,9 +4,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 func Example_use_system_browser() {

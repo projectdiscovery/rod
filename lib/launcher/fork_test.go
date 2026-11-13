@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/launcher"
 )
 
 func TestLaunchTimeout(t *testing.T) {
