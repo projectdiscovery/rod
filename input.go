@@ -42,17 +42,40 @@ func (k *Keyboard) Press(key input.Key) error {
 func (k *Keyboard) Release(key input.Key) error {
 	defer k.page.tryTrace(TraceTypeInput, "release key: "+key.Info().Code)()
 
+	sent, err := k.release(key)
+	if err != nil || !sent {
+		return err
+	}
+	if keyActivates(key) {
+		return k.page.settleInput()
+	}
+	return nil
+}
+
+func (k *Keyboard) release(key input.Key) (bool, error) {
 	s := k.state()
 	s.Lock()
 	defer s.Unlock()
 
 	if _, has := s.pressed[key]; !has {
-		return nil
+		return false, nil
 	}
 
 	delete(s.pressed, key)
 
-	return key.Encode(proto.InputDispatchKeyEventTypeKeyUp, s.modifiers()).Call(k.page)
+	err := key.Encode(proto.InputDispatchKeyEventTypeKeyUp, s.modifiers()).Call(k.page)
+	return err == nil, err
+}
+
+// keyActivates reports keys that run a control's default action on keyup.
+// Enter submits a form. Space activates a button.
+func keyActivates(key input.Key) bool {
+	switch key {
+	case input.Enter, input.NumpadEnter, input.Space:
+		return true
+	default:
+		return false
+	}
 }
 
 // Type releases the key after the press.
@@ -412,7 +435,7 @@ func (m *Mouse) Click(button proto.InputMouseButton, clickCount int) error {
 	// Chrome 157 runs the click's default action, such as submitting a form,
 	// on a later task. Older headless builds finished that navigation before
 	// the mouse event returned, and callers read the new document immediately.
-	return m.page.settleClick()
+	return m.page.settleInput()
 }
 
 func (m *Mouse) state() *Mouse {
@@ -484,6 +507,9 @@ func (t *Touch) Tap(x, y float64) error {
 	if err != nil {
 		return err
 	}
-
-	return t.End()
+	err = t.End()
+	if err != nil {
+		return err
+	}
+	return t.page.settleInput()
 }

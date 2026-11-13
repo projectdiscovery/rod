@@ -870,12 +870,14 @@ func (p *Page) WaitRepaint() error {
 	return err
 }
 
-// settleClick waits until the renderer has run the click's default action.
-// A form submission or link navigation replaces the document. The evaluation
-// is then retried on the new document, so [Mouse.Click] does not return until
-// that document can be read. A click that does not navigate resolves on the
-// next task.
-func (p *Page) settleClick() error {
+// settleInput waits until the renderer has run the input's default action.
+// A click, tap, or activating key can submit a form or follow a link. Chrome
+// 157 does that on a later task, after the input event has already returned.
+// The evaluation is retried on the new document, so the call does not return
+// until that document can be read. Older headless builds finished the
+// navigation before returning the input event. An input that does not
+// navigate resolves on the next task.
+func (p *Page) settleInput() error {
 	_, err := p.Eval(`() => new Promise(r => setTimeout(r, 0))`)
 	if errors.Is(err, cdp.ErrCtxDestroyed) {
 		return p.WaitLoad()
