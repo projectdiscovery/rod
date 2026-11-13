@@ -7,11 +7,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -206,5 +209,143 @@ func TestFetchArchiveStalledBody(t *testing.T) {
 		}
 	case <-time.After(15 * time.Second):
 		t.Fatal("download hung on a stalled body")
+	}
+}
+
+// silentHost accepts connections and never answers. The test cleanup closes
+// the listener and every connection, so a request that still waits ends.
+func silentHost(t *testing.T) (string, *atomic.Int32) {
+	t.Helper()
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var mu sync.Mutex
+	var conns []net.Conn
+	closed := false
+	accepted := &atomic.Int32{}
+	go func() {
+		for {
+			c, err := l.Accept()
+			if err != nil {
+				return
+			}
+			accepted.Add(1)
+			mu.Lock()
+			if closed {
+				_ = c.Close()
+			} else {
+				conns = append(conns, c)
+			}
+			mu.Unlock()
+		}
+	}()
+	t.Cleanup(func() {
+		_ = l.Close()
+		mu.Lock()
+		defer mu.Unlock()
+		closed = true
+		for _, c := range conns {
+			_ = c.Close()
+		}
+	})
+	return "http://" + l.Addr().String(), accepted
+}
+
+// A host that accepts the connection and sends no headers must not hang the
+// download when the caller set no client.
+func TestFetchArchiveSilentHost(t *testing.T) {
+	old := DownloadHeaderTimeout
+	DownloadHeaderTimeout = 300 * time.Millisecond
+	defer func() { DownloadHeaderTimeout = old }()
+
+	u, _ := silentHost(t)
+	dir := filepath.Join(t.TempDir(), "browser")
+	done := make(chan error, 1)
+	start := time.Now()
+	go func() {
+		_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{u + "/a.zip"})
+		done <- err
+	}()
+
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "no response headers") {
+			t.Fatalf("expected a header timeout, got %v", err)
+		}
+		if took := time.Since(start); took > 3*time.Second {
+			t.Fatalf("header timeout took %v", took)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("download hung on a host that sends no headers")
+	}
+}
+
+// The header bound ends when the headers arrive. A body that takes longer
+// than the bound still downloads with the default client.
+func TestFetchArchiveSlowBodyAfterHeaders(t *testing.T) {
+	old := DownloadHeaderTimeout
+	DownloadHeaderTimeout = 50 * time.Millisecond
+	defer func() { DownloadHeaderTimeout = old }()
+
+	data := buildZip(t, zipEntry{name: "top/bin/chrome", body: "exe", mode: 0o755})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.(http.Flusher).Flush()
+		half := len(data) / 2
+		_, _ = w.Write(data[:half])
+		w.(http.Flusher).Flush()
+		time.Sleep(300 * time.Millisecond)
+		_, _ = w.Write(data[half:])
+	}))
+	defer srv.Close()
+
+	dir := filepath.Join(t.TempDir(), "browser")
+	_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{srv.URL})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Zero turns the header bound off.
+func TestFetchArchiveHeaderTimeoutOff(t *testing.T) {
+	old := DownloadHeaderTimeout
+	DownloadHeaderTimeout = 0
+	defer func() { DownloadHeaderTimeout = old }()
+
+	data := buildZip(t, zipEntry{name: "top/bin/chrome", body: "exe", mode: 0o755})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(100 * time.Millisecond)
+		_, _ = w.Write(data)
+	}))
+	defer srv.Close()
+
+	dir := filepath.Join(t.TempDir(), "browser")
+	_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{srv.URL})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// The header timeout applies only to the default client. A client that the
+// caller set is used as it is, so a slow header answer still works.
+func TestFetchArchiveCallerClientNoHeaderTimeout(t *testing.T) {
+	old := DownloadHeaderTimeout
+	DownloadHeaderTimeout = time.Millisecond
+	defer func() { DownloadHeaderTimeout = old }()
+
+	data := buildZip(t, zipEntry{name: "top/bin/chrome", body: "exe", mode: 0o755})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		_, _ = w.Write(data)
+	}))
+	defer srv.Close()
+
+	client := &http.Client{}
+	defer client.CloseIdleConnections()
+	dir := filepath.Join(t.TempDir(), "browser")
+	_, err := fetchArchive(context.Background(), client, utils.LoggerQuiet, dir, "", []string{srv.URL})
+	if err != nil {
+		t.Fatal(err)
 	}
 }

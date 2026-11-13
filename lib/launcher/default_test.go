@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/projectdiscovery/rod/lib/launcher/flags"
 	"github.com/projectdiscovery/rod/lib/utils"
@@ -464,5 +465,59 @@ func TestCompliantLaunchFlags(t *testing.T) {
 	again.applyCompliant()
 	if again.Get("disable-blink-features") != "AutomationControlled" {
 		t.Fatalf("feature duplicated: %s", again.Get("disable-blink-features"))
+	}
+}
+
+// A download host that accepts the connection and sends no headers must not
+// block Get. The download fails in time and the cached browser is used.
+func TestSilentDownloadFallsBackToCachedBrowser(t *testing.T) {
+	old := DownloadHeaderTimeout
+	DownloadHeaderTimeout = 300 * time.Millisecond
+	t.Cleanup(func() { DownloadHeaderTimeout = old })
+
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = fmt.Fprint(w, `{"channels":{"Stable":{"version":"157.0.1.0"}}}`)
+	}))
+	t.Cleanup(s.Close)
+	oldVersions, oldStorage := ChromeForTestingVersionsURL, chromeForTestingStorage
+	ChromeForTestingVersionsURL = s.URL + "/versions.json"
+	storage, accepted := silentHost(t)
+	chromeForTestingStorage = storage
+	t.Cleanup(func() {
+		ChromeForTestingVersionsURL = oldVersions
+		chromeForTestingStorage = oldStorage
+	})
+	latestVersions.Lock()
+	delete(latestVersions.m, ChromeForTestingVersionsURL)
+	latestVersions.Unlock()
+
+	root := t.TempDir()
+	want := installFake(t, root, &chromeForTesting{version: "156.0.1.0", headlessShell: false})
+
+	b := NewBrowser()
+	b.RootDir = root
+	b.Logger = utils.LoggerQuiet
+	type result struct {
+		bin string
+		err error
+	}
+	done := make(chan result, 1)
+	go func() {
+		bin, err := b.Get()
+		done <- result{bin, err}
+	}()
+	select {
+	case r := <-done:
+		if r.err != nil {
+			t.Fatal(r.err)
+		}
+		if r.bin != want {
+			t.Fatalf("bin %s, want the cached Chrome for Testing %s", r.bin, want)
+		}
+		if accepted.Load() == 0 {
+			t.Fatal("the Chrome for Testing download was not tried")
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("Get hung on a download host that sends no headers")
 	}
 }
