@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/input"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/input"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 
@@ -97,7 +97,7 @@ func Example_basic() {
 
 // Shows how to disable headless mode and debug.
 // Rod provides a lot of debug options, you can set them with setter methods or use environment variables.
-// Doc for environment variables: https://pkg.go.dev/github.com/go-rod/rod/lib/defaults
+// Doc for environment variables: https://pkg.go.dev/github.com/projectdiscovery/rod/lib/defaults
 func Example_disable_headless_to_debug() {
 	// Headless runs the browser on foreground, you can also use flag "-rod=show"
 	// Devtools opens the tab in each new tab opened automatically

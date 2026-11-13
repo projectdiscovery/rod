@@ -1,6 +1,6 @@
 package launcher
 
-import "github.com/go-rod/rod/lib/launcher/flags"
+import "github.com/projectdiscovery/rod/lib/launcher/flags"
 
 // hardenedFlags is the flag list shared by the ProjectDiscovery headless
 // launchers. --no-sandbox and --disable-web-security are not included:

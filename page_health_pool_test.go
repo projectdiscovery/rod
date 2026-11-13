@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 // getWithin fails the test if Get blocks past d. A slot that was never freed

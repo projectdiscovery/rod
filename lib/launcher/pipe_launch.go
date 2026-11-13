@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/launcher/flags"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/launcher/flags"
 )
 
 // PipeSupported reports whether LaunchPipe can run on this platform. Go does

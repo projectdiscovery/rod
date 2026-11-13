@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 

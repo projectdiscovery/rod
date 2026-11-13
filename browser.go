@@ -17,12 +17,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/defaults"
-	"github.com/go-rod/rod/lib/devices"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/defaults"
+	"github.com/projectdiscovery/rod/lib/devices"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // aboutBlank is the URL of an empty tab.
@@ -37,7 +37,7 @@ var (
 // Browser represents the browser.
 // It doesn't depends on file system, it should work with remote browser seamlessly.
 // To check the env var you can use to quickly enable options from CLI, check here:
-// https://pkg.go.dev/github.com/go-rod/rod/lib/defaults
+// https://pkg.go.dev/github.com/projectdiscovery/rod/lib/defaults
 type Browser struct {
 	// BrowserContextID is the id for incognito window
 	BrowserContextID proto.BrowserBrowserContextID

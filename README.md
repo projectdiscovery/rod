@@ -18,10 +18,10 @@ Upstream go-rod is no longer released. These changes are the reason for the fork
 
 ## Upstream overview
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/go-rod/rod.svg)](https://pkg.go.dev/github.com/go-rod/rod)
+[![Go Reference](https://pkg.go.dev/badge/github.com/go-rod/rod.svg)](https://pkg.go.dev/github.com/projectdiscovery/rod)
 [![Discord Chat](https://img.shields.io/discord/719933559456006165.svg)][discord room]
 
-## [Documentation](https://go-rod.github.io/) | [API reference](https://pkg.go.dev/github.com/go-rod/rod?tab=doc) | [FAQ](https://go-rod.github.io/#/faq/README)
+## [Documentation](https://go-rod.github.io/) | [API reference](https://pkg.go.dev/github.com/projectdiscovery/rod?tab=doc) | [FAQ](https://go-rod.github.io/#/faq/README)
 
 Rod is a high-level driver directly based on [DevTools Protocol](https://chromedevtools.github.io/devtools-protocol).
 It's designed for web automation and scraping for both high-level and low-level use, senior developers can use the low-level packages and functions to easily

@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 func TestForkWaitEventContextTimeout(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/go-rod/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/proto"
 )
 
 type stateKey struct {

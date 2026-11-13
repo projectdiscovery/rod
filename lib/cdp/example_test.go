@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/proto"
+	"github.com/projectdiscovery/rod/lib/utils"
 	"github.com/ysmood/gson"
 )
 

@@ -11,8 +11,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/go-rod/rod/lib/defaults"
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/defaults"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // Request to send to browser.

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod/lib/cdp"
-	"github.com/go-rod/rod/lib/launcher"
+	"github.com/projectdiscovery/rod/lib/cdp"
+	"github.com/projectdiscovery/rod/lib/launcher"
 )
 
 func TestKeepAliveChrome(t *testing.T) {

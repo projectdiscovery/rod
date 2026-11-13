@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 func TestPruneOlderBrowsers(t *testing.T) {

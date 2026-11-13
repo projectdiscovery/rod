@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-rod/rod/lib/utils"
+	"github.com/projectdiscovery/rod/lib/utils"
 )
 
 // MaxDownloadSize caps a browser archive and its extracted content.
