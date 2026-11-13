@@ -19,11 +19,13 @@ func TestPruneOlderBrowsers(t *testing.T) {
 	full := filepath.Join(root, "chrome-120.0.1.0")
 	snap := filepath.Join(root, "chromium-100")
 	for _, dir := range []string{keep, old, newer, full, snap} {
-		if err := os.Mkdir(dir, 0o755); err != nil {
+		err := os.Mkdir(dir, 0o755)
+		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := os.WriteFile(old+".sha256", []byte("abc\n"), 0o644); err != nil {
+	err := os.WriteFile(old+".sha256", []byte("abc\n"), 0o644)
+	if err != nil {
 		t.Fatal(err)
 	}
 	n, err := PruneOlderBrowsers(root, keep)
@@ -33,14 +35,17 @@ func TestPruneOlderBrowsers(t *testing.T) {
 	if n != 1 {
 		t.Fatalf("removed %d", n)
 	}
-	if _, err := os.Stat(old); !os.IsNotExist(err) {
+	_, err = os.Stat(old)
+	if !os.IsNotExist(err) {
 		t.Fatal("old version still present")
 	}
-	if _, err := os.Stat(old + ".sha256"); !os.IsNotExist(err) {
+	_, err = os.Stat(old + ".sha256")
+	if !os.IsNotExist(err) {
 		t.Fatal("old pin still present")
 	}
 	for _, dir := range []string{keep, newer, full, snap} {
-		if _, err := os.Stat(dir); err != nil {
+		_, err := os.Stat(dir)
+		if err != nil {
 			t.Fatal(dir, err)
 		}
 	}
@@ -60,7 +65,8 @@ func TestRecordedPinRejectsReplacement(t *testing.T) {
 	b.Revision = 7
 	b.Hosts = []Host{func(int) string { return s.URL }}
 	b.Logger = utils.LoggerQuiet
-	if err := b.Download(); err != nil {
+	err := b.Download()
+	if err != nil {
 		t.Fatal(err)
 	}
 	pin, err := os.ReadFile(b.Dir() + ".sha256")
@@ -70,7 +76,8 @@ func TestRecordedPinRejectsReplacement(t *testing.T) {
 
 	payload = bad
 	b.SHA256 = ""
-	if err := b.Download(); err == nil || !strings.Contains(err.Error(), "sha256 mismatch") {
+	err = b.Download()
+	if err == nil || !strings.Contains(err.Error(), "sha256 mismatch") {
 		t.Fatalf("got %v", err)
 	}
 	body, err := os.ReadFile(filepath.Join(b.Dir(), "chrome"))

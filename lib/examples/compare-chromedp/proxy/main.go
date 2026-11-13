@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -38,8 +39,10 @@ func main() {
 // newProxy creates a proxy that requires authentication.
 func newProxy() *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
-		Director: func(r *http.Request) {
-			if dump, err := httputil.DumpRequest(r, true); err == nil {
+		Rewrite: func(pr *httputil.ProxyRequest) {
+			r := pr.Out
+			dump, err := httputil.DumpRequest(r, true)
+			if err == nil {
 				log.Printf("%s", dump)
 			}
 			// hardcode username/password "u:p" (base64 encoded: dTpw ) to make it simple
@@ -66,7 +69,7 @@ type transport struct {
 
 func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	if h := r.Header.Get("X-Failed"); h != "" {
-		return nil, fmt.Errorf(h)
+		return nil, errors.New(h)
 	}
 	return t.RoundTripper.RoundTrip(r)
 }

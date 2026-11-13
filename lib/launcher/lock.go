@@ -9,14 +9,16 @@ func lockDownload(dir string) (func(), error) {
 	if dir == "" {
 		dir = DefaultBrowserDir
 	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	err := os.MkdirAll(dir, 0o755)
+	if err != nil {
 		return nil, err
 	}
 	f, err := os.OpenFile(filepath.Join(dir, ".download.lock"), os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return nil, err
 	}
-	if err := lockFile(f); err != nil {
+	err = lockFile(f)
+	if err != nil {
 		_ = f.Close()
 		return nil, err
 	}

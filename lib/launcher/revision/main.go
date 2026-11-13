@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -70,15 +71,15 @@ func getList(path string) []string {
 	utils.E(err)
 	defer func() { _ = res.Body.Close() }()
 
-	var data interface{}
+	var data any
 	err = json.NewDecoder(res.Body).Decode(&data)
 	utils.E(err)
 
-	list := data.([]interface{})
+	list := data.([]any)
 
 	names := []string{}
 	for _, it := range list {
-		name := it.(map[string]interface{})["name"].(string)
+		name := it.(map[string]any)["name"].(string)
 		names = append(names, strings.TrimRight(name, "/"))
 	}
 
@@ -92,9 +93,7 @@ func largestCommonRevision(revLists [][]int) int {
 
 	shortest := revLists[0]
 
-	for i := len(shortest) - 1; i >= 0; i-- {
-		r := shortest[i]
-
+	for _, r := range slices.Backward(shortest) {
 		isCommon := true
 		for i := 1; i < len(revLists); i++ {
 			if !has(revLists[i], r) {

@@ -54,7 +54,7 @@ func HostNPM(revision int) string {
 // HostPlaywright to download browser.
 func HostPlaywright(revision int) string {
 	rev := RevisionPlaywright
-	if !(runtime.GOOS == "linux" && runtime.GOARCH == "arm64") {
+	if runtime.GOOS != goosLinux || runtime.GOARCH != "arm64" {
 		rev = revision
 	}
 	return fmt.Sprintf(
@@ -66,9 +66,9 @@ func HostPlaywright(revision int) string {
 // DefaultBrowserDir for downloaded browser. For unix is "$HOME/.cache/rod/browser",
 // for Windows it's "%APPDATA%\rod\browser".
 var DefaultBrowserDir = filepath.Join(map[string]string{
-	"windows": os.Getenv("APPDATA"),
-	"darwin":  filepath.Join(os.Getenv("HOME"), ".cache"),
-	"linux":   filepath.Join(os.Getenv("HOME"), ".cache"),
+	goosWindows: os.Getenv("APPDATA"),
+	goosDarwin:  filepath.Join(os.Getenv("HOME"), ".cache"),
+	goosLinux:   filepath.Join(os.Getenv("HOME"), ".cache"),
 }[runtime.GOOS], "rod", "browser")
 
 // Browser is a helper to download browser smartly.
@@ -129,76 +129,6 @@ func NewBrowser() *Browser {
 	}
 }
 
-// target is the Chrome for Testing build this browser uses. It is nil when a
-// Chromium snapshot of Revision is selected. The latest stable version is
-// looked up once per [latestTTL]. When the lookup fails, the newest build
-// already in RootDir is used, so an offline machine keeps working.
-func (lc *Browser) target() (*chromeForTesting, error) {
-	if lc.Revision != 0 {
-		return nil, nil
-	}
-	if lc.cft != nil {
-		return lc.cft, nil
-	}
-	if _, err := cftPlatform(); err != nil {
-		return nil, err
-	}
-
-	ctx := lc.Context
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	t := &chromeForTesting{headlessShell: lc.useShell()}
-	version, err := latestStable(ctx, lc.HTTPClient)
-	if err == nil {
-		t.version = version
-		return t, nil
-	}
-	installed, ok := newestInstalled(lc.RootDir, t)
-	if !ok {
-		return nil, err
-	}
-	t.version = installed
-	return t, nil
-}
-
-// resolved is target for the path helpers, which cannot return an error.
-// When the target can't be resolved, the path has an empty version and the
-// caller fails in [Browser.Get] or [Browser.Download] with the real error.
-func (lc *Browser) resolved() *chromeForTesting {
-	t, err := lc.target()
-	if err != nil {
-		return &chromeForTesting{headlessShell: lc.useShell()}
-	}
-	return t
-}
-
-// useShell reports whether the download is chrome-headless-shell. A headful
-// launch always gets full Chrome, because the shell cannot show a window.
-func (lc *Browser) useShell() bool {
-	return lc.HeadlessShell && !lc.Headful
-}
-
-func (lc *Browser) dirFor(t *chromeForTesting) string {
-	if t != nil {
-		return filepath.Join(lc.RootDir, t.dirName())
-	}
-	return filepath.Join(lc.RootDir, fmt.Sprintf("chromium-%d", lc.Revision))
-}
-
-func (lc *Browser) binFor(t *chromeForTesting) string {
-	if t != nil {
-		return filepath.Join(lc.dirFor(t), filepath.FromSlash(t.binName()))
-	}
-	bin := map[string]string{
-		"darwin":  "Chromium.app/Contents/MacOS/Chromium",
-		"linux":   "chrome",
-		"windows": "chrome.exe",
-	}[runtime.GOOS]
-
-	return filepath.Join(lc.dirFor(t), filepath.FromSlash(bin))
-}
-
 // Dir to download the browser.
 func (lc *Browser) Dir() string {
 	return lc.dirFor(lc.resolved())
@@ -221,70 +151,10 @@ func defaultHosts(t *chromeForTesting) []Host {
 // It will race downloading a TCP packet from each host and use the fastest host.
 func (lc *Browser) Download() error {
 	t, err := lc.target()
-	if err != nil {
+	if err != nil && !errors.Is(err, errChromiumSnapshot) {
 		return err
 	}
 	return lc.download(t)
-}
-
-func (lc *Browser) download(t *chromeForTesting) error {
-	hosts := lc.Hosts
-	if hosts == nil {
-		hosts = defaultHosts(t)
-	}
-	us := []string{}
-	for _, host := range hosts {
-		us = append(us, host(lc.Revision))
-	}
-
-	ctx := lc.Context
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	logger := lc.Logger
-	if logger == nil {
-		logger = utils.LoggerQuiet
-	}
-
-	dir := lc.dirFor(t)
-	sum := lc.SHA256
-	if sum == "" {
-		if b, err := os.ReadFile(dir + ".sha256"); err == nil {
-			sum = strings.TrimSpace(string(b))
-		}
-	}
-	if sum == "" {
-		sum = ChromeForTestingPins[lc.pinKey(t)]
-	}
-
-	got, err := fetchArchive(ctx, lc.HTTPClient, logger, dir, sum, us)
-	if err != nil {
-		return fmt.Errorf("can't find a browser binary for your OS, the doc might help https://go-rod.github.io/#/compatibility?id=os : %w", err) //nolint: lll
-	}
-	if err := os.WriteFile(dir+".sha256", []byte(got+"\n"), 0o644); err != nil {
-		return err
-	}
-
-	// Only the latest-stable path keeps one build per product. An explicit
-	// version from NewChromeForTesting is never pruned.
-	if t != nil && lc.cft == nil {
-		if n, err := PruneOlderBrowsers(lc.RootDir, dir); err == nil && n > 0 {
-			logger.Println("Removed older browsers:", n)
-		}
-	}
-	return nil
-}
-
-// pinKey is the ChromeForTestingPins key for the target t.
-func (lc *Browser) pinKey(t *chromeForTesting) string {
-	if t == nil {
-		return fmt.Sprintf("chromium/%d", lc.Revision)
-	}
-	platform, err := cftPlatform()
-	if err != nil {
-		return ""
-	}
-	return t.product() + "/" + platform + "/" + t.version
 }
 
 // Get is a smart helper to get the browser executable path.
@@ -306,7 +176,7 @@ func (lc *Browser) Get() (string, error) {
 	defer unlock()
 
 	t, err := lc.target()
-	if err != nil {
+	if err != nil && !errors.Is(err, errChromiumSnapshot) {
 		return "", err
 	}
 	bin := lc.binFor(t)
@@ -333,13 +203,151 @@ func (lc *Browser) Validate() error {
 	return validateBin(lc.BinPath())
 }
 
+// pinKey is the ChromeForTestingPins key for the target t.
+func (lc *Browser) pinKey(t *chromeForTesting) string {
+	if t == nil {
+		return fmt.Sprintf("chromium/%d", lc.Revision)
+	}
+	platform, err := cftPlatform()
+	if err != nil {
+		return ""
+	}
+	return t.product() + "/" + platform + "/" + t.version
+}
+
+func (lc *Browser) download(t *chromeForTesting) error {
+	hosts := lc.Hosts
+	if hosts == nil {
+		hosts = defaultHosts(t)
+	}
+	us := []string{}
+	for _, host := range hosts {
+		us = append(us, host(lc.Revision))
+	}
+
+	ctx := lc.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	logger := lc.Logger
+	if logger == nil {
+		logger = utils.LoggerQuiet
+	}
+
+	dir := lc.dirFor(t)
+	sum := lc.SHA256
+	if sum == "" {
+		b, err := os.ReadFile(dir + ".sha256")
+		if err == nil {
+			sum = strings.TrimSpace(string(b))
+		}
+	}
+	if sum == "" {
+		sum = ChromeForTestingPins[lc.pinKey(t)]
+	}
+
+	got, err := fetchArchive(ctx, lc.HTTPClient, logger, dir, sum, us)
+	if err != nil {
+		return fmt.Errorf("can't find a browser binary for your OS, the doc might help https://go-rod.github.io/#/compatibility?id=os : %w", err) //nolint: lll
+	}
+	err = os.WriteFile(dir+".sha256", []byte(got+"\n"), 0o644)
+	if err != nil {
+		return err
+	}
+
+	// Only the latest-stable path keeps one build per product. An explicit
+	// version from NewChromeForTesting is never pruned.
+	if t != nil && lc.cft == nil {
+		n, err := PruneOlderBrowsers(lc.RootDir, dir)
+		if err == nil && n > 0 {
+			logger.Println("Removed older browsers:", n)
+		}
+	}
+	return nil
+}
+
+func (lc *Browser) binFor(t *chromeForTesting) string {
+	if t != nil {
+		return filepath.Join(lc.dirFor(t), filepath.FromSlash(t.binName()))
+	}
+	bin := map[string]string{
+		goosDarwin:  "Chromium.app/Contents/MacOS/Chromium",
+		goosLinux:   productChrome,
+		goosWindows: "chrome.exe",
+	}[runtime.GOOS]
+
+	return filepath.Join(lc.dirFor(t), filepath.FromSlash(bin))
+}
+
+func (lc *Browser) dirFor(t *chromeForTesting) string {
+	if t != nil {
+		return filepath.Join(lc.RootDir, t.dirName())
+	}
+	return filepath.Join(lc.RootDir, fmt.Sprintf("chromium-%d", lc.Revision))
+}
+
+// useShell reports whether the download is chrome-headless-shell. A headful
+// launch always gets full Chrome, because the shell cannot show a window.
+func (lc *Browser) useShell() bool {
+	return lc.HeadlessShell && !lc.Headful
+}
+
+// resolved is target for the path helpers, which cannot return an error.
+// When the target can't be resolved, the path has an empty version and the
+// caller fails in [Browser.Get] or [Browser.Download] with the real error.
+func (lc *Browser) resolved() *chromeForTesting {
+	t, err := lc.target()
+	if err != nil && !errors.Is(err, errChromiumSnapshot) {
+		return &chromeForTesting{headlessShell: lc.useShell()}
+	}
+	return t
+}
+
+// target is the Chrome for Testing build this browser uses. It is nil when a
+// Chromium snapshot of Revision is selected. The latest stable version is
+// looked up once per [latestTTL]. When the lookup fails, the newest build
+// already in RootDir is used, so an offline machine keeps working.
+// errChromiumSnapshot is returned by target when a Chromium snapshot of Revision
+// is selected instead of Chrome for Testing.
+var errChromiumSnapshot = errors.New("launcher: a Chromium snapshot is selected")
+
+func (lc *Browser) target() (*chromeForTesting, error) {
+	if lc.Revision != 0 {
+		return nil, errChromiumSnapshot
+	}
+	if lc.cft != nil {
+		return lc.cft, nil
+	}
+	_, err := cftPlatform()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := lc.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	t := &chromeForTesting{headlessShell: lc.useShell()}
+	version, err := latestStable(ctx, lc.HTTPClient)
+	if err == nil {
+		t.version = version
+		return t, nil
+	}
+	installed, ok := newestInstalled(lc.RootDir, t)
+	if !ok {
+		return nil, err
+	}
+	t.version = installed
+	return t, nil
+}
+
 func validateBin(bin string) error {
 	_, err := os.Stat(bin)
 	if err != nil {
 		return err
 	}
 
-	cmd := exec.Command(bin, "--headless", "--no-sandbox",
+	cmd := exec.CommandContext(context.Background(), bin, "--headless", "--no-sandbox",
 		"--use-mock-keychain", "--disable-dev-shm-usage",
 		"--disable-gpu", "--dump-dom", "about:blank")
 	b, err := cmd.CombinedOutput()
@@ -361,7 +369,7 @@ func validateBin(bin string) error {
 // LookPath searches for the browser executable from often used paths on current operating system.
 func LookPath() (found string, has bool) {
 	list := map[string][]string{
-		"darwin": {
+		goosDarwin: {
 			"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 			"/Applications/Chromium.app/Contents/MacOS/Chromium",
 			"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
@@ -371,8 +379,8 @@ func LookPath() (found string, has bool) {
 			"/usr/bin/chromium",
 			"/usr/bin/chromium-browser",
 		},
-		"linux": {
-			"chrome",
+		goosLinux: {
+			productChrome,
 			"google-chrome",
 			"/usr/bin/google-chrome",
 			"microsoft-edge",
@@ -387,10 +395,10 @@ func LookPath() (found string, has bool) {
 			"/data/data/com.termux/files/usr/bin/chromium-browser",
 		},
 		"openbsd": {
-			"chrome",
+			productChrome,
 			"chromium",
 		},
-		"windows": append([]string{"chrome", "edge"}, expandWindowsExePaths(
+		goosWindows: append([]string{productChrome, "edge"}, expandWindowsExePaths(
 			`Google\Chrome\Application\chrome.exe`,
 			`Chromium\Application\chrome.exe`,
 			`Microsoft\Edge\Application\msedge.exe`,

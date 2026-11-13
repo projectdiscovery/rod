@@ -110,7 +110,9 @@ func (s *HijackResponseStage) c() proto.Client {
 // AddResponse adds a handler that runs after the browser received the
 // response headers for requests matching pattern. The handler should call
 // one of Continue, Fulfill, or Fail; otherwise the original response is sent.
-func (r *HijackRouter) AddResponse(pattern string, resourceType proto.NetworkResourceType, handler func(*HijackResponseStage)) error {
+func (r *HijackRouter) AddResponse(
+	pattern string, resourceType proto.NetworkResourceType, handler func(*HijackResponseStage),
+) error {
 	reg, err := regexp.Compile(proto.PatternToReg(pattern))
 	if err != nil {
 		return err
@@ -119,12 +121,13 @@ func (r *HijackRouter) AddResponse(pattern string, resourceType proto.NetworkRes
 	r.mu.Lock()
 	list := make([]*hijackResponseHandler, 0, len(r.response)+1)
 	list = append(list, r.response...)
-	r.response = append(list, &hijackResponseHandler{
+	list = append(list, &hijackResponseHandler{
 		pattern:  pattern,
 		regexp:   reg,
 		handler:  handler,
 		resource: resourceType,
 	})
+	r.response = list
 	r.mu.Unlock()
 
 	return r.apply()

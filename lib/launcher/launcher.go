@@ -258,24 +258,6 @@ func (l *Launcher) Compliant(enable bool) *Launcher {
 	return l
 }
 
-// applyCompliant drops the automation flag. Launch calls it.
-func (l *Launcher) applyCompliant() {
-	if !l.compliant {
-		return
-	}
-	l.browser.HeadlessShell = false
-	l.Delete("enable-automation")
-	const feature = "AutomationControlled"
-	cur := l.Get("disable-blink-features")
-	if cur == "" {
-		l.Set("disable-blink-features", feature)
-		return
-	}
-	if !strings.Contains(cur, feature) {
-		l.Set("disable-blink-features", cur+","+feature)
-	}
-}
-
 // Headless switch. Whether to run browser in headless mode. A mode without visible UI.
 func (l *Launcher) Headless(enable bool) *Launcher {
 	if enable {
@@ -483,7 +465,8 @@ func (l *Launcher) Launch() (string, error) {
 	defer l.ctxCancel()
 
 	// Do not start a browser nobody can use anymore.
-	if err := l.ctx.Err(); err != nil {
+	err := l.ctx.Err()
+	if err != nil {
 		return "", err
 	}
 
@@ -493,7 +476,8 @@ func (l *Launcher) Launch() (string, error) {
 	}
 
 	l.setupUserPreferences()
-	if err := l.preparePrivileges(); err != nil {
+	err = l.preparePrivileges()
+	if err != nil {
 		return "", err
 	}
 
@@ -508,11 +492,12 @@ func (l *Launcher) Launch() (string, error) {
 			return u, nil
 		}
 	}
-	cmd = exec.Command(bin, args...)
+	cmd = exec.CommandContext(context.Background(), bin, args...)
 
 	l.setupCmd(cmd)
 
-	if err = startLocked(l, cmd); err != nil {
+	err = startLocked(l, cmd)
+	if err != nil {
 		return "", l.annotate(err)
 	}
 
@@ -531,7 +516,7 @@ func (l *Launcher) Launch() (string, error) {
 func startLocked(l *Launcher, cmd *exec.Cmd) error {
 	started := make(chan error, 1)
 	go func() {
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == goosLinux {
 			runtime.LockOSThread()
 		}
 		err := cmd.Start()
@@ -550,31 +535,6 @@ func startLocked(l *Launcher, cmd *exec.Cmd) error {
 	return <-started
 }
 
-func (l *Launcher) hasLaunched() bool {
-	return !atomic.CompareAndSwapInt32(&l.isLaunched, 0, 1)
-}
-
-func (l *Launcher) setupUserPreferences() {
-	userDir := l.Get(flags.UserDataDir)
-	pref := l.Get(flags.Preferences)
-
-	if userDir == "" || pref == "" {
-		return
-	}
-
-	userDir, err := filepath.Abs(userDir)
-	utils.E(err)
-
-	profile := l.Get(flags.ProfileDir)
-	if profile == "" {
-		profile = "Default"
-	}
-
-	path := filepath.Join(userDir, profile, "Preferences")
-
-	utils.E(utils.OutputFile(path, pref))
-}
-
 // DropPrivileges runs the browser as uid and gid. On Unix the profile
 // directory is created and given to that user before start. The call does
 // nothing until it is used. It is not supported on Windows.
@@ -590,60 +550,6 @@ func (l *Launcher) DropPrivileges(uid, gid int) *Launcher {
 func (l *Launcher) NoInheritEnv(enable bool) *Launcher {
 	l.noInheritEnv = enable
 	return l
-}
-
-func (l *Launcher) setupCmd(cmd *exec.Cmd) {
-	l.osSetupCmd(cmd)
-
-	dir := l.Get(flags.WorkingDir)
-	env, hasEnv := l.GetFlags(flags.Env)
-	cmd.Dir = dir
-	if hasEnv {
-		cmd.Env = env
-	} else if l.noInheritEnv {
-		cmd.Env = minimalEnv()
-	}
-
-	cmd.Stdout = io.MultiWriter(l.logger, l.parser, l.output)
-	cmd.Stderr = io.MultiWriter(l.logger, l.parser, l.output)
-	// A child that inherited the pipe, which a crashed browser leaves
-	// behind, would otherwise keep Wait and Cleanup blocked forever.
-	cmd.WaitDelay = 3 * time.Second
-}
-
-func (l *Launcher) getBin() (string, error) {
-	bin := l.Get(flags.Bin)
-	if bin == "" {
-		l.browser.Context = l.ctx
-		// chrome-headless-shell cannot show a window, so a headful launch
-		// needs the full Chrome build.
-		l.browser.Headful = !l.Has(flags.Headless)
-		return l.browser.Get()
-	}
-	return bin, nil
-}
-
-func (l *Launcher) getURL() (u string, err error) {
-	timeout := l.launchTimeout
-	if timeout == 0 {
-		timeout = DefaultLaunchTimeout
-	}
-	var expired <-chan time.Time
-	if timeout > 0 {
-		t := time.NewTimer(timeout)
-		defer t.Stop()
-		expired = t.C
-	}
-	select {
-	case <-l.ctx.Done():
-		err = l.ctx.Err()
-	case u = <-l.parser.URL:
-	case <-l.exit:
-		err = l.parser.Err()
-	case <-expired:
-		err = fmt.Errorf("%w after %v", ErrLaunchTimeout, timeout)
-	}
-	return
 }
 
 // DefaultLaunchTimeout bounds how long Launch waits for the browser to print
@@ -697,14 +603,112 @@ func (l *Launcher) Cleanup() {
 	removeAllRetry(dir)
 }
 
+func (l *Launcher) getURL() (u string, err error) {
+	timeout := l.launchTimeout
+	if timeout == 0 {
+		timeout = DefaultLaunchTimeout
+	}
+	var expired <-chan time.Time
+	if timeout > 0 {
+		t := time.NewTimer(timeout)
+		defer t.Stop()
+		expired = t.C
+	}
+	select {
+	case <-l.ctx.Done():
+		err = l.ctx.Err()
+	case u = <-l.parser.URL:
+	case <-l.exit:
+		err = l.parser.Err()
+	case <-expired:
+		err = fmt.Errorf("%w after %v", ErrLaunchTimeout, timeout)
+	}
+	return
+}
+
+func (l *Launcher) getBin() (string, error) {
+	bin := l.Get(flags.Bin)
+	if bin == "" {
+		l.browser.Context = l.ctx
+		// chrome-headless-shell cannot show a window, so a headful launch
+		// needs the full Chrome build.
+		l.browser.Headful = !l.Has(flags.Headless)
+		return l.browser.Get()
+	}
+	return bin, nil
+}
+
+func (l *Launcher) setupCmd(cmd *exec.Cmd) {
+	l.osSetupCmd(cmd)
+
+	dir := l.Get(flags.WorkingDir)
+	env, hasEnv := l.GetFlags(flags.Env)
+	cmd.Dir = dir
+	if hasEnv {
+		cmd.Env = env
+	} else if l.noInheritEnv {
+		cmd.Env = minimalEnv()
+	}
+
+	cmd.Stdout = io.MultiWriter(l.logger, l.parser, l.output)
+	cmd.Stderr = io.MultiWriter(l.logger, l.parser, l.output)
+	// A child that inherited the pipe, which a crashed browser leaves
+	// behind, would otherwise keep Wait and Cleanup blocked forever.
+	cmd.WaitDelay = 3 * time.Second
+}
+
+func (l *Launcher) setupUserPreferences() {
+	userDir := l.Get(flags.UserDataDir)
+	pref := l.Get(flags.Preferences)
+
+	if userDir == "" || pref == "" {
+		return
+	}
+
+	userDir, err := filepath.Abs(userDir)
+	utils.E(err)
+
+	profile := l.Get(flags.ProfileDir)
+	if profile == "" {
+		profile = "Default"
+	}
+
+	path := filepath.Join(userDir, profile, "Preferences")
+
+	utils.E(utils.OutputFile(path, pref))
+}
+
+func (l *Launcher) hasLaunched() bool {
+	return !atomic.CompareAndSwapInt32(&l.isLaunched, 0, 1)
+}
+
+// applyCompliant drops the automation flag. Launch calls it.
+func (l *Launcher) applyCompliant() {
+	if !l.compliant {
+		return
+	}
+	l.browser.HeadlessShell = false
+	l.Delete("enable-automation")
+	const feature = "AutomationControlled"
+	cur := l.Get("disable-blink-features")
+	if cur == "" {
+		l.Set("disable-blink-features", feature)
+		return
+	}
+	if !strings.Contains(cur, feature) {
+		l.Set("disable-blink-features", cur+","+feature)
+	}
+}
+
 // removeAllRetry retries while the browser's children release their files,
 // which matters on Windows where open files cannot be deleted.
 func removeAllRetry(dir string) {
 	if dir == "" {
 		return
 	}
-	for i := 0; i < 20; i++ {
-		if err := os.RemoveAll(dir); err == nil {
+	for i := range 20 {
+		err := os.RemoveAll(dir)
+		if err == nil {
 			return
 		}
 		time.Sleep(time.Duration(i+1) * 50 * time.Millisecond)

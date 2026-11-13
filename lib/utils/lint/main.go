@@ -14,7 +14,7 @@ func main() {
 
 	utils.Exec("npx -ys -- prettier@2.8.8 --loglevel=error --write --ignore-path=.gitignore .")
 
-	utils.Exec("go run github.com/ysmood/golangci-lint@latest")
+	utils.Exec("go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0 run --fix")
 
 	lintMustPrefix()
 

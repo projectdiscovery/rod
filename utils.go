@@ -25,7 +25,7 @@ import (
 // CDPClient is usually used to make rod side-effect free. Such as proxy all IO of rod.
 type CDPClient interface {
 	Event() <-chan *cdp.Event
-	Call(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error)
+	Call(ctx context.Context, sessionID, method string, params any) ([]byte, error)
 }
 
 // Message represents a cdp.Event.
@@ -45,7 +45,7 @@ func (msg *Message) Load(e proto.Event) bool {
 	}
 
 	eVal := reflect.ValueOf(e)
-	if eVal.Kind() != reflect.Ptr {
+	if eVal.Kind() != reflect.Pointer {
 		return true
 	}
 	eVal = reflect.Indirect(eVal)
@@ -57,7 +57,8 @@ func (msg *Message) Load(e proto.Event) bool {
 		return true
 	}
 
-	if err := json.Unmarshal(msg.data, e); err != nil {
+	err := json.Unmarshal(msg.data, e)
+	if err != nil {
 		return false
 	}
 	msg.event = eVal
@@ -98,7 +99,7 @@ type Pool[T any] chan *T
 // NewPool instance.
 func NewPool[T any](limit int) Pool[T] {
 	p := make(chan *T, limit)
-	for i := 0; i < limit; i++ {
+	for range limit {
 		p <- nil
 	}
 	return p
@@ -250,7 +251,7 @@ func httHTML(w http.ResponseWriter, body string) {
 	_, _ = w.Write([]byte(body))
 }
 
-func mustToJSONForDev(value interface{}) string {
+func mustToJSONForDev(value any) string {
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)
 	enc.SetEscapeHTML(false)

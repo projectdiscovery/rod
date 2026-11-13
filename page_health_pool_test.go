@@ -11,8 +11,9 @@ import (
 
 // getWithin fails the test if Get blocks past d. A slot that was never freed
 // shows up here instead of as a hung test run.
-func getWithin(t *testing.T, pp *rod.HealthPagePool, d time.Duration) *rod.Page {
+func getWithin(t *testing.T, pp *rod.HealthPagePool) *rod.Page {
 	t.Helper()
+	d := 15 * time.Second
 	type result struct {
 		p   *rod.Page
 		err error
@@ -41,12 +42,12 @@ func TestHealthPagePoolNeverHandsOutClosed(t *testing.T) {
 	defer pp.Cleanup()
 
 	// A page closed while idle in the pool must not come back out.
-	p1 := getWithin(t, pp, 15*time.Second)
+	p1 := getWithin(t, pp)
 	id1 := p1.TargetID
 	pp.Put(p1)
 	g.E(p1.Close())
 
-	p2 := getWithin(t, pp, 15*time.Second)
+	p2 := getWithin(t, pp)
 	g.True(p2.TargetID != id1)
 	_, err := p2.Info()
 	g.E(err)
@@ -56,7 +57,7 @@ func TestHealthPagePoolNeverHandsOutClosed(t *testing.T) {
 	g.E(p2.Close())
 	pp.Put(p2)
 
-	p3 := getWithin(t, pp, 15*time.Second)
+	p3 := getWithin(t, pp)
 	g.True(p3.TargetID != id1 && p3.TargetID != p2.TargetID)
 	_, err = p3.Info()
 	g.E(err)
@@ -72,11 +73,11 @@ func TestHealthPagePoolResetsToBlank(t *testing.T) {
 	pp := rod.NewHealthPagePool(g.browser, 1)
 	defer pp.Cleanup()
 
-	p := getWithin(t, pp, 15*time.Second)
+	p := getWithin(t, pp)
 	p.MustNavigate(s.URL("/dirty")).MustWaitLoad()
 	pp.Put(p)
 
-	p = getWithin(t, pp, 15*time.Second)
+	p = getWithin(t, pp)
 	info, err := p.Info()
 	g.E(err)
 	g.Eq(info.URL, "about:blank")
@@ -95,7 +96,7 @@ func TestHealthPagePoolClosesPopups(t *testing.T) {
 	pp := rod.NewHealthPagePool(g.browser, 1)
 	defer pp.Cleanup()
 
-	p := getWithin(t, pp, 15*time.Second)
+	p := getWithin(t, pp)
 	p.MustNavigate(s.URL("/")).MustWaitLoad()
 	// Return nothing: window.open returns a Window that cannot be serialized.
 	p.MustEval(`(u) => { window.open(u) }`, s.URL("/popup"))

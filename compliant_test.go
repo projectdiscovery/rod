@@ -41,7 +41,8 @@ func TestCompliantFromEval(t *testing.T) {
 		t.Fatal("brand pointers alias")
 	}
 
-	if _, meta, err = compliantFromEval(`{"ua":"x"}`); err != nil || meta != nil {
+	_, meta, err = compliantFromEval(`{"ua":"x"}`)
+	if err != nil || meta != nil {
 		t.Fatalf("incomplete hints should wait, got %v %v", meta, err)
 	}
 }

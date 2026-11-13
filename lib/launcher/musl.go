@@ -12,11 +12,12 @@ import (
 // ErrMuslNoBrowser is returned by [Browser.Get] on a musl host, such as
 // Alpine, when no browser is installed. Chrome for Testing and the Chromium
 // snapshots are glibc builds and cannot run there.
-var ErrMuslNoBrowser = errors.New("launcher: downloadable browsers need glibc and this host uses musl, install Chromium (apk add chromium) or set Launcher.Bin")
+var ErrMuslNoBrowser = errors.New("launcher: downloadable browsers need glibc and this host uses musl, " +
+	"install Chromium (apk add chromium) or set Launcher.Bin")
 
 // hostUsesMusl reports whether this is a Linux host whose libc is musl.
 var hostUsesMusl = sync.OnceValue(func() bool {
-	return runtime.GOOS == "linux" && elfUsesMusl("/bin/sh")
+	return runtime.GOOS == goosLinux && elfUsesMusl("/bin/sh")
 })
 
 // elfUsesMusl reports whether the ELF file at path is linked against the musl

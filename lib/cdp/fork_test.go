@@ -49,7 +49,8 @@ func TestClientIgnoresBadJSON(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("event not delivered")
 	}
-	if err := c.Close(); err != nil {
+	err := c.Close()
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -154,8 +155,8 @@ func TestPipeRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pair.ChromeRead.Close()
-	defer pair.ChromeWrite.Close()
+	defer func() { _ = pair.ChromeRead.Close() }()
+	defer func() { _ = pair.ChromeWrite.Close() }()
 	p := NewPipe(pair.ParentRead, pair.ParentWrite)
 	go func() {
 		buf := make([]byte, 64)
@@ -163,7 +164,8 @@ func TestPipeRoundTrip(t *testing.T) {
 		_, _ = pair.ChromeWrite.Write(append(buf[:n], 0))
 	}()
 	msg := []byte(`{"id":1}`)
-	if err := p.Send(msg); err != nil {
+	err = p.Send(msg)
+	if err != nil {
 		t.Fatal(err)
 	}
 	got, err := p.Read()
@@ -177,8 +179,8 @@ func TestPipeRoundTrip(t *testing.T) {
 
 func TestWebSocketRejectsHugeLength(t *testing.T) {
 	client, server := net.Pipe()
-	defer client.Close()
-	defer server.Close()
+	defer func() { _ = client.Close() }()
+	defer func() { _ = server.Close() }()
 	ws := &WebSocket{conn: client, r: bufio.NewReader(client), closed: make(chan struct{}), MaxMessageSize: 32}
 	go func() {
 		// FIN+text, 64-bit length with the high bit set.
@@ -248,7 +250,7 @@ func TestClientPendingCleanup(t *testing.T) {
 	c := New().Start(f)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		_, _ = c.Call(ctx, "", "X.y", nil)
 		select {
 		case <-f.out:
@@ -278,8 +280,7 @@ func TestWebSocketBasicAuthFromURL(t *testing.T) {
 
 	u := strings.Replace(s.URL, "http://", "ws://user:pa%3Ass@", 1)
 	err := (&WebSocket{}).Connect(context.Background(), u, nil)
-	var bad *BadHandshakeError
-	if !errors.As(err, &bad) {
+	if _, ok := errors.AsType[*BadHandshakeError](err); !ok {
 		t.Fatalf("got %v", err)
 	}
 	want := "Basic " + base64.StdEncoding.EncodeToString([]byte("user:pa:ss"))
@@ -290,7 +291,7 @@ func TestWebSocketBasicAuthFromURL(t *testing.T) {
 
 func TestWebSocketKeepAliveDetectsDeadPeer(t *testing.T) {
 	client, server := net.Pipe()
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 	ws := &WebSocket{conn: client, r: bufio.NewReader(client), closed: make(chan struct{}), KeepAlive: 30 * time.Millisecond}
 	go func() {
 		// Swallow pings without ever answering.
@@ -313,8 +314,8 @@ func TestPipeCloseUnblocksRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pair.ChromeRead.Close()
-	defer pair.ChromeWrite.Close()
+	defer func() { _ = pair.ChromeRead.Close() }()
+	defer func() { _ = pair.ChromeWrite.Close() }()
 	p := NewPipe(pair.ParentRead, pair.ParentWrite)
 
 	errc := make(chan error, 1)
@@ -342,7 +343,8 @@ func TestPipeCloseUnblocksRead(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("Read not unblocked")
 	}
-	if err := p.Send([]byte("x")); !errors.Is(err, ErrPipeClosed) {
+	err = p.Send([]byte("x"))
+	if !errors.Is(err, ErrPipeClosed) {
 		t.Fatalf("send: %v", err)
 	}
 }

@@ -480,7 +480,7 @@ func TestPageWaitRequestIdle(t *testing.T) {
 	}`
 
 	waitReq := ""
-	g.browser.Logger(utils.Log(func(msg ...interface{}) {
+	g.browser.Logger(utils.Log(func(msg ...any) {
 		typ := msg[0].(rod.TraceType)
 		if typ == rod.TraceTypeWaitRequests {
 			list := msg[2].(map[string]string)
@@ -564,7 +564,7 @@ func TestPageWaitStable(t *testing.T) {
 	p.MustWaitStable()
 
 	g.Panic(func() {
-		g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+		g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 			switch method {
 			case (proto.DOMSnapshotCaptureSnapshot{}).ProtoReq():
 				utils.Sleep(0.3)
@@ -580,7 +580,7 @@ func TestPageWaitStable(t *testing.T) {
 		p.MustWaitStable()
 	})
 	g.Panic(func() {
-		g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+		g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 			switch method {
 			case (proto.DOMSnapshotCaptureSnapshot{}).ProtoReq():
 				return nil, errors.New("error")
@@ -860,7 +860,7 @@ func TestScrollScreenshotErrors(t *testing.T) {
 	_, err := p.ScrollScreenshot(&rod.ScrollScreenshotOptions{
 		/* cspell: disable-next-line */
 		Format:  proto.PageCaptureScreenshotFormatWebp,
-		Quality: gson.Int(10),
+		Quality: new(10),
 	})
 	g.Err(err)
 }
@@ -943,12 +943,13 @@ func TestPageNavigateErr(t *testing.T) {
 
 	// Chrome 157 no longer reports an error for an empty 4xx or 5xx body.
 	for _, path := range []string{"/404", "/500"} {
-		if err := g.page.Navigate(s.URL(path)); err != nil {
+		err := g.page.Navigate(s.URL(path))
+		if err != nil {
 			g.Is(err, &rod.NavigationError{})
 		}
 	}
 
-	l, err := net.Listen("tcp", "127.0.0.1:0")
+	l, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
 	g.E(err)
 	refused := "http://" + l.Addr().String()
 	g.E(l.Close())

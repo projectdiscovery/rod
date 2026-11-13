@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"image/color"
 	"image/png"
 	"net/http"
 	"net/http/httptest"
@@ -125,7 +126,7 @@ func TestForkHandleAuthKeepsPageHijack(t *testing.T) {
 
 	// HandleAuth must leave requests paused by the page router alone, so the
 	// router can still fulfill them.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		hijacked.MustNavigate(s.URL("/plain"))
 		hijacked.Timeout(10*time.Second).MustElementR("p", "hijacked")
 	}
@@ -147,11 +148,10 @@ func TestForkStalledSubscriberDoesNotBlock(t *testing.T) {
 	g := setup(t)
 
 	stalled := g.newPage(g.blank())
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 	_ = stalled.Context(ctx).Event() // never read
 
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		stalled.MustNavigate(g.blank())
 	}
 
@@ -247,13 +247,13 @@ func TestForkBrowserRouterLeavesPageRouter(t *testing.T) {
 
 	var browserSaw atomic.Int32
 	browserRouter := g.browser.HijackRequests()
-	browserRouter.MustAdd("*/nothing-matches", func(h *rod.Hijack) {
+	browserRouter.MustAdd("*/nothing-matches", func(_ *rod.Hijack) {
 		browserSaw.Add(1)
 	})
 	go browserRouter.Run()
 	defer browserRouter.MustStop()
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		p.MustNavigate(s.URL("/x"))
 		p.Timeout(10*time.Second).MustElementR("p", "page")
 	}
@@ -290,8 +290,8 @@ func TestForkScreenshotDeviceScale(t *testing.T) {
 	g.E(err)
 	g.Eq(img.Bounds().Dx(), 100)
 	g.Eq(img.Bounds().Dy(), 40)
-	r, _, _, _ := img.At(50, 20).RGBA()
-	g.Gt(r, uint32(0xf000))
+	c := color.RGBAModel.Convert(img.At(50, 20)).(color.RGBA)
+	g.Gt(uint32(c.R)<<8, uint32(0xf000))
 }
 
 func TestForkWaitDOMIdle(t *testing.T) {
@@ -520,7 +520,7 @@ func TestForkStuckEmulationDoesNotBlockPages(t *testing.T) {
 
 	started := make(chan struct{})
 	var once atomic.Int32
-	g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 		if method == (proto.EmulationSetDeviceMetricsOverride{}).ProtoReq() && once.CompareAndSwap(0, 1) {
 			close(started)
 			<-ctx.Done()
@@ -563,7 +563,7 @@ func TestForkWaitIdleDeadline(t *testing.T) {
 	g := setup(t)
 
 	p := g.page.MustNavigate(g.blank())
-	g.mc.setCall(func(ctx context.Context, sessionID, method string, params interface{}) ([]byte, error) {
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
 		req, ok := params.(proto.RuntimeCallFunctionOn)
 		if ok && req.AwaitPromise && strings.Contains(req.FunctionDeclaration, "waitIdle") {
 			<-ctx.Done()

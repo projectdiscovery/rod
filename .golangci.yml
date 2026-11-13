@@ -1,113 +1,111 @@
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
-    - gochecknoinits
-    - paralleltest
-    - wrapcheck
-    - gosec
-    - gochecknoglobals
-    - musttag
-    - varnamelen
-    - wsl
-    - nonamedreturns
-    - tagliatelle
-    - nlreturn
-    - nakedret
-    - gomnd
-    - mnd
-    - err113
-    - exhaustruct
-    - godox
-    - depguard
-    - testpackage
-    - exhaustive
-    - containedctx
-    - prealloc
-    - perfsprint
-    - ireturn
-    - contextcheck
     - canonicalheader
+    - containedctx
+    - contextcheck
     - copyloopvar
+    - depguard
+    - err113
+    - exhaustive
+    - exhaustruct
+    - exhaustruct_v5
+    - gochecknoglobals
+    - gochecknoinits
+    - godox
+    - gosec
     - intrange
+    - ireturn
+    - mnd
+    - musttag
+    - nakedret
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - prealloc
     - recvcheck
-
-    # Deprecated ones:
-    - execinquery
-    - structcheck
-    - interfacer
-    - deadcode
-    - varcheck
-    - ifshort
-    - exhaustivestruct
-    - golint
-    - maligned
-    - nosnakecase
-    - scopelint
-
-linters-settings:
-  cyclop:
-    max-complexity: 15
-  gocyclo:
-    min-complexity: 15
-  nestif:
-    min-complexity: 6
-  funlen:
-    lines: 120
-
-issues:
-  exclude-use-default: false
-
-  exclude-rules:
-    - path: _test.go$
-      linters:
-        - lll
-        - funlen
-        - dupword
-        - goconst
-        - contextcheck
-        - errorlint
-        - testableexamples
-        - forcetypeassert
-
-    # Generated code
-    - path: lib/proto/
-      linters:
-        - lll
-        - gocritic
-        - dupword
-        - forcetypeassert
-        - revive
-        - stylecheck
-    - path: lib/devices/list.go
-      linters:
-        - lll
-    - path: lib/js/helper.go
-      linters:
-        - lll
-
-    - path: /fixtures/
-      linters:
-        - forbidigo
-
-    - path: lib/examples/
-      linters:
-        - forbidigo
-        - noctx
-        - gocritic
-
-    - path: examples?_test.go$
-      linters:
-        - forbidigo
-        - noctx
-        - gocritic
-
-    - path: main.go$
-      linters:
-        - forbidigo
-        - noctx
-        - forcetypeassert
-        - lll
-
-    - path: lib/assets/
-      linters:
-        - lll
+    - tagliatelle
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
+  settings:
+    cyclop:
+      max-complexity: 15
+    funlen:
+      lines: 120
+    gocyclo:
+      min-complexity: 15
+    nestif:
+      min-complexity: 6
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - contextcheck
+          - dupword
+          - errorlint
+          - forcetypeassert
+          - funlen
+          - goconst
+          - lll
+          - testableexamples
+        path: _test.go$
+      - linters:
+          - dupword
+          - forcetypeassert
+          - gocritic
+          - lll
+          - revive
+          - staticcheck
+        path: lib/proto/
+      - linters:
+          - lll
+        path: lib/devices/list.go
+      - linters:
+          - lll
+        path: lib/js/helper.go
+      - linters:
+          - forbidigo
+        path: /fixtures/
+      - linters:
+          - forbidigo
+          - gocritic
+          - noctx
+        path: lib/examples/
+      - linters:
+          - forbidigo
+          - gocritic
+          - noctx
+        path: examples?_test.go$
+      - linters:
+          - forbidigo
+          - forcetypeassert
+          - lll
+          - noctx
+        path: main.go$
+      - linters:
+          - lll
+        path: lib/assets/
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      # Generated from the CDP schema and lib/devices/generate. Edits there are overwritten.
+      - lib/proto/[^/]+\.go$
+      - lib/devices/list\.go$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

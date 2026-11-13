@@ -75,7 +75,7 @@ func TestKeyTypeErr(t *testing.T) {
 func TestInput(t *testing.T) {
 	g := setup(t)
 
-	text := "雲の上は\nいつも晴れ"
+	text := "\u96f2\u306e\u4e0a\u306f\n\u3044\u3064\u3082\u6674\u308c"
 
 	p := g.page.MustNavigate(g.srcFile("fixtures/input.html"))
 

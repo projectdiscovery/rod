@@ -13,7 +13,8 @@ func (b *Browser) resumeAttached(params json.RawMessage) {
 		SessionID          string `json:"sessionId"`
 		WaitingForDebugger bool   `json:"waitingForDebugger"`
 	}
-	if err := json.Unmarshal(params, &ev); err != nil || !ev.WaitingForDebugger || ev.SessionID == "" {
+	err := json.Unmarshal(params, &ev)
+	if err != nil || !ev.WaitingForDebugger || ev.SessionID == "" {
 		return
 	}
 	ctx, cancel := context.WithTimeout(b.ctx, 5*time.Second)
@@ -22,13 +23,17 @@ func (b *Browser) resumeAttached(params json.RawMessage) {
 }
 
 // framePage returns a page bound to the out-of-process iframe whose target
-// id is targetID, attaching to it when needed. It returns nil when the frame
+// id is targetID, attaching to it when needed. The bool is false when the frame
 // is not a separate target, which is the case for same-site frames.
-func (b *Browser) framePage(targetID proto.TargetTargetID) (*Page, error) {
+func (b *Browser) framePage(targetID proto.TargetTargetID) (*Page, bool, error) {
 	info, err := b.pageInfo(targetID)
 	if err != nil || info.Type != proto.TargetTargetInfoType("iframe") {
-		return nil, nil //nolint: nilerr
+		return nil, false, nil //nolint: nilerr
 	}
 
-	return b.pageFromTarget(targetID, false)
+	page, err := b.pageFromTarget(targetID, false)
+	if err != nil {
+		return nil, false, err
+	}
+	return page, true, nil
 }

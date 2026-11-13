@@ -62,11 +62,8 @@ func browserVersion(name string) (prefix, version string, ok bool) {
 func compareVersion(a, b string) (int, bool) {
 	as := strings.Split(a, ".")
 	bs := strings.Split(b, ".")
-	n := len(as)
-	if len(bs) > n {
-		n = len(bs)
-	}
-	for i := 0; i < n; i++ {
+	n := max(len(bs), len(as))
+	for i := range n {
 		av, bv := 0, 0
 		if i < len(as) {
 			v, err := strconv.Atoi(as[i])

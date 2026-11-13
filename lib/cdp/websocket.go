@@ -82,9 +82,13 @@ func (ws *WebSocket) Connect(ctx context.Context, wsURL string, header http.Head
 	if err != nil {
 		return err
 	}
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = conn.SetDeadline(deadline)
+	// Bound the upgrade even when the caller has no deadline, so a peer that
+	// accepts the socket but never answers cannot hang Connect forever.
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		deadline = time.Now().Add(handshakeTimeout())
 	}
+	_ = conn.SetDeadline(deadline)
 
 	ws.mu.Lock()
 	ws.conn = conn
@@ -92,7 +96,8 @@ func (ws *WebSocket) Connect(ctx context.Context, wsURL string, header http.Head
 	ws.closed = make(chan struct{})
 	ws.mu.Unlock()
 
-	if err := ws.handshake(ctx, u, header); err != nil {
+	err = ws.handshake(ctx, u, header)
+	if err != nil {
 		_ = conn.Close()
 		return err
 	}
@@ -101,22 +106,6 @@ func (ws *WebSocket) Connect(ctx context.Context, wsURL string, header http.Head
 		go ws.keepAlive(conn, ws.closed)
 	}
 	return nil
-}
-
-func (ws *WebSocket) keepAlive(conn net.Conn, closed chan struct{}) {
-	t := time.NewTicker(ws.KeepAlive)
-	defer t.Stop()
-	for {
-		select {
-		case <-closed:
-			return
-		case <-t.C:
-			if err := ws.writeControl(0x89, nil); err != nil {
-				_ = ws.Close()
-				return
-			}
-		}
-	}
 }
 
 // Close the underlying connection. It is safe to call more than once.
@@ -135,27 +124,6 @@ func (ws *WebSocket) Close() error {
 	return conn.Close()
 }
 
-func (ws *WebSocket) initDialer(u *url.URL) {
-	if ws.Dialer != nil {
-		return
-	}
-	if u.Scheme == "wss" {
-		ws.Dialer = &tlsDialer{}
-		if u.Port() == "" {
-			u.Host += ":443"
-		}
-	} else {
-		ws.Dialer = &net.Dialer{Timeout: 30 * time.Second}
-	}
-}
-
-func (ws *WebSocket) limit() int {
-	if ws.MaxMessageSize > 0 {
-		return ws.MaxMessageSize
-	}
-	return MaxMessageSize
-}
-
 // Send a text message. The caller's buffer is not modified.
 func (ws *WebSocket) Send(msg []byte) error {
 	err := ws.send(msg)
@@ -163,6 +131,50 @@ func (ws *WebSocket) Send(msg []byte) error {
 		_ = ws.Close()
 	}
 	return err
+}
+
+// DefaultHandshakeTimeout bounds the HTTP upgrade when the caller's context has
+// no deadline.
+var DefaultHandshakeTimeout = 30 * time.Second
+
+func handshakeTimeout() time.Duration {
+	if DefaultHandshakeTimeout > 0 {
+		return DefaultHandshakeTimeout
+	}
+	return 30 * time.Second
+}
+
+// DefaultWriteTimeout is used when WebSocket.WriteTimeout is zero.
+var DefaultWriteTimeout = 60 * time.Second
+
+func maskBytes(b []byte, mask [4]byte) {
+	m := binary.LittleEndian.Uint32(mask[:])
+	i := 0
+	for ; i+8 <= len(b); i += 8 {
+		v := binary.LittleEndian.Uint64(b[i:])
+		v ^= uint64(m) | uint64(m)<<32
+		binary.LittleEndian.PutUint64(b[i:], v)
+	}
+	for ; i < len(b); i++ {
+		b[i] ^= mask[i%4]
+	}
+}
+
+// Read a text message from the browser.
+func (ws *WebSocket) Read() ([]byte, error) {
+	b, err := ws.read()
+	if err != nil {
+		_ = ws.Close()
+		return nil, err
+	}
+	return b, nil
+}
+
+func (ws *WebSocket) writeTimeout() time.Duration {
+	if ws.WriteTimeout > 0 {
+		return ws.WriteTimeout
+	}
+	return DefaultWriteTimeout
 }
 
 func (ws *WebSocket) send(msg []byte) error {
@@ -193,7 +205,8 @@ func (ws *WebSocket) send(msg []byte) error {
 	}
 
 	var mask [4]byte
-	if _, err := rand.Read(mask[:]); err != nil {
+	_, err := rand.Read(mask[:])
+	if err != nil {
 		return err
 	}
 	copy(buf[headerLen-4:], mask[:])
@@ -207,44 +220,50 @@ func (ws *WebSocket) send(msg []byte) error {
 	// applies here. WriteTimeout only trips when the peer stopped reading,
 	// and then the connection is closed.
 	_ = conn.SetWriteDeadline(time.Now().Add(ws.writeTimeout()))
-	_, err := conn.Write(buf)
+	_, err = conn.Write(buf)
 	_ = conn.SetWriteDeadline(time.Time{})
 	return err
 }
 
-func (ws *WebSocket) writeTimeout() time.Duration {
-	if ws.WriteTimeout > 0 {
-		return ws.WriteTimeout
+func (ws *WebSocket) limit() int {
+	if ws.MaxMessageSize > 0 {
+		return ws.MaxMessageSize
 	}
-	return DefaultWriteTimeout
+	return MaxMessageSize
 }
 
-// DefaultWriteTimeout is used when WebSocket.WriteTimeout is zero.
-var DefaultWriteTimeout = 60 * time.Second
-
-func maskBytes(b []byte, mask [4]byte) {
-	m := binary.LittleEndian.Uint32(mask[:])
-	i := 0
-	for ; i+8 <= len(b); i += 8 {
-		v := binary.LittleEndian.Uint64(b[i:])
-		v ^= uint64(m) | uint64(m)<<32
-		binary.LittleEndian.PutUint64(b[i:], v)
+func (ws *WebSocket) initDialer(u *url.URL) {
+	if ws.Dialer != nil {
+		return
 	}
-	for ; i < len(b); i++ {
-		b[i] ^= mask[i%4]
+	if u.Scheme == "wss" {
+		ws.Dialer = &tlsDialer{}
+		if u.Port() == "" {
+			u.Host += ":443"
+		}
+	} else {
+		ws.Dialer = &net.Dialer{Timeout: 30 * time.Second}
 	}
 }
 
-// Read a text message from the browser.
-func (ws *WebSocket) Read() ([]byte, error) {
-	b, err := ws.read()
-	if err != nil {
-		_ = ws.Close()
-		return nil, err
+func (ws *WebSocket) keepAlive(_ net.Conn, closed chan struct{}) {
+	t := time.NewTicker(ws.KeepAlive)
+	defer t.Stop()
+	for {
+		select {
+		case <-closed:
+			return
+		case <-t.C:
+			err := ws.writeControl(0x89, nil)
+			if err != nil {
+				_ = ws.Close()
+				return
+			}
+		}
 	}
-	return b, nil
 }
 
+//nolint:gocognit,gocyclo,cyclop,funlen // the frame parser follows the RFC 6455 states in order
 func (ws *WebSocket) read() ([]byte, error) {
 	ws.mu.Lock()
 	r := ws.r
@@ -285,12 +304,14 @@ func (ws *WebSocket) read() ([]byte, error) {
 		}
 		var key [4]byte
 		if masked {
-			if _, err := io.ReadFull(r, key[:]); err != nil {
+			_, err := io.ReadFull(r, key[:])
+			if err != nil {
 				return nil, err
 			}
 		}
 		payload := make([]byte, size)
-		if _, err := io.ReadFull(r, payload); err != nil {
+		_, err = io.ReadFull(r, payload)
+		if err != nil {
 			return nil, err
 		}
 		if masked {
@@ -307,7 +328,8 @@ func (ws *WebSocket) read() ([]byte, error) {
 			if !fin || size > maxControlFrame {
 				return nil, errors.New("cdp: malformed ping")
 			}
-			if err := ws.writeControl(0x8A, payload); err != nil {
+			err := ws.writeControl(0x8A, payload)
+			if err != nil {
 				return nil, err
 			}
 			continue
@@ -363,13 +385,15 @@ func (ws *WebSocket) readLen(r *bufio.Reader, b byte) (int, error) {
 	switch b {
 	case 126:
 		var buf [2]byte
-		if _, err := io.ReadFull(r, buf[:]); err != nil {
+		_, err := io.ReadFull(r, buf[:])
+		if err != nil {
 			return 0, err
 		}
 		return int(binary.BigEndian.Uint16(buf[:])), nil
 	case 127:
 		var buf [8]byte
-		if _, err := io.ReadFull(r, buf[:]); err != nil {
+		_, err := io.ReadFull(r, buf[:])
+		if err != nil {
 			return 0, err
 		}
 		n := binary.BigEndian.Uint64(buf[:])
@@ -428,7 +452,8 @@ func verifyWebSocketAccept(responseHeaders http.Header, websocketKey string) boo
 
 func (ws *WebSocket) handshake(ctx context.Context, u *url.URL, header http.Header) error {
 	keyBytes := make([]byte, 16)
-	if _, err := rand.Read(keyBytes); err != nil {
+	_, err := rand.Read(keyBytes)
+	if err != nil {
 		return err
 	}
 	secKey := base64.StdEncoding.EncodeToString(keyBytes)
@@ -462,7 +487,8 @@ func (ws *WebSocket) handshake(ctx context.Context, u *url.URL, header http.Head
 	r := ws.r
 	ws.mu.Unlock()
 
-	if err := req.Write(conn); err != nil {
+	err = req.Write(conn)
+	if err != nil {
 		return err
 	}
 

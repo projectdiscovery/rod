@@ -39,7 +39,7 @@ func keepState(methodName string) bool {
 	}
 }
 
-func (b *Browser) set(sessionID proto.TargetSessionID, methodName string, params interface{}) {
+func (b *Browser) set(sessionID proto.TargetSessionID, methodName string, params any) {
 	if !keepState(methodName) {
 		return
 	}
@@ -74,7 +74,7 @@ func (b *Browser) LoadState(sessionID proto.TargetSessionID, method proto.Reques
 }
 
 // RemoveState a state.
-func (b *Browser) RemoveState(key interface{}) {
+func (b *Browser) RemoveState(key any) {
 	b.states.Delete(key)
 }
 
@@ -103,10 +103,7 @@ func (b *Browser) EnableDomain(sessionID proto.TargetSessionID, req proto.Reques
 
 	return func() {
 		b.domainMu.Lock()
-		n := b.domains[key] - 1
-		if n < 0 {
-			n = 0
-		}
+		n := max(b.domains[key]-1, 0)
 		b.domains[key] = n
 		shouldDisable := n == 0
 		b.domainMu.Unlock()
@@ -143,7 +140,7 @@ func (b *Browser) cachePage(page *Page) {
 // targetGone cancels the page owning a detached session or destroyed target
 // and drops its cached states.
 func (b *Browser) targetGone(method string, params []byte) {
-	var key interface{}
+	var key any
 	switch method {
 	case "Target.detachedFromTarget":
 		var e proto.TargetDetachedFromTarget
@@ -194,7 +191,8 @@ func (p *Page) DisableDomain(method proto.Request) (restore func()) {
 }
 
 func (p *Page) cleanupStates() {
-	if cache, ok := p.browser.states.Load(p.TargetID); ok && cache.(*Page).SessionID == p.SessionID { //nolint: forcetypeassert
+	cache, ok := p.browser.states.Load(p.TargetID)
+	if ok && cache.(*Page).SessionID == p.SessionID { //nolint: forcetypeassert
 		p.browser.RemoveState(p.TargetID)
 	}
 	p.browser.RemoveState(sessionPageKey(p.SessionID))
@@ -202,7 +200,7 @@ func (p *Page) cleanupStates() {
 }
 
 func (b *Browser) purgeSession(sessionID proto.TargetSessionID) {
-	b.states.Range(func(k, _ interface{}) bool {
+	b.states.Range(func(k, _ any) bool {
 		key, ok := k.(stateKey)
 		if ok && key.sessionID == sessionID {
 			b.states.Delete(k)

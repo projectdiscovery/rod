@@ -16,7 +16,8 @@ func (l *Launcher) preparePrivileges() error {
 	if dir == "" {
 		return nil
 	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	err := os.MkdirAll(dir, 0o755)
+	if err != nil {
 		return err
 	}
 	return os.Chown(dir, l.uid, l.gid)

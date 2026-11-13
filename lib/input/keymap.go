@@ -5,6 +5,7 @@ package input
 var (
 	// Functions row.
 	//
+
 	Escape = AddKey("Escape", "", "Escape", 27, 0)
 	F1     = AddKey("F1", "", "F1", 112, 0)
 	F2     = AddKey("F2", "", "F2", 113, 0)
@@ -21,6 +22,7 @@ var (
 
 	// Numbers row.
 	//
+
 	Backquote = AddKey("`", "~", "Backquote", 192, 0)
 	Digit1    = AddKey("1", "!", "Digit1", 49, 0)
 	Digit2    = AddKey("2", "@", "Digit2", 50, 0)
@@ -39,6 +41,7 @@ var (
 
 	// First row.
 	//
+
 	Tab          = AddKey("\t", "", "Tab", 9, 0)
 	KeyQ         = AddKey("q", "Q", "KeyQ", 81, 0)
 	KeyW         = AddKey("w", "W", "KeyW", 87, 0)
@@ -55,6 +58,7 @@ var (
 
 	// Second row.
 	//
+
 	CapsLock  = AddKey("CapsLock", "", "CapsLock", 20, 0)
 	KeyA      = AddKey("a", "A", "KeyA", 65, 0)
 	KeyS      = AddKey("s", "S", "KeyS", 83, 0)
@@ -71,6 +75,7 @@ var (
 
 	// Third row.
 	//
+
 	ShiftLeft  = AddKey("Shift", "", "ShiftLeft", 16, 1)
 	KeyZ       = AddKey("z", "Z", "KeyZ", 90, 0)
 	KeyX       = AddKey("x", "X", "KeyX", 88, 0)
@@ -86,6 +91,7 @@ var (
 
 	// Last row.
 	//
+
 	ControlLeft  = AddKey("Control", "", "ControlLeft", 17, 1)
 	MetaLeft     = AddKey("Meta", "", "MetaLeft", 91, 1)
 	AltLeft      = AddKey("Alt", "", "AltLeft", 18, 1)
@@ -98,6 +104,7 @@ var (
 
 	// Center block.
 	//
+
 	PrintScreen = AddKey("PrintScreen", "", "PrintScreen", 44, 0)
 	ScrollLock  = AddKey("ScrollLock", "", "ScrollLock", 145, 0)
 	Pause       = AddKey("Pause", "", "Pause", 19, 0)
@@ -114,6 +121,7 @@ var (
 
 	// Numpad.
 	//
+
 	NumLock        = AddKey("NumLock", "", "NumLock", 144, 0)
 	NumpadDivide   = AddKey("/", "", "NumpadDivide", 111, 3)
 	NumpadMultiply = AddKey("*", "", "NumpadMultiply", 106, 3)
