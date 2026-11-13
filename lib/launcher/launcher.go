@@ -131,6 +131,7 @@ func New() *Launcher {
 		parser:    NewURLParser(),
 		logger:    io.Discard,
 		output:    &limitBuf{max: LaunchOutputLimit},
+		compliant: true,
 	}
 }
 
@@ -246,13 +247,14 @@ func (l *Launcher) HeadlessShell(enable bool) *Launcher {
 	return l
 }
 
-// Compliant launches full Chrome without the automation switch, so
-// navigator.webdriver is false. [Browser.Compliant] then aligns the user
-// agent and client hints with that browser. A headless shell is not used.
-// Calling it with false leaves the launcher unchanged.
+// Compliant controls how the browser is launched. It is on by default:
+// full Chrome starts without the automation switch, so navigator.webdriver
+// is false, and [Browser.Compliant] aligns the user agent and client hints
+// with that browser. A headless shell is not used. Pass false to opt out and
+// keep the automation switch and the launcher's headless-shell setting.
 func (l *Launcher) Compliant(enable bool) *Launcher {
+	l.compliant = enable
 	if enable {
-		l.compliant = true
 		l.browser.HeadlessShell = false
 	}
 	return l

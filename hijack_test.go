@@ -60,7 +60,8 @@ func TestHijack(t *testing.T) {
 		g.Eq(proto.NetworkResourceTypeXHR, ctx.Request.Type())
 		g.Is(ctx.Request.IsNavigation(), false)
 		g.Has(s.URL(), ctx.Request.Header("Origin"))
-		g.Len(ctx.Request.Headers(), 6)
+		// Compliant mode sends the client hints that match the user agent.
+		g.Len(ctx.Request.Headers(), 8)
 		g.True(ctx.Request.JSONBody().Nil())
 
 		// send request load response from real destination as the default value to hijack

@@ -510,6 +510,10 @@ func TestForkHijackEventExposed(t *testing.T) {
 
 func TestForkStuckEmulationDoesNotBlockPages(t *testing.T) {
 	g := setup(t)
+	// The emulation path only runs when compliant mode is off. Use a copy so
+	// the pooled browser keeps its default.
+	browser := *g.browser
+	browser.Compliant(false)
 
 	res, err := proto.TargetCreateTarget{URL: "about:blank"}.Call(g.browser)
 	g.E(err)
@@ -536,7 +540,7 @@ func TestForkStuckEmulationDoesNotBlockPages(t *testing.T) {
 
 	errCh := make(chan error, 1)
 	go func() {
-		_, err := g.browser.Context(ctx).PageFromTarget(res.TargetID)
+		_, err := browser.Context(ctx).PageFromTarget(res.TargetID)
 		errCh <- err
 	}()
 

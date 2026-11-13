@@ -722,7 +722,8 @@ func TestPageScreenshot(t *testing.T) {
 	g := setup(t)
 
 	f := filepath.Join("tmp", "screenshots", g.RandStr(16)+".png")
-	p := g.page.MustNavigate(g.srcFile("fixtures/click.html"))
+	// Pin the viewport. The default device no longer sets it.
+	p := g.page.MustSetViewport(1280, 800, 1, false).MustNavigate(g.srcFile("fixtures/click.html"))
 	p.MustElement("button")
 	p.MustScreenshot()
 	data := p.MustScreenshot(f)
@@ -743,7 +744,7 @@ func TestPageScreenshot(t *testing.T) {
 func TestScreenshotFullPage(t *testing.T) {
 	g := setup(t)
 
-	p := g.page.MustNavigate(g.srcFile("fixtures/scroll.html"))
+	p := g.page.MustSetViewport(1280, 800, 1, false).MustNavigate(g.srcFile("fixtures/scroll.html"))
 	p.MustElement("button")
 	data := p.MustScreenshotFullPage()
 	img, err := png.Decode(bytes.NewBuffer(data))
@@ -783,7 +784,7 @@ func TestScreenshotFullPage(t *testing.T) {
 func TestScrollScreenshot(t *testing.T) {
 	g := setup(t)
 
-	p := g.page.MustNavigate(g.srcFile("fixtures/scroll-y.html"))
+	p := g.page.MustSetViewport(1280, 800, 1, false).MustNavigate(g.srcFile("fixtures/scroll-y.html"))
 	p.MustElement("button")
 	data := p.MustScrollScreenshot()
 	img, err := png.Decode(bytes.NewBuffer(data))
