@@ -25,9 +25,9 @@ func TestLockDownloadExcludes(t *testing.T) {
 	}()
 
 	select {
-	case <-acquired:
+	case err := <-acquired:
 		unlock()
-		t.Fatal("second lock acquired while the first was held")
+		t.Fatalf("second lock acquired while the first was held: %v", err)
 	case <-time.After(200 * time.Millisecond):
 	}
 
