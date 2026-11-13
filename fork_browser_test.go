@@ -626,3 +626,192 @@ func TestForkConcurrentPageFromTarget(t *testing.T) {
 	}
 	g.Eq(pages[0].TargetID, res.TargetID)
 }
+
+// probeRedirect sends the compliant probe target to another URL. An empty URL
+// leaves the probe as it is.
+type probeRedirect struct {
+	*cdp.Client
+	to   atomic.Pointer[string]
+	hits atomic.Int32
+	// polls counts the probe's client hint reads.
+	polls atomic.Int32
+	// blanks counts the about:blank targets that Chrome created.
+	blanks atomic.Int32
+	// committed counts the probe reads that saw a committed page.
+	committed atomic.Int32
+}
+
+func (c *probeRedirect) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
+	blank, poll := false, false
+	switch req := params.(type) {
+	case proto.TargetCreateTarget:
+		switch req.URL {
+		case "chrome://version":
+			if to := c.to.Load(); to != nil && *to != "" {
+				req.URL = *to
+				params = req
+				c.hits.Add(1)
+			}
+		case "about:blank":
+			blank = true
+		}
+	case proto.RuntimeEvaluate:
+		if strings.Contains(req.Expression, "pending: true") {
+			c.polls.Add(1)
+			poll = true
+		}
+	}
+	res, err := c.Client.Call(ctx, sessionID, method, params)
+	if blank && err == nil {
+		c.blanks.Add(1)
+	}
+	if poll && err == nil && !bytes.Contains(res, []byte("pending")) {
+		c.committed.Add(1)
+	}
+	return res, err
+}
+
+// waitFor waits until cond is true. A slow runner, such as the macOS CI
+// runner, can take more than a second to create the first target.
+func waitFor(t *testing.T, what string, cond func() bool) {
+	t.Helper()
+	deadline := time.Now().Add(30 * time.Second)
+	for !cond() {
+		if time.Now().After(deadline) {
+			t.Fatalf("%s did not happen", what)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+}
+
+func launchProbeRedirect(t *testing.T, to string) (*rod.Browser, *probeRedirect) {
+	t.Helper()
+	l := launcher.New().NoSandbox(true)
+	t.Cleanup(l.Cleanup)
+	t.Cleanup(l.Kill)
+	client := &probeRedirect{Client: cdp.New().Start(cdp.MustConnectWS(l.MustLaunch()))}
+	client.to.Store(&to)
+	b := rod.New().Client(client).MustConnect()
+	t.Cleanup(func() { _ = b.Close() })
+	return b, client
+}
+
+// chrome-headless-shell has no chrome://version and commits an error page
+// instead. That page is final, so the probe must not wait for chrome://version.
+func TestForkCompliantProbeErrorPage(t *testing.T) {
+	setup(t)
+	// Nothing listens on port 1, so the probe commits chrome-error://chromewebdata.
+	b, client := launchProbeRedirect(t, "http://127.0.0.1:1/")
+
+	p, err := b.Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The probe must stop when the error page commits, and not poll until its
+	// limit. A time limit is not used: a slow runner can take seconds to
+	// create the first target.
+	if client.committed.Load() != 1 {
+		t.Fatalf("probe saw %d committed pages in %d reads", client.committed.Load(), client.polls.Load())
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
+	}
+	ua := p.MustEval(`() => navigator.userAgent`).Str()
+	if strings.Contains(ua, "Headless") {
+		t.Fatalf("ua %s", ua)
+	}
+}
+
+// A probe that never commits must stop when the caller's context ends. That
+// stop must not be kept, so a later caller with a live context still reads the
+// profile.
+func TestForkCompliantProbeHonorsContext(t *testing.T) {
+	setup(t)
+	// about:blank never leaves the first document, so the probe stays pending.
+	b, client := launchProbeRedirect(t, "about:blank")
+
+	// Cancel only when the probe polls its pending document. A fixed deadline
+	// can end before the probe starts on a slow runner.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cancelled := make(chan time.Time, 1)
+	go func() {
+		for client.polls.Load() < 2 && ctx.Err() == nil {
+			time.Sleep(10 * time.Millisecond)
+		}
+		cancelled <- time.Now()
+		cancel()
+	}()
+	_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
+	returned := time.Now()
+	cancel()
+	at := <-cancelled
+	if client.polls.Load() < 2 {
+		t.Fatalf("probe polled %d times, err = %v", client.polls.Load(), err)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("err = %v", err)
+	}
+	if took := returned.Sub(at); took > 1500*time.Millisecond {
+		t.Fatalf("cancel took %v", took)
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
+	}
+
+	none := ""
+	client.to.Store(&none)
+	p, err := b.Page(proto.TargetCreateTarget{URL: "about:blank"})
+	if err != nil {
+		t.Fatalf("read after cancel: %v", err)
+	}
+	ua := p.MustEval(`() => navigator.userAgent`).Str()
+	if strings.Contains(ua, "Headless") {
+		t.Fatalf("ua %s", ua)
+	}
+}
+
+// A caller that waits behind another probe read must stop when its own
+// context ends.
+func TestForkCompliantProbeWaiterHonorsContext(t *testing.T) {
+	setup(t)
+	b, client := launchProbeRedirect(t, "about:blank")
+
+	first, cancelFirst := context.WithCancel(context.Background())
+	defer cancelFirst()
+	firstDone := make(chan error, 1)
+	go func() {
+		_, err := b.Context(first).Page(proto.TargetCreateTarget{URL: "about:blank"})
+		firstDone <- err
+	}()
+	waitFor(t, "the first probe read", func() bool { return client.polls.Load() >= 2 })
+
+	// Cancel the waiter only after Chrome created its page, so the cancel
+	// reaches the wait for the probe lock and not the create call.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	waiterDone := make(chan error, 1)
+	go func() {
+		_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
+		waiterDone <- err
+	}()
+	waitFor(t, "the waiter page create", func() bool { return client.blanks.Load() >= 2 })
+	time.Sleep(100 * time.Millisecond)
+	start := time.Now()
+	cancel()
+	err := <-waiterDone
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("err = %v", err)
+	}
+	if took := time.Since(start); took > 1500*time.Millisecond {
+		t.Fatalf("waiter took %v", took)
+	}
+
+	cancelFirst()
+	if err := <-firstDone; !errors.Is(err, context.Canceled) {
+		t.Fatalf("first read err = %v", err)
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
+	}
+}

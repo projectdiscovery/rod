@@ -102,7 +102,7 @@ func New() *Browser {
 		autoAttach:    &atomic.Bool{},
 		states:        &sync.Map{},
 		opening:       map[proto.TargetTargetID]*pageOpen{},
-		profile:       &compliantProfile{},
+		profile:       newCompliantProfile(),
 		compliant:     true,
 	}).WithPanic(utils.Panic)
 }
