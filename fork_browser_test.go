@@ -633,17 +633,49 @@ type probeRedirect struct {
 	*cdp.Client
 	to   atomic.Pointer[string]
 	hits atomic.Int32
+	// polls counts the probe's client hint reads.
+	polls atomic.Int32
+	// blanks counts the about:blank targets that Chrome created.
+	blanks atomic.Int32
 }
 
 func (c *probeRedirect) Call(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
-	if req, ok := params.(proto.TargetCreateTarget); ok && req.URL == "chrome://version" {
-		if to := c.to.Load(); to != nil && *to != "" {
-			req.URL = *to
-			params = req
-			c.hits.Add(1)
+	blank := false
+	switch req := params.(type) {
+	case proto.TargetCreateTarget:
+		switch req.URL {
+		case "chrome://version":
+			if to := c.to.Load(); to != nil && *to != "" {
+				req.URL = *to
+				params = req
+				c.hits.Add(1)
+			}
+		case "about:blank":
+			blank = true
+		}
+	case proto.RuntimeEvaluate:
+		if strings.Contains(req.Expression, "pending: true") {
+			c.polls.Add(1)
 		}
 	}
-	return c.Client.Call(ctx, sessionID, method, params)
+	res, err := c.Client.Call(ctx, sessionID, method, params)
+	if blank && err == nil {
+		c.blanks.Add(1)
+	}
+	return res, err
+}
+
+// waitFor waits until cond is true. A slow runner, such as the macOS CI
+// runner, can take more than a second to create the first target.
+func waitFor(t *testing.T, what string, cond func() bool) {
+	t.Helper()
+	deadline := time.Now().Add(30 * time.Second)
+	for !cond() {
+		if time.Now().After(deadline) {
+			t.Fatalf("%s did not happen", what)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 func launchProbeRedirect(t *testing.T, to string) (*rod.Browser, *probeRedirect) {
@@ -690,14 +722,29 @@ func TestForkCompliantProbeHonorsContext(t *testing.T) {
 	// about:blank never leaves the first document, so the probe stays pending.
 	b, client := launchProbeRedirect(t, "about:blank")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	// Cancel only when the probe polls its pending document. A fixed deadline
+	// can end before the probe starts on a slow runner.
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	start := time.Now()
+	cancelled := make(chan time.Time, 1)
+	go func() {
+		for client.polls.Load() < 2 && ctx.Err() == nil {
+			time.Sleep(10 * time.Millisecond)
+		}
+		cancelled <- time.Now()
+		cancel()
+	}()
 	_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
-	if !errors.Is(err, context.DeadlineExceeded) {
+	returned := time.Now()
+	cancel()
+	at := <-cancelled
+	if client.polls.Load() < 2 {
+		t.Fatalf("probe polled %d times, err = %v", client.polls.Load(), err)
+	}
+	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("err = %v", err)
 	}
-	if took := time.Since(start); took > 1500*time.Millisecond {
+	if took := returned.Sub(at); took > 1500*time.Millisecond {
 		t.Fatalf("cancel took %v", took)
 	}
 	if client.hits.Load() != 1 {
@@ -722,32 +769,41 @@ func TestForkCompliantProbeWaiterHonorsContext(t *testing.T) {
 	setup(t)
 	b, client := launchProbeRedirect(t, "about:blank")
 
-	first, cancelFirst := context.WithTimeout(context.Background(), 2*time.Second)
+	first, cancelFirst := context.WithCancel(context.Background())
 	defer cancelFirst()
 	firstDone := make(chan error, 1)
 	go func() {
 		_, err := b.Context(first).Page(proto.TargetCreateTarget{URL: "about:blank"})
 		firstDone <- err
 	}()
-	deadline := time.Now().Add(5 * time.Second)
-	for client.hits.Load() == 0 && time.Now().Before(deadline) {
-		time.Sleep(10 * time.Millisecond)
-	}
-	if client.hits.Load() == 0 {
-		t.Fatal("the first probe did not start")
-	}
+	waitFor(t, "the first probe read", func() bool { return client.polls.Load() >= 2 })
 
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	// Cancel the waiter only after Chrome created its page, so the cancel
+	// reaches the wait for the probe lock and not the create call.
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	waiterDone := make(chan error, 1)
+	go func() {
+		_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
+		waiterDone <- err
+	}()
+	waitFor(t, "the waiter page create", func() bool { return client.blanks.Load() >= 2 })
+	time.Sleep(100 * time.Millisecond)
 	start := time.Now()
-	_, err := b.Context(ctx).Page(proto.TargetCreateTarget{URL: "about:blank"})
-	if !errors.Is(err, context.DeadlineExceeded) {
+	cancel()
+	err := <-waiterDone
+	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("err = %v", err)
 	}
 	if took := time.Since(start); took > 1500*time.Millisecond {
 		t.Fatalf("waiter took %v", took)
 	}
-	if err := <-firstDone; !errors.Is(err, context.DeadlineExceeded) {
+
+	cancelFirst()
+	if err := <-firstDone; !errors.Is(err, context.Canceled) {
 		t.Fatalf("first read err = %v", err)
+	}
+	if client.hits.Load() != 1 {
+		t.Fatalf("probe redirected %d times", client.hits.Load())
 	}
 }
