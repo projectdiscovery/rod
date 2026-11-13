@@ -160,7 +160,7 @@ func symbol(n string) string {
 	n = replaceLower(n, "Ui")
 	n = replaceLower(n, "Https")
 
-	n = strings.Replace(n, "Ids", "IDs", -1)
+	n = strings.ReplaceAll(n, "Ids", "IDs")
 
 	return n
 }
