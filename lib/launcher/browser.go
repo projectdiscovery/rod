@@ -11,6 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/projectdiscovery/rod/lib/defaults"
@@ -177,6 +179,9 @@ func (lc *Browser) Get() (string, error) {
 
 	t, err := lc.target()
 	if err != nil && !errors.Is(err, errChromiumSnapshot) {
+		if legacy, ok := lc.legacyFallback(); ok {
+			return legacy, nil
+		}
 		return "", err
 	}
 	bin := lc.binFor(t)
@@ -187,7 +192,65 @@ func (lc *Browser) Get() (string, error) {
 	// Try to cleanup before downloading
 	_ = os.RemoveAll(lc.dirFor(t))
 
-	return bin, lc.download(t)
+	err = lc.download(t)
+	if err != nil && t != nil && lc.canFallBack() {
+		if cached, ok := newestInstalled(lc.RootDir, t); ok {
+			c := &chromeForTesting{version: cached, headlessShell: t.headlessShell}
+			if validateBin(lc.binFor(c)) == nil {
+				return lc.binFor(c), nil
+			}
+		}
+		if legacy, ok := lc.legacyFallback(); ok {
+			return legacy, nil
+		}
+	}
+	return bin, err
+}
+
+// canFallBack reports whether Get may use a cached browser in place of the
+// latest stable one. An explicit Chrome for Testing version or a canceled
+// context never falls back.
+func (lc *Browser) canFallBack() bool {
+	return lc.cft == nil && (lc.Context == nil || lc.Context.Err() == nil)
+}
+
+// legacyFallback is [Browser.legacyChromium] when [Browser.canFallBack].
+func (lc *Browser) legacyFallback() (string, bool) {
+	if !lc.canFallBack() {
+		return "", false
+	}
+	return lc.legacyChromium()
+}
+
+// legacyChromium returns the newest valid Chromium snapshot in RootDir, such
+// as the chromium-1321438 directory that go-rod downloaded by default. It is
+// the fallback when the latest Chrome for Testing cannot be resolved or
+// downloaded, so a cache from an older release keeps working offline.
+func (lc *Browser) legacyChromium() (string, bool) {
+	entries, err := os.ReadDir(lc.RootDir)
+	if err != nil {
+		return "", false
+	}
+	revs := []int{}
+	for _, e := range entries {
+		rest, ok := strings.CutPrefix(e.Name(), "chromium-")
+		if !ok || !e.IsDir() {
+			continue
+		}
+		rev, err := strconv.Atoi(rest)
+		if err != nil || rev <= 0 {
+			continue
+		}
+		revs = append(revs, rev)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(revs)))
+	for _, rev := range revs {
+		bin := filepath.Join(lc.RootDir, fmt.Sprintf("chromium-%d", rev), filepath.FromSlash(chromiumBin()))
+		if validateBin(bin) == nil {
+			return bin, true
+		}
+	}
+	return "", false
 }
 
 // MustGet is similar with Get.
@@ -270,13 +333,16 @@ func (lc *Browser) binFor(t *chromeForTesting) string {
 	if t != nil {
 		return filepath.Join(lc.dirFor(t), filepath.FromSlash(t.binName()))
 	}
-	bin := map[string]string{
+	return filepath.Join(lc.dirFor(t), filepath.FromSlash(chromiumBin()))
+}
+
+// chromiumBin is the executable path inside a Chromium snapshot directory.
+func chromiumBin() string {
+	return map[string]string{
 		goosDarwin:  "Chromium.app/Contents/MacOS/Chromium",
 		goosLinux:   productChrome,
 		goosWindows: "chrome.exe",
 	}[runtime.GOOS]
-
-	return filepath.Join(lc.dirFor(t), filepath.FromSlash(bin))
 }
 
 func (lc *Browser) dirFor(t *chromeForTesting) string {
