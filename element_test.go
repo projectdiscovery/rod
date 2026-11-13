@@ -74,7 +74,7 @@ func TestClickSubmitsForm(t *testing.T) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		defer uploaded.Close()
+		defer func() { _ = uploaded.Close() }()
 		body, _ := io.ReadAll(uploaded)
 		// The response has to arrive after the mouse event. Click must not
 		// return until this document is the one the caller reads.
