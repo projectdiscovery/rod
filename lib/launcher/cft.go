@@ -20,7 +20,7 @@ var ChromeForTestingVersionsURL = "https://googlechromelabs.github.io/chrome-for
 var chromeForTestingStorage = "https://storage.googleapis.com/chrome-for-testing-public"
 
 // ChromeForTestingPins maps "product/platform/version" to the SHA-256 hex
-// digest of that archive. product is "chrome" or "chrome-headless-shell",
+// digest of that archive. product is productChrome or "chrome-headless-shell",
 // platform is linux64, linux-arm64, mac-arm64, mac-x64, win64 or win32. A
 // listed version is refused when the download does not match. Chrome for
 // Testing does not publish these hashes, so latest stable is not listed: the
@@ -68,7 +68,7 @@ func (c *chromeForTesting) product() string {
 	if c.headlessShell {
 		return "chrome-headless-shell"
 	}
-	return "chrome"
+	return productChrome
 }
 
 func (c *chromeForTesting) dirName() string {
@@ -77,18 +77,18 @@ func (c *chromeForTesting) dirName() string {
 
 func (c *chromeForTesting) binName() string {
 	if c.headlessShell {
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == goosWindows {
 			return "chrome-headless-shell.exe"
 		}
 		return "chrome-headless-shell"
 	}
 	switch runtime.GOOS {
-	case "darwin":
+	case goosDarwin:
 		return "Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
-	case "windows":
+	case goosWindows:
 		return "chrome.exe"
 	}
-	return "chrome"
+	return productChrome
 }
 
 // HostChromeForTesting returns the download URL of a Chrome for Testing
@@ -137,7 +137,8 @@ func LatestChromeForTesting(ctx context.Context, client *http.Client, channel st
 			Version string `json:"version"`
 		} `json:"channels"`
 	}
-	if err := json.NewDecoder(io.LimitReader(res.Body, 1<<20)).Decode(&data); err != nil {
+	err = json.NewDecoder(io.LimitReader(res.Body, 1<<20)).Decode(&data)
+	if err != nil {
 		return "", err
 	}
 	ch, ok := data.Channels[channel]
@@ -151,6 +152,7 @@ func LatestChromeForTesting(ctx context.Context, client *http.Client, channel st
 // not cached.
 var latestVersions = struct {
 	sync.Mutex
+
 	m map[string]latestEntry
 }{m: map[string]latestEntry{}}
 
@@ -195,7 +197,8 @@ func newestInstalled(root string, c *chromeForTesting) (string, bool) {
 		if !ok || prefix != c.product()+"-" {
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(root, e.Name(), filepath.FromSlash(c.binName()))); err != nil {
+		_, err := os.Stat(filepath.Join(root, e.Name(), filepath.FromSlash(c.binName())))
+		if err != nil {
 			continue
 		}
 		if best == "" {

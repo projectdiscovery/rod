@@ -79,22 +79,27 @@ func (b *Browser) readCompliantProfile() (string, *proto.EmulationUserAgentMetad
 	_ = proto.PageEnable{}.Call(probe)
 
 	var last error
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		res, err := proto.RuntimeEvaluate{
 			Expression:    compliantHintJS,
 			AwaitPromise:  true,
 			ReturnByValue: true,
 		}.Call(probe)
-		if err != nil {
+		switch {
+		case err != nil:
 			last = err
-		} else if res.ExceptionDetails != nil {
+		case res.ExceptionDetails != nil:
 			last = fmt.Errorf("compliant profile: %s", res.ExceptionDetails.Text)
-		} else if ua, meta, err := compliantFromValue(res.Result.Value); err != nil {
-			last = fmt.Errorf("compliant profile: %w (%s)", err, res.Result.Value.Str())
-		} else if meta != nil {
-			return ua, meta, nil
-		} else {
-			last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
+		default:
+			ua, meta, err := compliantFromValue(res.Result.Value)
+			switch {
+			case err != nil:
+				last = fmt.Errorf("compliant profile: %w (%s)", err, res.Result.Value.Str())
+			case meta != nil:
+				return ua, meta, nil
+			default:
+				last = fmt.Errorf("compliant profile: client hints not ready (%s)", res.Result.Value.Str())
+			}
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
@@ -135,7 +140,8 @@ func compliantFromValue(v gson.JSON) (string, *proto.EmulationUserAgentMetadata,
 // compliantFromEval parses the JSON form of [compliantFromValue].
 func compliantFromEval(raw string) (string, *proto.EmulationUserAgentMetadata, error) {
 	var parsed compliantHints
-	if err := json.Unmarshal([]byte(raw), &parsed); err != nil {
+	err := json.Unmarshal([]byte(raw), &parsed)
+	if err != nil {
 		return "", nil, err
 	}
 	if parsed.Hints == nil || len(parsed.Hints.Brands) == 0 || parsed.UA == "" {

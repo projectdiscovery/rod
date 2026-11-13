@@ -12,7 +12,8 @@ import (
 func TestKeepAliveChrome(t *testing.T) {
 	u := launcher.New().MustLaunch()
 	ws := &cdp.WebSocket{KeepAlive: 100 * time.Millisecond}
-	if err := ws.Connect(context.Background(), u, nil); err != nil {
+	err := ws.Connect(context.Background(), u, nil)
+	if err != nil {
 		t.Fatal(err)
 	}
 	c := cdp.New().Start(ws)
@@ -22,10 +23,12 @@ func TestKeepAliveChrome(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	if err := c.Err(); err != nil {
+	err = c.Err()
+	if err != nil {
 		t.Fatalf("idle connection dropped: %v", err)
 	}
-	if _, err := c.Call(context.Background(), "", "Browser.getVersion", nil); err != nil {
+	_, err = c.Call(context.Background(), "", "Browser.getVersion", nil)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -37,15 +40,17 @@ func TestShortDeadlineKeepsConnection(t *testing.T) {
 		_, _ = c.Call(context.Background(), "", "Browser.close", nil)
 	}()
 
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(i)*time.Microsecond)
 		_, _ = c.Call(ctx, "", "Browser.getVersion", nil)
 		cancel()
 	}
-	if err := c.Err(); err != nil {
+	err := c.Err()
+	if err != nil {
 		t.Fatalf("short deadlines closed the connection: %v", err)
 	}
-	if _, err := c.Call(context.Background(), "", "Browser.getVersion", nil); err != nil {
+	_, err = c.Call(context.Background(), "", "Browser.getVersion", nil)
+	if err != nil {
 		t.Fatal(err)
 	}
 }

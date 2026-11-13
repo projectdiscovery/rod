@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"runtime"
@@ -13,7 +14,7 @@ import (
 // not pass ExtraFiles to child processes on Windows, so there the browser has
 // to be launched on a debugging port instead.
 func PipeSupported() bool {
-	return runtime.GOOS != "windows"
+	return runtime.GOOS != goosWindows
 }
 
 // LaunchPipe starts the browser with --remote-debugging-pipe and returns a
@@ -38,17 +39,19 @@ func (l *Launcher) LaunchPipe() (*cdp.Client, error) {
 	}
 
 	l.setupUserPreferences()
-	if err := l.preparePrivileges(); err != nil {
+	err = l.preparePrivileges()
+	if err != nil {
 		return nil, err
 	}
 	args := l.FormatArgs()
 	args = append(args, "--remote-debugging-pipe")
 
-	cmd := exec.Command(bin, args...)
+	cmd := exec.CommandContext(context.Background(), bin, args...)
 	cmd.ExtraFiles = []*os.File{pair.ChromeRead, pair.ChromeWrite}
 	l.setupCmd(cmd)
 
-	if err := startLocked(l, cmd); err != nil {
+	err = startLocked(l, cmd)
+	if err != nil {
 		err = l.annotate(err)
 		_ = pair.ChromeRead.Close()
 		_ = pair.ChromeWrite.Close()

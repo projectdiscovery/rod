@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
@@ -171,7 +172,7 @@ func (p *Page) SetBlockedURLs(urls []string) error {
 // It will return immediately after the server responds the http header.
 func (p *Page) Navigate(url string) error {
 	if url == "" {
-		url = "about:blank"
+		url = aboutBlank
 	}
 
 	// try to stop loading
@@ -260,14 +261,6 @@ func (p *Page) Activate() (*Page, error) {
 	return p, err
 }
 
-func (p *Page) getWindowID() (proto.BrowserWindowID, error) {
-	res, err := proto.BrowserGetWindowForTarget{TargetID: p.TargetID}.Call(p)
-	if err != nil {
-		return 0, err
-	}
-	return res.WindowID, err
-}
-
 // GetWindow position and size info.
 func (p *Page) GetWindow() (*proto.BrowserBounds, error) {
 	id, err := p.getWindowID()
@@ -342,73 +335,6 @@ func (p *Page) ForceClose(timeout time.Duration) error {
 		timeout = 5 * time.Second
 	}
 	return p.closeWith(timeout)
-}
-
-func (p *Page) closeWith(timeout time.Duration) error {
-	// Closing the target ends the page session, and Chrome may report that
-	// before answering Page.close, so the close must not depend on it. A
-	// shorter deadline on the page context still applies.
-	if dl, ok := p.ctx.Deadline(); ok {
-		if d := time.Until(dl); d < timeout {
-			timeout = d
-		}
-	}
-	ctx, cancel := context.WithTimeout(context.WithoutCancel(p.ctx), timeout)
-	defer cancel()
-
-	success := true
-	messages := p.browser.listen(ctx, "", map[string]struct{}{
-		(proto.TargetTargetDestroyed{}).ProtoEvent():      {},
-		(proto.PageJavascriptDialogClosed{}).ProtoEvent(): {},
-	})
-
-	for {
-		if err := ctx.Err(); err != nil {
-			return err
-		}
-		err := proto.PageClose{}.Call(p.Context(ctx))
-		if errors.Is(err, cdp.ErrNotAttachedToActivePage) {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-time.After(100 * time.Millisecond):
-			}
-			continue
-		} else if err != nil {
-			return err
-		}
-		break
-	}
-
-	stopped := false
-	for msg := range messages {
-		destroyed := proto.TargetTargetDestroyed{}
-		closed := proto.PageJavascriptDialogClosed{}
-		if msg.Load(&destroyed) {
-			stopped = destroyed.TargetID == p.TargetID
-		} else if msg.SessionID == p.SessionID && msg.Load(&closed) {
-			success = closed.Result
-			stopped = !success
-		}
-
-		if stopped {
-			break
-		}
-	}
-	if _, attached := p.browser.states.Load(sessionPageKey(p.SessionID)); !stopped && attached {
-		return ctx.Err()
-	}
-
-	if success {
-		p.cleanupStates()
-		if p.sessionCancel != nil {
-			p.sessionCancel()
-		}
-	} else {
-		return &PageCloseCanceledError{}
-	}
-
-	return nil
 }
 
 // TriggerFavicon supports when browser in headless mode
@@ -729,7 +655,7 @@ func (p *Page) WaitOpen() func() (*Page, error) {
 //	go page.EachEvent(func(e *proto.PageJavascriptDialogOpening) {
 //	    _ = proto.PageHandleJavaScriptDialog{ Accept: false, PromptText: ""}.Call(page)
 //	})()
-func (p *Page) EachEvent(callbacks ...interface{}) (wait func()) {
+func (p *Page) EachEvent(callbacks ...any) (wait func()) {
 	ctx, release := p.lifetime()
 	w := p.browser.Context(ctx).eachEvent(p.SessionID, callbacks...)
 	return func() {
@@ -810,10 +736,8 @@ func (p *Page) WaitRequestIdle(
 	}
 
 	wait := p.EachEvent(func(sent *proto.NetworkRequestWillBeSent) {
-		for _, t := range excludeTypes {
-			if sent.Type == t {
-				return
-			}
+		if slices.Contains(excludeTypes, sent.Type) {
+			return
 		}
 
 		if match(sent.Request.URL) {
@@ -920,8 +844,16 @@ func (p *Page) WaitStable(d time.Duration) error {
 }
 
 // WaitIdle waits until the next window.requestIdleCallback is called.
+// timeout is also a deadline for the call. A frozen page used to leave the
+// promise pending after the page-side timer had already expired.
 func (p *Page) WaitIdle(timeout time.Duration) (err error) {
-	_, err = p.Evaluate(evalHelper(js.WaitIdle, timeout.Milliseconds()).ByPromise())
+	ctx := p.ctx
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(p.ctx, timeout+500*time.Millisecond)
+		defer cancel()
+	}
+	_, err = p.Context(ctx).Evaluate(evalHelper(js.WaitIdle, timeout.Milliseconds()).ByPromise())
 	return err
 }
 
@@ -1124,7 +1056,7 @@ func (p *Page) Release(obj *proto.RuntimeRemoteObject) error {
 }
 
 // Call implements the [proto.Client].
-func (p *Page) Call(ctx context.Context, sessionID, methodName string, params interface{}) (res []byte, err error) {
+func (p *Page) Call(ctx context.Context, sessionID, methodName string, params any) (res []byte, err error) {
 	res, err = p.browser.Call(ctx, sessionID, methodName, params)
 	return res, p.translate(err)
 }
@@ -1133,4 +1065,81 @@ func (p *Page) Call(ctx context.Context, sessionID, methodName string, params in
 func (p *Page) Event() <-chan *Message {
 	ctx, _ := p.lifetime()
 	return p.browser.listen(ctx, p.SessionID, nil)
+}
+
+//nolint:gocyclo,cyclop // close retries and cancellation share one path
+func (p *Page) closeWith(timeout time.Duration) error {
+	// Closing the target ends the page session, and Chrome may report that
+	// before answering Page.close, so the close must not depend on it. A
+	// shorter deadline on the page context still applies.
+	if dl, ok := p.ctx.Deadline(); ok {
+		if d := time.Until(dl); d < timeout {
+			timeout = d
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(p.ctx), timeout)
+	defer cancel()
+
+	success := true
+	messages := p.browser.listen(ctx, "", map[string]struct{}{
+		(proto.TargetTargetDestroyed{}).ProtoEvent():      {},
+		(proto.PageJavascriptDialogClosed{}).ProtoEvent(): {},
+	})
+
+	for {
+		err := ctx.Err()
+		if err != nil {
+			return err
+		}
+		err = proto.PageClose{}.Call(p.Context(ctx))
+		if errors.Is(err, cdp.ErrNotAttachedToActivePage) {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(100 * time.Millisecond):
+			}
+			continue
+		} else if err != nil {
+			return err
+		}
+		break
+	}
+
+	stopped := false
+	for msg := range messages {
+		destroyed := proto.TargetTargetDestroyed{}
+		closed := proto.PageJavascriptDialogClosed{}
+		if msg.Load(&destroyed) {
+			stopped = destroyed.TargetID == p.TargetID
+		} else if msg.SessionID == p.SessionID && msg.Load(&closed) {
+			success = closed.Result
+			stopped = !success
+		}
+
+		if stopped {
+			break
+		}
+	}
+	if _, attached := p.browser.states.Load(sessionPageKey(p.SessionID)); !stopped && attached {
+		return ctx.Err()
+	}
+
+	if success {
+		p.cleanupStates()
+		if p.sessionCancel != nil {
+			p.sessionCancel()
+		}
+	} else {
+		return &PageCloseCanceledError{}
+	}
+
+	return nil
+}
+
+func (p *Page) getWindowID() (proto.BrowserWindowID, error) {
+	res, err := proto.BrowserGetWindowForTarget{TargetID: p.TargetID}.Call(p)
+	if err != nil {
+		return 0, err
+	}
+	return res.WindowID, err
 }

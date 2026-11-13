@@ -3,7 +3,6 @@ package input
 
 import (
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/ysmood/gson"
 )
 
 // Modifier values.
@@ -104,7 +103,7 @@ func (k Key) Encode(t proto.InputDispatchKeyEventType, modifiers int) *proto.Inp
 	}
 
 	info := k.Info()
-	l := gson.Int(info.Location)
+	l := new(info.Location)
 	keypad := false
 	if info.Location == 3 {
 		l = nil

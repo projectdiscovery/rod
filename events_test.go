@@ -37,8 +37,7 @@ func expectNone(t *testing.T, ch <-chan *Message) {
 
 func TestRouterSessionAndMethod(t *testing.T) {
 	r := newRouter(16)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	all := r.subscribe(ctx, "", nil)
 	load := r.subscribe(ctx, "", map[string]struct{}{"Page.loadEventFired": {}})
@@ -72,13 +71,12 @@ func TestRouterSessionAndMethod(t *testing.T) {
 
 func TestRouterOrder(t *testing.T) {
 	r := newRouter(-1)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 	ch := r.subscribe(ctx, "s", nil)
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		r.publish(testMsg("s", fmt.Sprintf("M.%d", i)))
 	}
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		if m := recvOne(t, ch); m.Method != fmt.Sprintf("M.%d", i) {
 			t.Fatalf("got %s at %d", m.Method, i)
 		}
@@ -87,8 +85,7 @@ func TestRouterOrder(t *testing.T) {
 
 func TestRouterStalledConsumerDoesNotBlock(t *testing.T) {
 	r := newRouter(8)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	_ = r.subscribe(ctx, "stalled", nil) // never read
 	live := r.subscribe(ctx, "live", nil)
@@ -96,7 +93,7 @@ func TestRouterStalledConsumerDoesNotBlock(t *testing.T) {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for i := 0; i < 10000; i++ {
+		for range 10000 {
 			r.publish(testMsg("stalled", "Network.dataReceived"))
 			r.publish(testMsg("stalled", "Fetch.requestPaused"))
 		}
@@ -116,11 +113,10 @@ func TestRouterStalledConsumerDoesNotBlock(t *testing.T) {
 
 func TestRouterKeepsCritical(t *testing.T) {
 	r := newRouter(4)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 	ch := r.subscribe(ctx, "s", nil)
 
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		r.publish(testMsg("s", "Network.dataReceived"))
 		r.publish(testMsg("s", "Fetch.requestPaused"))
 	}
@@ -162,7 +158,7 @@ func TestRouterUnsubscribe(t *testing.T) {
 	r.publish(testMsg("s", "A.b"))
 	cancel()
 	for _, ch := range chans {
-		for range ch { //nolint: revive
+		for range ch {
 		}
 	}
 
@@ -186,12 +182,11 @@ func BenchmarkRouterPublish(b *testing.B) {
 	for _, pages := range []int{1, 50, 500} {
 		b.Run(fmt.Sprintf("pages=%d", pages), func(b *testing.B) {
 			r := newRouter(-1)
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			for i := 0; i < pages; i++ {
+			ctx := b.Context()
+			for i := range pages {
 				ch := r.subscribe(ctx, proto.TargetSessionID(fmt.Sprint(i)), nil)
 				go func() {
-					for range ch { //nolint: revive
+					for range ch {
 					}
 				}()
 			}

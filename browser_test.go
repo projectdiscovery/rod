@@ -277,7 +277,7 @@ func TestBinarySize(t *testing.T) {
 		g.SkipNow()
 	}
 
-	cmd := exec.Command("go", "build",
+	cmd := exec.CommandContext(g.Context(), "go", "build",
 		"-trimpath",
 		"-ldflags", "-w -s",
 		"-o", "tmp/translator",

@@ -34,7 +34,7 @@ func BenchmarkManager(b *testing.B) {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(num)
-	for i := 0; i < num; i++ {
+	for range num {
 		limiter <- 0
 
 		go func() {

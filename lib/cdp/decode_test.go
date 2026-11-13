@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+//nolint:gocyclo,cyclop // table of decode cases
 func TestScanIncoming(t *testing.T) {
 	msg, err := scanIncoming([]byte(`{"method":"Network.requestWillBeSent","params":{"url":"http://a}b","n":1},"sessionId":"abc"}`))
 	if err != nil {

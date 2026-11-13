@@ -78,16 +78,16 @@ func profileInUse(dir string) bool {
 }
 
 func ownerAlive(target string) bool {
-	i := strings.LastIndex(target, "-")
-	if i < 0 {
+	before, after, ok := strings.CutLast(target, "-")
+	if !ok {
 		return true
 	}
 	host, _ := os.Hostname()
-	if target[:i] != host {
+	if before != host {
 		// Owned by another host sharing this directory; leave it alone.
 		return true
 	}
-	pid, err := strconv.Atoi(target[i+1:])
+	pid, err := strconv.Atoi(after)
 	if err != nil || pid <= 0 {
 		return true
 	}

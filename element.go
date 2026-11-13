@@ -426,7 +426,7 @@ func (el *Element) SetFiles(paths []string) error {
 // is fired all NodeID on the page will be reassigned to another value)
 // we don't recommend using the NodeID, instead, use the [proto.DOMBackendNodeID] to identify the element.
 func (el *Element) Describe(depth int, pierce bool) (*proto.DOMNode, error) {
-	val, err := proto.DOMDescribeNode{ObjectID: el.id(), Depth: gson.Int(depth), Pierce: pierce}.Call(el)
+	val, err := proto.DOMDescribeNode{ObjectID: el.id(), Depth: new(depth), Pierce: pierce}.Call(el)
 	if err != nil {
 		return nil, err
 	}
@@ -464,11 +464,11 @@ func (el *Element) Frame() (*Page, error) {
 	// A cross-site iframe runs in its own target and has no content document
 	// in this session, so it is driven through its own session instead.
 	if node.ContentDocument == nil && node.FrameID != "" {
-		frame, err := el.page.browser.Context(el.ctx).framePage(proto.TargetTargetID(node.FrameID))
+		frame, isFrame, err := el.page.browser.Context(el.ctx).framePage(proto.TargetTargetID(node.FrameID))
 		if err != nil {
 			return nil, err
 		}
-		if frame != nil {
+		if isFrame {
 			return frame.Sleeper(el.sleeper), nil
 		}
 	}
@@ -691,7 +691,7 @@ func (el *Element) Screenshot(format proto.PageCaptureScreenshotFormat, quality 
 	}
 
 	opts := &proto.PageCaptureScreenshot{
-		Quality: gson.Int(quality),
+		Quality: new(quality),
 		Format:  format,
 	}
 
@@ -710,7 +710,8 @@ func (el *Element) Screenshot(format proto.PageCaptureScreenshotFormat, quality 
 
 	// The capture is in device pixels while the shape is in CSS pixels.
 	scale := 1.0
-	if res, err := el.page.Context(el.ctx).Eval(`() => window.devicePixelRatio`); err == nil {
+	res, err := el.page.Context(el.ctx).Eval(`() => window.devicePixelRatio`)
+	if err == nil {
 		if v := res.Value.Num(); v > 0 {
 			scale = v
 		}
@@ -740,12 +741,12 @@ func (el *Element) Remove() error {
 }
 
 // Call implements the [proto.Client].
-func (el *Element) Call(ctx context.Context, sessionID, methodName string, params interface{}) (res []byte, err error) {
+func (el *Element) Call(ctx context.Context, sessionID, methodName string, params any) (res []byte, err error) {
 	return el.page.Call(ctx, sessionID, methodName, params)
 }
 
 // Eval is a shortcut for [Element.Evaluate] with AwaitPromise, ByValue and AutoExp set to true.
-func (el *Element) Eval(js string, params ...interface{}) (*proto.RuntimeRemoteObject, error) {
+func (el *Element) Eval(js string, params ...any) (*proto.RuntimeRemoteObject, error) {
 	return el.Evaluate(Eval(js, params...).ByPromise())
 }
 
@@ -760,10 +761,6 @@ func (el *Element) Equal(elm *Element) (bool, error) {
 	return res.Value.Bool(), err
 }
 
-func (el *Element) id() proto.RuntimeRemoteObjectID {
-	return el.Object.ObjectID
-}
-
 // GetXPath returns the xpath of the element.
 func (el *Element) GetXPath(optimized bool) (string, error) {
 	str, err := el.Evaluate(evalHelper(js.GetXPath, optimized))
@@ -771,4 +768,8 @@ func (el *Element) GetXPath(optimized bool) (string, error) {
 		return "", err
 	}
 	return str.Value.String(), nil
+}
+
+func (el *Element) id() proto.RuntimeRemoteObjectID {
+	return el.Object.ObjectID
 }

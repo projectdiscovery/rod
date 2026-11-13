@@ -55,7 +55,9 @@ func newRouter(queue int) *router {
 // subscribe returns a channel of events. An empty session means every
 // session. A nil methods set means every method. The channel is closed after
 // ctx ends.
-func (r *router) subscribe(ctx context.Context, session proto.TargetSessionID, methods map[string]struct{}) <-chan *Message {
+func (r *router) subscribe(
+	ctx context.Context, session proto.TargetSessionID, methods map[string]struct{},
+) <-chan *Message {
 	s := &subscription{
 		r:       r,
 		ctx:     ctx,

@@ -42,6 +42,7 @@ func main() {
 		)
 	`
 
+	var inits, testParts []string
 	for _, domain := range parse(schema) {
 		code := comment + `
 
@@ -59,34 +60,37 @@ func main() {
 		}
 		code += "*/\n\n"
 
+		var defs []string
 		for _, definition := range domain.definitions {
 			if definition.skip {
 				continue
 			}
 
-			code += definition.format()
-			testsCode += definition.formatTests()
+			defs = append(defs, definition.format())
+			testParts = append(testParts, definition.formatTests())
 
 			if definition.originName != "" {
-				init += utils.S(`
+				inits = append(inits, utils.S(`
 					"{{.name}}": reflect.TypeOf({{.type}}{}),`,
 					"name", definition.domain.name+"."+definition.originName,
 					"type", definition.name,
-				)
+				))
 			}
 		}
 
+		code += strings.Join(defs, "")
 		utils.E(utils.OutputFile(
 			filepath.FromSlash(
 				fmt.Sprintf("lib/proto/%s.go", toSnakeCase(domain.name))),
 			code))
 	}
 
-	init += `
+	init += strings.Join(inits, "") + `
 		}
 	`
 
 	utils.E(utils.OutputFile(filepath.FromSlash("lib/proto/definitions.go"), init))
+	testsCode += strings.Join(testParts, "")
 	utils.E(utils.OutputFile(filepath.FromSlash("lib/proto/definitions_test.go"), testsCode))
 
 	path := "./lib/proto"

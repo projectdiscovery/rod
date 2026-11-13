@@ -98,7 +98,7 @@ func (b *Browser) Err() error {
 
 // cancelPages ends every cached page session with cause.
 func (b *Browser) cancelPages(cause error) {
-	b.states.Range(func(k, v interface{}) bool {
+	b.states.Range(func(k, v any) bool {
 		if _, ok := k.(sessionPageKey); !ok {
 			return true
 		}
@@ -151,7 +151,7 @@ func waitResult(ctx context.Context) error {
 
 // EachEventContext is [Page.EachEvent] bound to ctx and to the page session.
 // wait returns nil when a callback returned true, otherwise why it ended.
-func (p *Page) EachEventContext(ctx context.Context, callbacks ...interface{}) (wait func() error) {
+func (p *Page) EachEventContext(ctx context.Context, callbacks ...any) (wait func() error) {
 	merged, cancel := p.mergeContext(ctx)
 	w := p.browser.Context(merged).eachEventStop(p.SessionID, callbacks...)
 	return func() error {
@@ -178,7 +178,8 @@ func (p *Page) HandleDialogContext(ctx context.Context) (
 	var e proto.PageJavascriptDialogOpening
 	w := p.WaitEventContext(ctx, &e)
 	return func() (*proto.PageJavascriptDialogOpening, error) {
-			if err := w(); err != nil {
+			err := w()
+			if err != nil {
 				restore()
 				return nil, err
 			}
@@ -196,7 +197,7 @@ func (p *Page) AutoDialog(accept bool, promptText string) (stop func()) {
 	ctx, cancel := context.WithCancel(p.ctx)
 	pc := p.Context(ctx)
 	restore := p.EnableDomain(&proto.PageEnable{})
-	wait := pc.EachEvent(func(e *proto.PageJavascriptDialogOpening) {
+	wait := pc.EachEvent(func(_ *proto.PageJavascriptDialogOpening) {
 		_ = proto.PageHandleJavaScriptDialog{Accept: accept, PromptText: promptText}.Call(pc)
 	})
 	done := make(chan struct{})
@@ -212,11 +213,11 @@ func (p *Page) AutoDialog(accept bool, promptText string) (stop func()) {
 }
 
 // eventLoader builds a callback that copies the first event into e and stops.
-func eventLoader(e proto.Event) interface{} {
+func eventLoader(e proto.Event) any {
 	valE := reflect.ValueOf(e)
 	valTrue := reflect.ValueOf(true)
 
-	if valE.Kind() != reflect.Ptr {
+	if valE.Kind() != reflect.Pointer {
 		valE = reflect.New(valE.Type())
 	}
 

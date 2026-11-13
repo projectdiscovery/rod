@@ -17,12 +17,14 @@ func decodeIncoming(b []byte) (incoming, error) {
 		return msg, nil
 	}
 	var fallback incoming
-	if jerr := json.Unmarshal(b, &fallback); jerr != nil {
+	jerr := json.Unmarshal(b, &fallback)
+	if jerr != nil {
 		return incoming{}, err
 	}
 	return fallback, nil
 }
 
+//nolint:gocognit,gocyclo,cyclop,funlen // hand-written scanner on the hot decode path
 func scanIncoming(b []byte) (incoming, error) {
 	i := skipSpace(b, 0)
 	if i >= len(b) || b[i] != '{' {
@@ -79,7 +81,8 @@ func scanIncoming(b []byte) (incoming, error) {
 			msg.Result = append([]byte(nil), raw...)
 		case "error":
 			var cdpErr Error
-			if err := json.Unmarshal(raw, &cdpErr); err != nil {
+			err := json.Unmarshal(raw, &cdpErr)
+			if err != nil {
 				return incoming{}, err
 			}
 			msg.Error = &cdpErr
@@ -116,6 +119,7 @@ func skipSpace(b []byte, i int) int {
 	return i
 }
 
+//nolint:gocyclo,cyclop,funlen // escape sequences each need their own case
 func parseString(b []byte, i int) (string, int, error) {
 	if i >= len(b) || b[i] != '"' {
 		return "", 0, errors.New("cdp: expected string")

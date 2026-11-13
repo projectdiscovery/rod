@@ -78,7 +78,7 @@ func (pp *HealthPagePool) Cleanup() {
 }
 
 func (pp *HealthPagePool) create() (*Page, error) {
-	return pp.browser.Page(proto.TargetCreateTarget{URL: "about:blank"})
+	return pp.browser.Page(proto.TargetCreateTarget{URL: aboutBlank})
 }
 
 // discard closes a page that failed a check and frees its slot.
@@ -89,7 +89,8 @@ func (pp *HealthPagePool) discard(p *Page) {
 
 // healthy reports whether p can be handed out right now.
 func (pp *HealthPagePool) healthy(p *Page) bool {
-	if _, err := pp.browser.Timeout(pp.timeout).Version(); err != nil {
+	_, err := pp.browser.Timeout(pp.timeout).Version()
+	if err != nil {
 		return false
 	}
 	info, err := p.Timeout(pp.timeout).Info()
@@ -107,15 +108,18 @@ func (pp *HealthPagePool) reset(p *Page) bool {
 		return false
 	}
 
-	if err := pp.closePopups(p); err != nil {
+	err := pp.closePopups(p)
+	if err != nil {
 		return false
 	}
 
 	t := p.Timeout(pp.timeout)
-	if err := t.Navigate("about:blank"); err != nil {
+	err = t.Navigate("about:blank")
+	if err != nil {
 		return false
 	}
-	if err := t.WaitLoad(); err != nil {
+	err = t.WaitLoad()
+	if err != nil {
 		return false
 	}
 	info, err := t.Info()
@@ -135,7 +139,8 @@ func (pp *HealthPagePool) closePopups(p *Page) error {
 		if info.OpenerID != p.TargetID || info.Type != proto.TargetTargetInfoTypePage {
 			continue
 		}
-		if _, err := (proto.TargetCloseTarget{TargetID: info.TargetID}).Call(pp.browser.Timeout(pp.timeout)); err != nil {
+		_, err := (proto.TargetCloseTarget{TargetID: info.TargetID}).Call(pp.browser.Timeout(pp.timeout))
+		if err != nil {
 			return err
 		}
 	}

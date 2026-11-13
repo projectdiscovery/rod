@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -34,7 +35,8 @@ func Shell() (string, error) {
 }
 
 func plan9Shell() (string, error) {
-	if _, err := os.Stat("/dev/osversion"); err != nil {
+	_, err := os.Stat("/dev/osversion")
+	if err != nil {
 		if os.IsNotExist(err) {
 			return "", err
 		}
@@ -50,7 +52,7 @@ func nixShell() (string, error) {
 		return "", err
 	}
 
-	out, err := exec.Command("getent", "passwd", user.Uid).Output()
+	out, err := exec.CommandContext(context.Background(), "getent", "passwd", user.Uid).Output()
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +71,7 @@ func androidShell() (string, error) {
 
 func darwinShell() (string, error) {
 	dir := "Local/Default/Users/" + os.Getenv("USER")
-	out, err := exec.Command("dscl", "localhost", "-read", dir, "UserShell").Output()
+	out, err := exec.CommandContext(context.Background(), "dscl", "localhost", "-read", dir, "UserShell").Output()
 	if err != nil {
 		return "", err
 	}

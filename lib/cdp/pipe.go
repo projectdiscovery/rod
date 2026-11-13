@@ -62,38 +62,6 @@ func (p *Pipe) Read() ([]byte, error) {
 	return b, err
 }
 
-func (p *Pipe) read() ([]byte, error) {
-	p.rmu.Lock()
-	defer p.rmu.Unlock()
-	if p.closed.Load() {
-		return nil, ErrPipeClosed
-	}
-	// ReadSlice avoids an extra copy for short messages. Long ones fall
-	// back to a bounded ReadBytes so a missing NUL cannot grow forever.
-	b, err := p.br.ReadSlice(0)
-	if err == bufio.ErrBufferFull {
-		rest := make([]byte, 0, p.max)
-		rest = append(rest, b...)
-		for {
-			chunk, err2 := p.br.ReadSlice(0)
-			if len(rest)+len(chunk) > p.max {
-				return nil, ErrMessageTooLarge
-			}
-			rest = append(rest, chunk...)
-			if err2 == nil {
-				return trimNUL(rest), nil
-			}
-			if err2 != bufio.ErrBufferFull {
-				return nil, err2
-			}
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	return trimNUL(b), nil
-}
-
 func trimNUL(b []byte) []byte {
 	if len(b) > 0 && b[len(b)-1] == 0 {
 		b = b[:len(b)-1]
@@ -114,6 +82,38 @@ func (p *Pipe) Close() error {
 		}
 	})
 	return err
+}
+
+func (p *Pipe) read() ([]byte, error) {
+	p.rmu.Lock()
+	defer p.rmu.Unlock()
+	if p.closed.Load() {
+		return nil, ErrPipeClosed
+	}
+	// ReadSlice avoids an extra copy for short messages. Long ones fall
+	// back to a bounded ReadBytes so a missing NUL cannot grow forever.
+	b, err := p.br.ReadSlice(0)
+	if errors.Is(err, bufio.ErrBufferFull) {
+		rest := make([]byte, 0, p.max)
+		rest = append(rest, b...)
+		for {
+			chunk, err2 := p.br.ReadSlice(0)
+			if len(rest)+len(chunk) > p.max {
+				return nil, ErrMessageTooLarge
+			}
+			rest = append(rest, chunk...)
+			if err2 == nil {
+				return trimNUL(rest), nil
+			}
+			if !errors.Is(err2, bufio.ErrBufferFull) {
+				return nil, err2
+			}
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return trimNUL(b), nil
 }
 
 // PipePair is the two ends passed to Chrome and the two ends kept by the parent.

@@ -21,12 +21,13 @@ func TestConnectDefaultsToPipe(t *testing.T) {
 	}
 
 	b := New()
-	if err := b.Connect(); err != nil {
+	err := b.Connect()
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	pid := b.launcher.PID()
-	out, err := exec.Command("ps", "-o", "args=", "-p", strconv.Itoa(pid)).Output()
+	out, err := exec.CommandContext(t.Context(), "ps", "-o", "args=", "-p", strconv.Itoa(pid)).Output()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,11 +39,13 @@ func TestConnectDefaultsToPipe(t *testing.T) {
 		t.Fatalf("browser opened a debugging port: %s", args)
 	}
 
-	if _, err := b.Version(); err != nil {
+	_, err = b.Version()
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := b.Close(); err != nil {
+	err = b.Close()
+	if err != nil {
 		t.Fatal(err)
 	}
 	deadline := time.Now().Add(15 * time.Second)

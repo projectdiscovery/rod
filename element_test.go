@@ -340,7 +340,7 @@ func TestShadowDOM(t *testing.T) {
 func TestInputTime(t *testing.T) {
 	g := setup(t)
 
-	now := time.Date(2006, 1, 2, 3, 4, 5, 0, time.Local)
+	now := time.Date(2006, 1, 2, 3, 4, 5, 0, time.Local) //nolint:gosmopolitan // the page compares against the local zone
 
 	p := g.page.MustNavigate(g.srcFile("fixtures/input.html"))
 
@@ -905,7 +905,7 @@ func TestElementWait(t *testing.T) {
 	e1 := p.MustElement("body > ul > li")
 	g.Eq(e1.MustText(), "coffee")
 
-	params := []interface{}{1, 3, 4}
+	params := []any{1, 3, 4}
 	go func() {
 		utils.Sleep(0.3)
 		e1.MustEval(`(a, b, c) => this.innerText = 'x'.repeat(a + b + c)`, params...)

@@ -54,23 +54,14 @@ func TestWebSocketErr(t *testing.T) {
 
 type MockConn struct {
 	sync.Mutex
+
 	errOnCount int
 	frame      []byte
 }
 
-func (c *MockConn) checkErr(d int) error {
-	c.Lock()
-	defer c.Unlock()
-
-	if c.errOnCount == 0 {
-		return errors.New("err")
-	}
-	c.errOnCount += d
-	return nil
-}
-
 func (c *MockConn) Read(b []byte) (int, error) {
-	if err := c.checkErr(-1); err != nil {
+	err := c.checkErr(-1)
+	if err != nil {
 		return 0, err
 	}
 
@@ -78,7 +69,8 @@ func (c *MockConn) Read(b []byte) (int, error) {
 }
 
 func (c *MockConn) Write(b []byte) (int, error) {
-	if err := c.checkErr(-1); err != nil {
+	err := c.checkErr(-1)
+	if err != nil {
 		return 0, err
 	}
 	return len(b), nil
@@ -105,5 +97,16 @@ func (c *MockConn) SetReadDeadline(_ time.Time) error {
 }
 
 func (c *MockConn) SetWriteDeadline(_ time.Time) error {
+	return nil
+}
+
+func (c *MockConn) checkErr(d int) error {
+	c.Lock()
+	defer c.Unlock()
+
+	if c.errOnCount == 0 {
+		return errors.New("err")
+	}
+	c.errOnCount += d
 	return nil
 }

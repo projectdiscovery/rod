@@ -3,6 +3,7 @@
 package launcher
 
 import (
+	"context"
 	"os/exec"
 	"syscall"
 
@@ -20,7 +21,7 @@ func (l *Launcher) osSetupCmd(cmd *exec.Cmd) {
 		command = append(command, flags...)
 		command = append(command, cmd.Args...)
 
-		*cmd = *exec.Command("xvfb-run", command...)
+		*cmd = *exec.CommandContext(context.Background(), "xvfb-run", command...)
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	setPdeathsig(cmd.SysProcAttr)

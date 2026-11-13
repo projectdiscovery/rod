@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"image/color"
 	"image/png"
 	"net/http"
 	"net/http/httptest"
@@ -125,7 +126,7 @@ func TestForkHandleAuthKeepsPageHijack(t *testing.T) {
 
 	// HandleAuth must leave requests paused by the page router alone, so the
 	// router can still fulfill them.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		hijacked.MustNavigate(s.URL("/plain"))
 		hijacked.Timeout(10*time.Second).MustElementR("p", "hijacked")
 	}
@@ -147,11 +148,10 @@ func TestForkStalledSubscriberDoesNotBlock(t *testing.T) {
 	g := setup(t)
 
 	stalled := g.newPage(g.blank())
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 	_ = stalled.Context(ctx).Event() // never read
 
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		stalled.MustNavigate(g.blank())
 	}
 
@@ -247,13 +247,13 @@ func TestForkBrowserRouterLeavesPageRouter(t *testing.T) {
 
 	var browserSaw atomic.Int32
 	browserRouter := g.browser.HijackRequests()
-	browserRouter.MustAdd("*/nothing-matches", func(h *rod.Hijack) {
+	browserRouter.MustAdd("*/nothing-matches", func(_ *rod.Hijack) {
 		browserSaw.Add(1)
 	})
 	go browserRouter.Run()
 	defer browserRouter.MustStop()
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		p.MustNavigate(s.URL("/x"))
 		p.Timeout(10*time.Second).MustElementR("p", "page")
 	}
@@ -290,8 +290,8 @@ func TestForkScreenshotDeviceScale(t *testing.T) {
 	g.E(err)
 	g.Eq(img.Bounds().Dx(), 100)
 	g.Eq(img.Bounds().Dy(), 40)
-	r, _, _, _ := img.At(50, 20).RGBA()
-	g.Gt(r, uint32(0xf000))
+	c := color.RGBAModel.Convert(img.At(50, 20)).(color.RGBA)
+	g.Gt(uint32(c.R)<<8, uint32(0xf000))
 }
 
 func TestForkWaitDOMIdle(t *testing.T) {
@@ -505,4 +505,80 @@ func TestForkHijackEventExposed(t *testing.T) {
 
 	p.MustNavigate(s.URL("/event"))
 	g.Eq(seen.Load(), int32(1))
+}
+
+func TestForkStuckEmulationDoesNotBlockPages(t *testing.T) {
+	g := setup(t)
+
+	res, err := proto.TargetCreateTarget{URL: "about:blank"}.Call(g.browser)
+	g.E(err)
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, _ = proto.TargetCloseTarget{TargetID: res.TargetID}.Call(g.browser.Context(ctx))
+	})
+
+	started := make(chan struct{})
+	var once atomic.Int32
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
+		if method == (proto.EmulationSetDeviceMetricsOverride{}).ProtoReq() && once.CompareAndSwap(0, 1) {
+			close(started)
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		return g.mc.principal.Call(ctx, sessionID, method, params)
+	})
+	t.Cleanup(g.mc.resetCall)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := g.browser.Context(ctx).PageFromTarget(res.TargetID)
+		errCh <- err
+	}()
+
+	select {
+	case <-started:
+	case <-time.After(15 * time.Second):
+		t.Fatal("emulation was not reached")
+	}
+
+	other, err := g.browser.Page(proto.TargetCreateTarget{URL: g.blank()})
+	g.E(err)
+	g.E(other.Close())
+
+	select {
+	case err := <-errCh:
+		if err == nil {
+			t.Fatal("stuck emulation returned success")
+		}
+	case <-time.After(8 * time.Second):
+		t.Fatal("stuck emulation did not return")
+	}
+}
+
+func TestForkWaitIdleDeadline(t *testing.T) {
+	g := setup(t)
+
+	p := g.page.MustNavigate(g.blank())
+	g.mc.setCall(func(ctx context.Context, sessionID, method string, params any) ([]byte, error) {
+		req, ok := params.(proto.RuntimeCallFunctionOn)
+		if ok && req.AwaitPromise && strings.Contains(req.FunctionDeclaration, "waitIdle") {
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		return g.mc.principal.Call(ctx, sessionID, method, params)
+	})
+	t.Cleanup(g.mc.resetCall)
+
+	start := time.Now()
+	err := p.WaitIdle(200 * time.Millisecond)
+	if err == nil {
+		t.Fatal("frozen idle wait returned success")
+	}
+	if time.Since(start) > 3*time.Second {
+		t.Fatalf("idle wait ignored its timeout after %s", time.Since(start))
+	}
 }

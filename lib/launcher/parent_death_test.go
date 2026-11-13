@@ -4,6 +4,7 @@ package launcher_test
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,24 +17,26 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 )
 
+//nolint:gocognit // the test runs as a subprocess and then checks the browser is gone
 func TestBrowserDiesWithParent(t *testing.T) {
 	if os.Getenv("ROD_TEST_PARENT") == "1" {
 		l := launcher.New().NoSandbox(true)
 		l.MustLaunch()
-		fmt.Printf("browser-pid=%d\n", l.PID())
+		_, _ = fmt.Fprintf(os.Stdout, "browser-pid=%d\n", l.PID())
 		select {}
 	}
 
 	for _, sig := range []syscall.Signal{syscall.SIGKILL, syscall.SIGINT} {
 		t.Run(sig.String(), func(t *testing.T) {
-			cmd := exec.Command(os.Args[0], "-test.run=^TestBrowserDiesWithParent$")
+			cmd := exec.CommandContext(context.Background(), os.Args[0], "-test.run=^TestBrowserDiesWithParent$")
 			cmd.Env = append(os.Environ(), "ROD_TEST_PARENT=1")
 			cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 			out, err := cmd.StdoutPipe()
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := cmd.Start(); err != nil {
+			err = cmd.Start()
+			if err != nil {
 				t.Fatal(err)
 			}
 
@@ -76,10 +79,11 @@ func running(pid int) bool {
 	if syscall.Kill(pid, 0) != nil {
 		return false
 	}
-	if b, err := os.ReadFile("/proc/" + strconv.Itoa(pid) + "/stat"); err == nil {
+	b, err := os.ReadFile("/proc/" + strconv.Itoa(pid) + "/stat")
+	if err == nil {
 		_, state, _ := strings.Cut(string(b), ") ")
 		return !strings.HasPrefix(state, "Z")
 	}
-	out, err := exec.Command("ps", "-o", "stat=", "-p", strconv.Itoa(pid)).Output()
+	out, err := exec.CommandContext(context.Background(), "ps", "-o", "stat=", "-p", strconv.Itoa(pid)).Output()
 	return err != nil || !strings.HasPrefix(strings.TrimSpace(string(out)), "Z")
 }

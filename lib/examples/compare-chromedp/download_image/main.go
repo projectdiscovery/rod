@@ -20,7 +20,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := os.WriteFile("download.png", b, 0o644); err != nil {
+	err = os.WriteFile("download.png", b, 0o644)
+	if err != nil {
 		log.Fatal(err)
 	}
 	log.Print("wrote download.png")
