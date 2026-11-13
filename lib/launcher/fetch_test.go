@@ -11,7 +11,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-rod/rod/lib/utils"
 )
@@ -138,5 +140,37 @@ func TestFetchArchiveFallsBack(t *testing.T) {
 	_, err = fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{bad.URL})
 	if err == nil {
 		t.Fatal("404 accepted")
+	}
+}
+
+// A server that sends headers and a few bytes, then goes silent, must not hang
+// the download forever.
+func TestFetchArchiveStalledBody(t *testing.T) {
+	old := DownloadIdleTimeout
+	DownloadIdleTimeout = 300 * time.Millisecond
+	defer func() { DownloadIdleTimeout = old }()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("PK"))
+		w.(http.Flusher).Flush()
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+
+	dir := filepath.Join(t.TempDir(), "browser")
+	done := make(chan error, 1)
+	go func() {
+		_, err := fetchArchive(context.Background(), nil, utils.LoggerQuiet, dir, "", []string{srv.URL})
+		done <- err
+	}()
+
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "stalled") {
+			t.Fatalf("expected stall error, got %v", err)
+		}
+	case <-time.After(15 * time.Second):
+		t.Fatal("download hung on a stalled body")
 	}
 }
